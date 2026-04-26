@@ -10,24 +10,18 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class MainActivity extends AppCompatActivity {
+public class ProfileActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_profile);
 
-        Button btnQrPage = findViewById(R.id.btnQrPage);
-        Button btnProfilePage = findViewById(R.id.btnProfilePage);
+        Button btnBackHomeProfile = findViewById(R.id.btnBackHomeProfile);
 
-        btnQrPage.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, QrActivity.class);
-            startActivity(intent);
-        });
-
-        btnProfilePage.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+        btnBackHomeProfile.setOnClickListener(v -> {
+            Intent intent = new Intent(ProfileActivity.this, MainActivity.class);
             startActivity(intent);
         });
 

@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".QrActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -18,27 +18,20 @@
         app:layout_constraintEnd_toEndOf="parent">
 
         <TextView
-            android:id="@+id/txtHomeTitle"
+            android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
             android:layout_marginBottom="24dp"
-            android:text="Home Page"
+            android:text="QR Page"
             android:textSize="34sp"
             android:textStyle="bold" />
 
         <Button
-            android:id="@+id/btnQrPage"
+            android:id="@+id/btnBackHomeQr"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:text="QR Page" />
-
-        <Button
-            android:id="@+id/btnProfilePage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Profile Page" />
+            android:text="Back to Home Page" />
 
     </LinearLayout>
 
