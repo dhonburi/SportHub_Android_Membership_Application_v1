@@ -18,14 +18,16 @@ public class LoginActivity extends AppCompatActivity {
             "kyle",
             "solomon",
             "dhon",
-            "member"
+            "member",
+            "admin"
     };
 
     String[] validPasswords = {
             "Kyle123!@",
             "Solomon123!@",
             "Dhon123!@",
-            "Member123!@"
+            "Member123!@",
+            "Admin123!@"
     };
 
     @Override
