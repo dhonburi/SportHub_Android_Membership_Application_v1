@@ -7,22 +7,22 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-public class TrainingSessionsFragment extends Fragment {
+public class TrainingDetailFragment extends Fragment {
 
-    public TrainingSessionsFragment() {
-        super(R.layout.fragment_training_sessions);
+    public TrainingDetailFragment() {
+        super(R.layout.fragment_training_detail);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        View cardBasketball = view.findViewById(R.id.cardBasketball);
+        View btnBackTraining = view.findViewById(R.id.btnBackTraining);
 
-        cardBasketball.setOnClickListener(v -> {
+        btnBackTraining.setOnClickListener(v -> {
             getParentFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.homeInnerFragmentContainer, new TrainingDetailFragment())
+                    .replace(R.id.homeInnerFragmentContainer, new TrainingSessionsFragment())
                     .commit();
         });
     }
