@@ -1,64 +1,121 @@
 package com.example.sporthubandroidmembershipapplicationv1;
 
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link QrFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
+
+import java.util.Locale;
+
 public class QrFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private ImageView imageViewQrCode;
+    private TextView textViewTimer;
+    private TextView textViewReferenceCode;
+    private Handler refreshHandler = new Handler(Looper.getMainLooper());
+    private Runnable refreshRunnable;
+    private long lastWindowGenerated = -1;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    public QrFragment() { }
 
-    public QrFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment QrFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static QrFragment newInstance(String param1, String param2) {
-        QrFragment fragment = new QrFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_qr, container, false);
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // UI CONSISTENCY FIX: Force activity background to white/light gray
+        if (getActivity() != null) {
+            View mainContainer = getActivity().findViewById(R.id.main);
+            if (mainContainer != null) {
+                mainContainer.setBackgroundColor(Color.parseColor("#E9E9E9"));
+            }
+        }
+
+        imageViewQrCode = view.findViewById(R.id.imageViewQrCode);
+        textViewTimer = view.findViewById(R.id.textViewTimer);
+        textViewReferenceCode = view.findViewById(R.id.textViewReferenceCode);
+
+        startSystemClockSync();
+    }
+
+    private void startSystemClockSync() {
+        refreshRunnable = new Runnable() {
+            @Override
+            public void run() {
+                long currentTimeMillis = System.currentTimeMillis();
+                long secondsPassedInMinute = (currentTimeMillis / 1000) % 60;
+                long secondsLeft = 60 - secondsPassedInMinute;
+
+                // Sync QR window with the actual current minute
+                long currentMinuteWindow = currentTimeMillis / 60000;
+                updateQrForWindow(currentMinuteWindow);
+
+                textViewTimer.setText(String.format(Locale.getDefault(), "Updating in %ds...", secondsLeft));
+                refreshHandler.postDelayed(this, 1000);
+            }
+        };
+        refreshHandler.post(refreshRunnable);
+    }
+
+    private void updateQrForWindow(long windowId) {
+        if (windowId != lastWindowGenerated) {
+            lastWindowGenerated = windowId;
+
+            // Generate data (e.g., MEMBER-ID + TIME-WINDOW)
+            String uniqueData = "MEMBER-99821_" + windowId;
+            String refCode = "REF: 99821-" + (windowId % 10000);
+
+            textViewReferenceCode.setText(refCode);
+            Bitmap bitmap = generateQrCodeBitmap(uniqueData);
+            if (bitmap != null) {
+                imageViewQrCode.setImageBitmap(bitmap);
+            }
+        }
+    }
+
+    private Bitmap generateQrCodeBitmap(String text) {
+        QRCodeWriter writer = new QRCodeWriter();
+        try {
+            BitMatrix bitMatrix = writer.encode(text, BarcodeFormat.QR_CODE, 512, 512);
+            int width = bitMatrix.getWidth();
+            int height = bitMatrix.getHeight();
+            Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+            for (int x = 0; x < width; x++) {
+                for (int y = 0; y < height; y++) {
+                    bmp.setPixel(x, y, bitMatrix.get(x, y) ? Color.BLACK : Color.WHITE);
+                }
+            }
+            return bmp;
+        } catch (WriterException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_qr, container, false);
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (refreshHandler != null && refreshRunnable != null) {
+            refreshHandler.removeCallbacks(refreshRunnable);
+        }
     }
 }
