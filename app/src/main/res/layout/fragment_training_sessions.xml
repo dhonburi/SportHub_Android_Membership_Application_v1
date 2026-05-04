@@ -16,10 +16,9 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="14dp">
+            android:layout_marginBottom="14dp"
+            android:orientation="horizontal">
 
-            <!-- Basketball -->
             <LinearLayout
                 android:id="@+id/cardBasketball"
                 android:layout_width="0dp"
@@ -47,15 +46,17 @@
                     android:textStyle="bold" />
             </LinearLayout>
 
-            <!-- Volleyball -->
             <LinearLayout
+                android:id="@+id/cardVolleyball"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
                 android:background="#E9E9E9"
                 android:orientation="vertical"
-                android:padding="10dp">
+                android:padding="10dp"
+                android:clickable="true"
+                android:focusable="true">
 
                 <View
                     android:layout_width="match_parent"
@@ -78,18 +79,20 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="14dp">
+            android:layout_marginBottom="14dp"
+            android:orientation="horizontal">
 
-            <!-- Badminton -->
             <LinearLayout
+                android:id="@+id/cardBadminton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
                 android:background="#E9E9E9"
                 android:orientation="vertical"
-                android:padding="10dp">
+                android:padding="10dp"
+                android:clickable="true"
+                android:focusable="true">
 
                 <View
                     android:layout_width="match_parent"
@@ -106,15 +109,17 @@
                     android:textStyle="bold" />
             </LinearLayout>
 
-            <!-- Table Tennis -->
             <LinearLayout
+                android:id="@+id/cardTableTennis"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
                 android:background="#E9E9E9"
                 android:orientation="vertical"
-                android:padding="10dp">
+                android:padding="10dp"
+                android:clickable="true"
+                android:focusable="true">
 
                 <View
                     android:layout_width="match_parent"
@@ -139,15 +144,17 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <!-- Football -->
             <LinearLayout
+                android:id="@+id/cardFootball"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
                 android:background="#E9E9E9"
                 android:orientation="vertical"
-                android:padding="10dp">
+                android:padding="10dp"
+                android:clickable="true"
+                android:focusable="true">
 
                 <View
                     android:layout_width="match_parent"
@@ -164,15 +171,17 @@
                     android:textStyle="bold" />
             </LinearLayout>
 
-            <!-- Placeholder -->
             <LinearLayout
+                android:id="@+id/cardMoreTrainings"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
                 android:background="#E9E9E9"
                 android:orientation="vertical"
-                android:padding="10dp">
+                android:padding="10dp"
+                android:clickable="true"
+                android:focusable="true">
 
                 <View
                     android:layout_width="match_parent"

@@ -12,7 +12,7 @@
         android:paddingTop="8dp"
         android:paddingBottom="24dp">
 
-        <!-- Top Title Row -->
+        <!-- Top Row -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -32,9 +32,10 @@
                 android:focusable="true" />
 
             <TextView
+                android:id="@+id/txtTrainingTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Basketball Trainings"
+                android:text="Training Title"
                 android:textSize="22sp"
                 android:textStyle="bold"
                 android:textColor="#000000" />
@@ -46,7 +47,7 @@
             android:layout_width="220dp"
             android:layout_height="56dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="18dp"
+            android:layout_marginBottom="20dp"
             android:text="Register Now"
             android:textAllCaps="false"
             android:textStyle="bold"
@@ -54,7 +55,7 @@
             android:textColor="#FFFFFF"
             android:backgroundTint="#E4B72E" />
 
-        <!-- Detail Card 1 -->
+        <!-- Card 1 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -71,29 +72,32 @@
 
             <LinearLayout
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:orientation="vertical">
 
                 <TextView
+                    android:id="@+id/txtHeader1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Beginner / Upper Beginner:"
+                    android:text="Header 1"
                     android:textColor="#000000"
-                    android:textSize="18sp"
+                    android:textSize="17sp"
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/txtDesc1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="Designed for beginner and upper beginner players aged 6 to 12 years to learn the fundamentals of basketball in a structured environment."
+                    android:text="Description 1"
                     android:textColor="#5F5F5F"
-                    android:textSize="15sp" />
+                    android:textSize="15sp"
+                    android:textStyle="normal" />
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Detail Card 2 -->
+        <!-- Card 2 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -110,29 +114,32 @@
 
             <LinearLayout
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:orientation="vertical">
 
                 <TextView
+                    android:id="@+id/txtHeader2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Intermediate Basketball:"
+                    android:text="Header 2"
                     android:textColor="#000000"
-                    android:textSize="18sp"
+                    android:textSize="17sp"
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/txtDesc2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="For players who already know the basics and want to improve their confidence, teamwork, and match-play performance."
+                    android:text="Description 2"
                     android:textColor="#5F5F5F"
-                    android:textSize="15sp" />
+                    android:textSize="15sp"
+                    android:textStyle="normal" />
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Detail Card 3 -->
+        <!-- Card 3 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -148,25 +155,28 @@
 
             <LinearLayout
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:orientation="vertical">
 
                 <TextView
+                    android:id="@+id/txtHeader3"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Senior Basketball:"
+                    android:text="Header 3"
                     android:textColor="#000000"
-                    android:textSize="18sp"
+                    android:textSize="17sp"
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/txtDesc3"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="An instructional programme for players with stronger core skills who want a more competitive and structured basketball training experience."
+                    android:text="Description 3"
                     android:textColor="#5F5F5F"
-                    android:textSize="15sp" />
+                    android:textSize="15sp"
+                    android:textStyle="normal" />
             </LinearLayout>
         </LinearLayout>
 
