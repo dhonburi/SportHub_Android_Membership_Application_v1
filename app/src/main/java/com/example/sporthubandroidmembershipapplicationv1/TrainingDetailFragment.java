@@ -53,10 +53,7 @@ public class TrainingDetailFragment extends Fragment {
         }
 
         btnBackTraining.setOnClickListener(v -> {
-            getParentFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.homeInnerFragmentContainer, new TrainingSessionsFragment())
-                    .commit();
+            getParentFragmentManager().popBackStack();
         });
     }
 
