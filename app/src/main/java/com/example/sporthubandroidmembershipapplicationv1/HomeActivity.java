@@ -1,12 +1,10 @@
 package com.example.sporthubandroidmembershipapplicationv1;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -15,7 +13,6 @@ import androidx.fragment.app.Fragment;
 public class HomeActivity extends AppCompatActivity {
 
     Button btnHomeFragment, btnQrFragment, btnProfileFragment;
-    ConstraintLayout mainLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,39 +20,40 @@ public class HomeActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_home);
 
-        mainLayout = findViewById(R.id.main);
-
-        btnHomeFragment = findViewById(R.id.btnHomeFragment);
-        btnQrFragment = findViewById(R.id.btnQrFragment);
-        btnProfileFragment = findViewById(R.id.btnProfileFragment);
-
-        loadFragment(new HomeFragment());
-        updateSelectedButton(btnHomeFragment);
-        mainLayout.setBackgroundColor(Color.parseColor("#E9E9E9"));
-
-        btnHomeFragment.setOnClickListener(v -> {
-            loadFragment(new HomeFragment());
-            updateSelectedButton(btnHomeFragment);
-            mainLayout.setBackgroundColor(Color.parseColor("#E9E9E9"));
-        });
-
-        btnQrFragment.setOnClickListener(v -> {
-            loadFragment(new QrFragment());
-            updateSelectedButton(btnQrFragment);
-            mainLayout.setBackgroundColor(Color.parseColor("#111111"));
-        });
-
-        btnProfileFragment.setOnClickListener(v -> {
-            loadFragment(new ProfileFragment());
-            updateSelectedButton(btnProfileFragment);
-            mainLayout.setBackgroundColor(Color.parseColor("#E9E9E9"));
-        });
-
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        btnHomeFragment = findViewById(R.id.btnHomeFragment);
+        btnQrFragment = findViewById(R.id.btnQrFragment);
+        btnProfileFragment = findViewById(R.id.btnProfileFragment);
+
+        btnHomeFragment.setOnClickListener(v -> {
+            loadFragment(new HomeFragment());
+            updateSelectedButton(btnHomeFragment);
+        });
+
+        btnQrFragment.setOnClickListener(v -> {
+            loadFragment(new QrFragment());
+            updateSelectedButton(btnQrFragment);
+        });
+
+        btnProfileFragment.setOnClickListener(v -> {
+            loadFragment(new ProfileFragment());
+            updateSelectedButton(btnProfileFragment);
+        });
+
+        String openFragment = getIntent().getStringExtra("OPEN_FRAGMENT");
+
+        if ("QR".equals(openFragment)) {
+            loadFragment(new QrFragment());
+            updateSelectedButton(btnQrFragment);
+        } else {
+            loadFragment(new HomeFragment());
+            updateSelectedButton(btnHomeFragment);
+        }
     }
 
     private void loadFragment(Fragment fragment) {
@@ -66,16 +64,22 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void updateSelectedButton(Button selectedButton) {
+        // Reset all buttons back to the rounded unselected background
         btnHomeFragment.setBackgroundResource(R.drawable.nav_button_unselected_bg);
         btnQrFragment.setBackgroundResource(R.drawable.nav_button_unselected_bg);
         btnProfileFragment.setBackgroundResource(R.drawable.nav_button_unselected_bg);
 
-        btnHomeFragment.setTextColor(Color.WHITE);
-        btnQrFragment.setTextColor(Color.WHITE);
-        btnProfileFragment.setTextColor(Color.WHITE);
+        btnHomeFragment.setTextColor(getColor(android.R.color.white));
+        btnQrFragment.setTextColor(getColor(android.R.color.white));
+        btnProfileFragment.setTextColor(getColor(android.R.color.white));
 
+        btnHomeFragment.setAlpha(1f);
+        btnQrFragment.setAlpha(1f);
+        btnProfileFragment.setAlpha(1f);
+
+        // Apply the rounded selected background
         selectedButton.setBackgroundResource(R.drawable.nav_button_bg);
-        selectedButton.setTextColor(Color.BLACK);
+        selectedButton.setTextColor(getColor(android.R.color.black));
 
         selectedButton.animate()
                 .scaleX(1.08f)
