@@ -82,13 +82,14 @@
         android:layout_height="100dp"
         android:layout_gravity="center_horizontal"
         android:translationY="25dp"
+        android:padding="1dp"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:shapeAppearanceOverlay="@style/RoundedLogo"
         app:srcCompat="@drawable/synergy_logo_black"
         app:strokeColor="@android:color/white"
-        app:strokeWidth="2dp" />
+        app:strokeWidth="3dp" />
 
     <!-- Black on white background -->
 
