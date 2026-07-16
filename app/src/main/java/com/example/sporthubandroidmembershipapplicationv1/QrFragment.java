@@ -20,6 +20,10 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 
+import com.google.zxing.EncodeHintType;
+import java.util.HashMap;
+import java.util.Map;
+
 import java.util.Locale;
 
 public class QrFragment extends Fragment {
@@ -95,7 +99,10 @@ public class QrFragment extends Fragment {
     private Bitmap generateQrCodeBitmap(String text) {
         QRCodeWriter writer = new QRCodeWriter();
         try {
-            BitMatrix bitMatrix = writer.encode(text, BarcodeFormat.QR_CODE, 512, 512);
+            Map<EncodeHintType, Object> hints = new HashMap<>();
+            hints.put(EncodeHintType.MARGIN, 1); // removes the quiet zone
+
+            BitMatrix bitMatrix = writer.encode(text, BarcodeFormat.QR_CODE, 512, 512, hints);
             int width = bitMatrix.getWidth();
             int height = bitMatrix.getHeight();
             Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
