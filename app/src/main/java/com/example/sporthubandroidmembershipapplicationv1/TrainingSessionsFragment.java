@@ -2,6 +2,7 @@ package com.example.sporthubandroidmembershipapplicationv1;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -9,89 +10,80 @@ import androidx.fragment.app.Fragment;
 
 public class TrainingSessionsFragment extends Fragment {
 
+    private LinearLayout cardBasketball;
+    private LinearLayout cardVolleyball;
+    private LinearLayout cardBadminton;
+    private LinearLayout cardTableTennis;
+    private LinearLayout cardFitness;
+    private LinearLayout cardFootball;
+
     public TrainingSessionsFragment() {
         super(R.layout.fragment_training_sessions);
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(
+            @NonNull View view,
+            @Nullable Bundle savedInstanceState
+    ) {
         super.onViewCreated(view, savedInstanceState);
 
-        view.findViewById(R.id.cardBasketball).setOnClickListener(v ->
-                openTrainingDetail(
-                        "Basketball Trainings",
-                        "Beginner / Upper Beginner:\nDesigned for beginner and upper beginner players aged 6 to 12 years to learn the fundamentals of basketball in a structured environment.",
-                        "Intermediate Basketball:\nFor players who already know the basics and want to improve confidence, teamwork, and match-play performance.",
-                        "Senior Basketball:\nAn instructional programme for players with stronger core skills who want a more competitive and structured basketball training experience."
-                )
+        cardBasketball = view.findViewById(R.id.cardBasketball);
+        cardVolleyball = view.findViewById(R.id.cardVolleyball);
+        cardBadminton = view.findViewById(R.id.cardBadminton);
+        cardTableTennis = view.findViewById(R.id.cardTableTennis);
+        cardFitness = view.findViewById(R.id.cardFitness);
+        cardFootball = view.findViewById(R.id.cardFootball);
+
+        cardBasketball.setOnClickListener(v ->
+                openTrainingDetails("Basketball")
         );
 
-        view.findViewById(R.id.cardVolleyball).setOnClickListener(v ->
-                openTrainingDetail(
-                        "Volleyball Trainings",
-                        "Beginner Volleyball:\nIntroduces basic passing, serving, and teamwork in a supportive training environment.",
-                        "Intermediate Volleyball:\nHelps players improve game awareness, coordination, and ball control.",
-                        "Advanced Volleyball:\nFocuses on match play, team communication, and stronger technical ability."
-                )
+        cardVolleyball.setOnClickListener(v ->
+                openTrainingDetails("Volleyball")
         );
 
-        view.findViewById(R.id.cardBadminton).setOnClickListener(v ->
-                openTrainingDetail(
-                        "Badminton Trainings",
-                        "Junior Badminton:\nBuilds early movement, coordination, and racket skills for younger players.",
-                        "Intermediate Badminton:\nSupports players who want to strengthen consistency, footwork, and tactical play.",
-                        "Senior Badminton:\nDesigned for players aiming to improve competitiveness and advanced gameplay."
-                )
+        cardBadminton.setOnClickListener(v ->
+                openTrainingDetails("Badminton")
         );
 
-        view.findViewById(R.id.cardTableTennis).setOnClickListener(v ->
-                openTrainingDetail(
-                        "Table Tennis Trainings",
-                        "Beginner Table Tennis:\nCovers the fundamentals of grip, control, and rally practice.",
-                        "Intermediate Table Tennis:\nFocuses on improving reactions, spin control, and structured drills.",
-                        "Advanced Table Tennis:\nSupports more competitive players through tactical and technical development."
-                )
+        cardTableTennis.setOnClickListener(v ->
+                openTrainingDetails("Table Tennis")
         );
 
-        view.findViewById(R.id.cardFootball).setOnClickListener(v ->
-                openTrainingDetail(
-                        "Football Trainings",
-                        "Junior Football:\nIntroduces movement, passing, teamwork, and coordination for newer players.",
-                        "Intermediate Football:\nHelps players improve positioning, decision-making, and match readiness.",
-                        "Senior Football:\nDesigned for players seeking a more competitive and intensive training experience."
-                )
+        cardFitness.setOnClickListener(v ->
+                openTrainingDetails("Fitness")
         );
 
-        view.findViewById(R.id.cardMoreTrainings).setOnClickListener(v ->
-                openTrainingDetail(
-                        "More Trainings",
-                        "Multi-sport Introduction:\nA flexible programme introducing different sports and movement-based activities.",
-                        "Community Activity Sessions:\nCasual sessions that encourage participation, fitness, and social involvement.",
-                        "Future Programmes:\nPlaceholder for upcoming training categories and new programme additions."
-                )
+        cardFootball.setOnClickListener(v ->
+                openTrainingDetails("Football")
         );
     }
 
-    private void openTrainingDetail(String title, String detail1, String detail2, String detail3) {
-        TrainingDetailFragment fragment = new TrainingDetailFragment();
+    private void openTrainingDetails(String sportName) {
 
-        Bundle args = new Bundle();
-        args.putString("title", title);
-        args.putString("detail1", detail1);
-        args.putString("detail2", detail2);
-        args.putString("detail3", detail3);
-        fragment.setArguments(args);
+        TrainingDetailFragment detailFragment =
+                TrainingDetailFragment.newInstance(sportName);
 
         getParentFragmentManager()
                 .beginTransaction()
+
+                // Opening animation:
+                // Detail page slides in from the right
+                // Training list slides out to the left
                 .setCustomAnimations(
                         R.anim.slide_in_right,
                         R.anim.slide_out_left,
                         R.anim.slide_in_left,
                         R.anim.slide_out_right
                 )
-                .replace(R.id.homeInnerFragmentContainer, fragment)
-                .addToBackStack(null)
+
+                .setReorderingAllowed(true)
+                .replace(
+                        R.id.homeInnerFragmentContainer,
+                        detailFragment
+                )
+                .addToBackStack("training_details")
                 .commit();
     }
 }
