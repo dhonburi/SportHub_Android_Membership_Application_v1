@@ -1,204 +1,332 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/transparent"
-    android:fillViewport="true">
+    android:clipToPadding="false"
+    android:fillViewport="true"
+    android:overScrollMode="never">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingTop="8dp"
-        android:paddingBottom="24dp">
+        android:paddingBottom="32dp">
 
         <!-- Row 1 -->
+
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="14dp"
-            android:orientation="horizontal">
+            android:layout_height="250dp"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <!-- Basketball -->
 
             <LinearLayout
                 android:id="@+id/cardBasketball"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="7dp"
                 android:layout_weight="1"
-                android:layout_marginEnd="8dp"
-                android:background="#E9E9E9"
-                android:orientation="vertical"
-                android:padding="10dp"
+                android:background="@drawable/training_card_bg"
                 android:clickable="true"
-                android:focusable="true">
+                android:focusable="true"
+                android:orientation="vertical">
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="150dp"
-                    android:background="#8AA0B3" />
+                    android:layout_height="185dp"
+                    android:background="@drawable/training_blue_placeholder" />
 
-                <TextView
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:text="Basketball Trainings"
-                    android:textColor="#000000"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="10dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Basketball&#10;Trainings"
+                        android:textColor="#111111"
+                        android:textSize="17sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="↗"
+                        android:textColor="#777777"
+                        android:textSize="28sp" />
+
+                </LinearLayout>
+
             </LinearLayout>
+
+            <!-- Volleyball -->
 
             <LinearLayout
                 android:id="@+id/cardVolleyball"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="7dp"
                 android:layout_weight="1"
-                android:layout_marginStart="8dp"
-                android:background="#E9E9E9"
-                android:orientation="vertical"
-                android:padding="10dp"
+                android:background="@drawable/training_card_bg"
                 android:clickable="true"
-                android:focusable="true">
+                android:focusable="true"
+                android:orientation="vertical">
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="150dp"
-                    android:background="#7FA8A0" />
+                    android:layout_height="185dp"
+                    android:background="@drawable/training_green_placeholder" />
 
-                <TextView
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:text="Volleyball Trainings"
-                    android:textColor="#000000"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="10dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Volleyball&#10;Trainings"
+                        android:textColor="#111111"
+                        android:textSize="17sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="↗"
+                        android:textColor="#777777"
+                        android:textSize="28sp" />
+
+                </LinearLayout>
+
             </LinearLayout>
 
         </LinearLayout>
 
         <!-- Row 2 -->
+
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="14dp"
-            android:orientation="horizontal">
+            android:layout_height="250dp"
+            android:layout_marginTop="14dp"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <!-- Badminton -->
 
             <LinearLayout
                 android:id="@+id/cardBadminton"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="7dp"
                 android:layout_weight="1"
-                android:layout_marginEnd="8dp"
-                android:background="#E9E9E9"
-                android:orientation="vertical"
-                android:padding="10dp"
+                android:background="@drawable/training_card_bg"
                 android:clickable="true"
-                android:focusable="true">
+                android:focusable="true"
+                android:orientation="vertical">
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="150dp"
-                    android:background="#B9A3A3" />
+                    android:layout_height="185dp"
+                    android:background="@drawable/training_pink_placeholder" />
 
-                <TextView
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:text="Badminton Trainings"
-                    android:textColor="#000000"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="10dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Badminton&#10;Trainings"
+                        android:textColor="#111111"
+                        android:textSize="17sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="↗"
+                        android:textColor="#777777"
+                        android:textSize="28sp" />
+
+                </LinearLayout>
+
             </LinearLayout>
+
+            <!-- Table tennis -->
 
             <LinearLayout
                 android:id="@+id/cardTableTennis"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="7dp"
                 android:layout_weight="1"
-                android:layout_marginStart="8dp"
-                android:background="#E9E9E9"
-                android:orientation="vertical"
-                android:padding="10dp"
+                android:background="@drawable/training_card_bg"
                 android:clickable="true"
-                android:focusable="true">
+                android:focusable="true"
+                android:orientation="vertical">
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="150dp"
-                    android:background="#D6B188" />
+                    android:layout_height="185dp"
+                    android:background="@drawable/training_orange_placeholder" />
 
-                <TextView
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:text="Table Tennis Trainings"
-                    android:textColor="#000000"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="10dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Table Tennis&#10;Trainings"
+                        android:textColor="#111111"
+                        android:textSize="17sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="↗"
+                        android:textColor="#777777"
+                        android:textSize="28sp" />
+
+                </LinearLayout>
+
             </LinearLayout>
 
         </LinearLayout>
 
         <!-- Row 3 -->
+
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_height="250dp"
+            android:layout_marginTop="14dp"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <!-- Fitness -->
+
+            <LinearLayout
+                android:id="@+id/cardFitness"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="7dp"
+                android:layout_weight="1"
+                android:background="@drawable/training_card_bg"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="vertical">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="185dp"
+                    android:background="@drawable/training_grey_placeholder" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="10dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Fitness&#10;Trainings"
+                        android:textColor="#111111"
+                        android:textSize="17sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="↗"
+                        android:textColor="#777777"
+                        android:textSize="28sp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Football -->
 
             <LinearLayout
                 android:id="@+id/cardFootball"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="7dp"
                 android:layout_weight="1"
-                android:layout_marginEnd="8dp"
-                android:background="#E9E9E9"
-                android:orientation="vertical"
-                android:padding="10dp"
+                android:background="@drawable/training_card_bg"
                 android:clickable="true"
-                android:focusable="true">
+                android:focusable="true"
+                android:orientation="vertical">
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="150dp"
-                    android:background="#BFBFBF" />
+                    android:layout_height="185dp"
+                    android:background="@drawable/training_dark_grey_placeholder" />
 
-                <TextView
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:text="Football Trainings"
-                    android:textColor="#000000"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="10dp">
 
-            <LinearLayout
-                android:id="@+id/cardMoreTrainings"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="8dp"
-                android:background="#E9E9E9"
-                android:orientation="vertical"
-                android:padding="10dp"
-                android:clickable="true"
-                android:focusable="true">
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Football&#10;Trainings"
+                        android:textColor="#111111"
+                        android:textSize="17sp"
+                        android:textStyle="bold" />
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="150dp"
-                    android:background="#9C9C9C" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="↗"
+                        android:textColor="#777777"
+                        android:textSize="28sp" />
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:text="More Trainings"
-                    android:textColor="#000000"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
+                </LinearLayout>
+
             </LinearLayout>
 
         </LinearLayout>
 
     </LinearLayout>
-</androidx.core.widget.NestedScrollView>
+
+</ScrollView>
