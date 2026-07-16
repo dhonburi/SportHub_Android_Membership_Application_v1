@@ -1,64 +1,97 @@
 package com.example.sporthubandroidmembershipapplicationv1;
 
 import android.os.Bundle;
+import android.view.View;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link TrainingSessionsFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class TrainingSessionsFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
     public TrainingSessionsFragment() {
-        // Required empty public constructor
+        super(R.layout.fragment_training_sessions);
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment TrainingSessionsFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static TrainingSessionsFragment newInstance(String param1, String param2) {
-        TrainingSessionsFragment fragment = new TrainingSessionsFragment();
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        view.findViewById(R.id.cardBasketball).setOnClickListener(v ->
+                openTrainingDetail(
+                        "Basketball Trainings",
+                        "Beginner / Upper Beginner:\nDesigned for beginner and upper beginner players aged 6 to 12 years to learn the fundamentals of basketball in a structured environment.",
+                        "Intermediate Basketball:\nFor players who already know the basics and want to improve confidence, teamwork, and match-play performance.",
+                        "Senior Basketball:\nAn instructional programme for players with stronger core skills who want a more competitive and structured basketball training experience."
+                )
+        );
+
+        view.findViewById(R.id.cardVolleyball).setOnClickListener(v ->
+                openTrainingDetail(
+                        "Volleyball Trainings",
+                        "Beginner Volleyball:\nIntroduces basic passing, serving, and teamwork in a supportive training environment.",
+                        "Intermediate Volleyball:\nHelps players improve game awareness, coordination, and ball control.",
+                        "Advanced Volleyball:\nFocuses on match play, team communication, and stronger technical ability."
+                )
+        );
+
+        view.findViewById(R.id.cardBadminton).setOnClickListener(v ->
+                openTrainingDetail(
+                        "Badminton Trainings",
+                        "Junior Badminton:\nBuilds early movement, coordination, and racket skills for younger players.",
+                        "Intermediate Badminton:\nSupports players who want to strengthen consistency, footwork, and tactical play.",
+                        "Senior Badminton:\nDesigned for players aiming to improve competitiveness and advanced gameplay."
+                )
+        );
+
+        view.findViewById(R.id.cardTableTennis).setOnClickListener(v ->
+                openTrainingDetail(
+                        "Table Tennis Trainings",
+                        "Beginner Table Tennis:\nCovers the fundamentals of grip, control, and rally practice.",
+                        "Intermediate Table Tennis:\nFocuses on improving reactions, spin control, and structured drills.",
+                        "Advanced Table Tennis:\nSupports more competitive players through tactical and technical development."
+                )
+        );
+
+        view.findViewById(R.id.cardFootball).setOnClickListener(v ->
+                openTrainingDetail(
+                        "Football Trainings",
+                        "Junior Football:\nIntroduces movement, passing, teamwork, and coordination for newer players.",
+                        "Intermediate Football:\nHelps players improve positioning, decision-making, and match readiness.",
+                        "Senior Football:\nDesigned for players seeking a more competitive and intensive training experience."
+                )
+        );
+
+        view.findViewById(R.id.cardMoreTrainings).setOnClickListener(v ->
+                openTrainingDetail(
+                        "More Trainings",
+                        "Multi-sport Introduction:\nA flexible programme introducing different sports and movement-based activities.",
+                        "Community Activity Sessions:\nCasual sessions that encourage participation, fitness, and social involvement.",
+                        "Future Programmes:\nPlaceholder for upcoming training categories and new programme additions."
+                )
+        );
+    }
+
+    private void openTrainingDetail(String title, String detail1, String detail2, String detail3) {
+        TrainingDetailFragment fragment = new TrainingDetailFragment();
+
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putString("title", title);
+        args.putString("detail1", detail1);
+        args.putString("detail2", detail2);
+        args.putString("detail3", detail3);
         fragment.setArguments(args);
-        return fragment;
-    }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_training_sessions, container, false);
+        getParentFragmentManager()
+                .beginTransaction()
+                .setCustomAnimations(
+                        R.anim.slide_in_right,
+                        R.anim.slide_out_left,
+                        R.anim.slide_in_left,
+                        R.anim.slide_out_right
+                )
+                .replace(R.id.homeInnerFragmentContainer, fragment)
+                .addToBackStack(null)
+                .commit();
     }
 }

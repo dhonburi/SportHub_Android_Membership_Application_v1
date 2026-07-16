@@ -9,46 +9,57 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingTop="6dp"
+        android:paddingTop="8dp"
         android:paddingBottom="24dp">
 
-        <!-- Top hero image -->
-        <View
+        <!-- Top Row -->
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="210dp"
-            android:background="#B7B7B7" />
-
-        <!-- Title -->
-        <TextView
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="16dp"
-            android:text="Venue Booking"
-            android:textColor="#000000"
-            android:textSize="22sp"
-            android:textStyle="bold" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp">
 
-        <!-- Book a Court button -->
+            <TextView
+                android:id="@+id/btnBackTraining"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="←"
+                android:textSize="32sp"
+                android:textColor="#7A7A7A"
+                android:paddingEnd="18dp"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <TextView
+                android:id="@+id/txtTrainingTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Training Title"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="#000000" />
+        </LinearLayout>
+
+        <!-- Register Button -->
         <Button
-            android:id="@+id/btnBookCourt"
+            android:id="@+id/btnRegisterNow"
             android:layout_width="220dp"
             android:layout_height="56dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="14dp"
             android:layout_marginBottom="20dp"
-            android:backgroundTint="#E4B72E"
-            android:text="Book a Court"
+            android:text="Register Now"
             android:textAllCaps="false"
-            android:textColor="#FFFFFF"
+            android:textStyle="bold"
             android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#E4B72E" />
 
-        <!-- Booking Card 1 -->
+        <!-- Card 1 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="14dp"
             android:background="#E9E9E9"
             android:orientation="horizontal"
             android:padding="12dp">
@@ -57,37 +68,40 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_marginEnd="12dp"
-                android:background="#B9B0A0" />
+                android:background="#8CA0B8" />
 
             <LinearLayout
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:orientation="vertical">
 
                 <TextView
+                    android:id="@+id/txtHeader1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="44 Portage Road:"
+                    android:text="Header 1"
                     android:textColor="#000000"
                     android:textSize="17sp"
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/txtDesc1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="A versatile multi-sport venue with basketball, volleyball, badminton, pickleball, and more—ideal for games, training, and events."
+                    android:text="Description 1"
                     android:textColor="#5F5F5F"
-                    android:textSize="15sp" />
+                    android:textSize="15sp"
+                    android:textStyle="normal" />
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Booking Card 2 -->
+        <!-- Card 2 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="14dp"
             android:background="#E9E9E9"
             android:orientation="horizontal"
             android:padding="12dp">
@@ -96,37 +110,39 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_marginEnd="12dp"
-                android:background="#96B9A3" />
+                android:background="#B9A3A3" />
 
             <LinearLayout
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:orientation="vertical">
 
                 <TextView
+                    android:id="@+id/txtHeader2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="38 Portage Road:"
+                    android:text="Header 2"
                     android:textColor="#000000"
                     android:textSize="17sp"
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/txtDesc2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="A dedicated badminton space offering easy booking and a focused environment for casual and regular play."
+                    android:text="Description 2"
                     android:textColor="#5F5F5F"
-                    android:textSize="15sp" />
+                    android:textSize="15sp"
+                    android:textStyle="normal" />
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Booking Card 3 -->
+        <!-- Card 3 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
             android:background="#E9E9E9"
             android:orientation="horizontal"
             android:padding="12dp">
@@ -135,68 +151,32 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_marginEnd="12dp"
-                android:background="#C7C7C7" />
+                android:background="#D6B188" />
 
             <LinearLayout
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:orientation="vertical">
 
                 <TextView
+                    android:id="@+id/txtHeader3"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="36 Portage Road:"
+                    android:text="Header 3"
                     android:textColor="#000000"
                     android:textSize="17sp"
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/txtDesc3"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="A flexible training and activity venue suitable for community sessions, team use, and future booking expansion."
+                    android:text="Description 3"
                     android:textColor="#5F5F5F"
-                    android:textSize="15sp" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- Booking Card 4 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:background="#E9E9E9"
-            android:orientation="horizontal"
-            android:padding="12dp">
-
-            <View
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_marginEnd="12dp"
-                android:background="#AAB8C5" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Community Court Placeholder:"
-                    android:textColor="#000000"
-                    android:textSize="17sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="Placeholder booking location for testing the scroll behaviour and card-based booking layout in the prototype."
-                    android:textColor="#5F5F5F"
-                    android:textSize="15sp" />
+                    android:textSize="15sp"
+                    android:textStyle="normal" />
             </LinearLayout>
         </LinearLayout>
 
