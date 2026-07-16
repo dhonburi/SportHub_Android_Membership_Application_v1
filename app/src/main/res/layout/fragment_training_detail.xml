@@ -1,184 +1,237 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/transparent"
-    android:fillViewport="true">
+    android:clipToPadding="false"
+    android:fillViewport="true"
+    android:overScrollMode="never">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingTop="8dp"
-        android:paddingBottom="24dp">
+        android:paddingBottom="28dp">
 
-        <!-- Top Row -->
+        <!-- Page heading -->
+
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="58dp"
             android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:layout_marginBottom="16dp">
+            android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/btnBackTraining"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="←"
-                android:textSize="32sp"
-                android:textColor="#7A7A7A"
-                android:paddingEnd="18dp"
+                android:layout_width="54dp"
+                android:layout_height="match_parent"
                 android:clickable="true"
-                android:focusable="true" />
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:text="←"
+                android:textColor="#777777"
+                android:textSize="37sp" />
 
             <TextView
                 android:id="@+id/txtTrainingTitle"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Training Title"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                android:textColor="#000000" />
+                android:layout_weight="1"
+                android:text="Basketball Trainings"
+                android:textColor="#111111"
+                android:textSize="27sp"
+                android:textStyle="bold" />
+
         </LinearLayout>
 
-        <!-- Register Button -->
-        <Button
+        <!-- Register button -->
+
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnRegisterNow"
-            android:layout_width="220dp"
-            android:layout_height="56dp"
+            android:layout_width="230dp"
+            android:layout_height="58dp"
             android:layout_gravity="center_horizontal"
+            android:layout_marginTop="9dp"
             android:layout_marginBottom="20dp"
-            android:text="Register Now"
+            android:background="@drawable/register_button_bg"
+            android:backgroundTint="@null"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:text="Register Now    ↗"
             android:textAllCaps="false"
-            android:textStyle="bold"
-            android:textSize="18sp"
             android:textColor="#FFFFFF"
-            android:backgroundTint="#E4B72E" />
+            android:textSize="19sp"
+            android:textStyle="bold"
+            app:backgroundTint="@null" />
 
-        <!-- Card 1 -->
+        <!-- Beginner card -->
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="14dp"
-            android:background="#E9E9E9"
+            android:layout_marginBottom="13dp"
+            android:background="@drawable/training_detail_card_bg"
+            android:gravity="center_vertical"
+            android:minHeight="155dp"
             android:orientation="horizontal"
             android:padding="12dp">
 
             <View
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_marginEnd="12dp"
-                android:background="#8CA0B8" />
+                android:layout_width="126dp"
+                android:layout_height="126dp"
+                android:background="@drawable/detail_blue_placeholder" />
 
             <LinearLayout
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
                 android:layout_weight="1"
+                android:minHeight="126dp"
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/txtHeader1"
+                    android:id="@+id/txtBeginnerTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Header 1"
-                    android:textColor="#000000"
+                    android:text="Beginner / Upper Beginner:"
+                    android:textColor="#111111"
                     android:textSize="17sp"
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/txtDesc1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="Description 1"
-                    android:textColor="#5F5F5F"
-                    android:textSize="15sp"
-                    android:textStyle="normal" />
+                    android:lineSpacingExtra="1dp"
+                    android:text="Designed for beginner and upper beginner players aged 6 to 12 years to learn the fundamentals of basketball in a structured environment."
+                    android:textColor="#666666"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:gravity="end"
+                    android:text="↗"
+                    android:textColor="#777777"
+                    android:textSize="27sp" />
+
             </LinearLayout>
+
         </LinearLayout>
 
-        <!-- Card 2 -->
+        <!-- Intermediate card -->
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="14dp"
-            android:background="#E9E9E9"
+            android:layout_marginBottom="13dp"
+            android:background="@drawable/training_detail_card_bg"
+            android:gravity="center_vertical"
+            android:minHeight="155dp"
             android:orientation="horizontal"
             android:padding="12dp">
 
             <View
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_marginEnd="12dp"
-                android:background="#B9A3A3" />
+                android:layout_width="126dp"
+                android:layout_height="126dp"
+                android:background="@drawable/detail_pink_placeholder" />
 
             <LinearLayout
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
                 android:layout_weight="1"
+                android:minHeight="126dp"
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/txtHeader2"
+                    android:id="@+id/txtIntermediateTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Header 2"
-                    android:textColor="#000000"
+                    android:text="Intermediate Basketball:"
+                    android:textColor="#111111"
                     android:textSize="17sp"
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/txtDesc2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="Description 2"
-                    android:textColor="#5F5F5F"
-                    android:textSize="15sp"
-                    android:textStyle="normal" />
+                    android:lineSpacingExtra="1dp"
+                    android:text="For players who already know the basics and want to improve confidence, teamwork, skills and match-play performance."
+                    android:textColor="#666666"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:gravity="end"
+                    android:text="↗"
+                    android:textColor="#777777"
+                    android:textSize="27sp" />
+
             </LinearLayout>
+
         </LinearLayout>
 
-        <!-- Card 3 -->
+        <!-- Senior card -->
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#E9E9E9"
+            android:background="@drawable/training_detail_card_bg"
+            android:gravity="center_vertical"
+            android:minHeight="155dp"
             android:orientation="horizontal"
             android:padding="12dp">
 
             <View
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_marginEnd="12dp"
-                android:background="#D6B188" />
+                android:layout_width="126dp"
+                android:layout_height="126dp"
+                android:background="@drawable/detail_orange_placeholder" />
 
             <LinearLayout
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
                 android:layout_weight="1"
+                android:minHeight="126dp"
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/txtHeader3"
+                    android:id="@+id/txtSeniorTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Header 3"
-                    android:textColor="#000000"
+                    android:text="Senior Basketball:"
+                    android:textColor="#111111"
                     android:textSize="17sp"
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/txtDesc3"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="Description 3"
-                    android:textColor="#5F5F5F"
-                    android:textSize="15sp"
-                    android:textStyle="normal" />
+                    android:lineSpacingExtra="1dp"
+                    android:text="An instructional programme for players with stronger core skills who want a more competitive and structured basketball training environment."
+                    android:textColor="#666666"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:gravity="end"
+                    android:text="↗"
+                    android:textColor="#777777"
+                    android:textSize="27sp" />
+
             </LinearLayout>
+
         </LinearLayout>
 
     </LinearLayout>
-</androidx.core.widget.NestedScrollView>
+
+</ScrollView>
