@@ -1,64 +1,66 @@
 package com.example.sporthubandroidmembershipapplicationv1;
 
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link BookingsFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class BookingsFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private Button btnBookCourt;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private LinearLayout cardPortage44;
+    private LinearLayout cardPortage38;
+    private LinearLayout cardPortage36;
 
     public BookingsFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment BookingsFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static BookingsFragment newInstance(String param1, String param2) {
-        BookingsFragment fragment = new BookingsFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+        super(R.layout.fragment_bookings);
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+    public void onViewCreated(
+            @NonNull View view,
+            @Nullable Bundle savedInstanceState
+    ) {
+        super.onViewCreated(view, savedInstanceState);
+
+        btnBookCourt = view.findViewById(R.id.btnBookCourt);
+
+        cardPortage44 = view.findViewById(R.id.cardPortage44);
+        cardPortage38 = view.findViewById(R.id.cardPortage38);
+        cardPortage36 = view.findViewById(R.id.cardPortage36);
+
+        btnBookCourt.setOnClickListener(v -> {
+            Toast.makeText(
+                    requireContext(),
+                    "Court booking will be added later.",
+                    Toast.LENGTH_SHORT
+            ).show();
+        });
+
+        cardPortage44.setOnClickListener(v ->
+                showVenueMessage("44 Portage Road")
+        );
+
+        cardPortage38.setOnClickListener(v ->
+                showVenueMessage("38 Portage Road")
+        );
+
+        cardPortage36.setOnClickListener(v ->
+                showVenueMessage("36 Portage Road")
+        );
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_bookings, container, false);
+    private void showVenueMessage(String venueName) {
+        Toast.makeText(
+                requireContext(),
+                venueName + " booking details will be added later.",
+                Toast.LENGTH_SHORT
+        ).show();
     }
 }

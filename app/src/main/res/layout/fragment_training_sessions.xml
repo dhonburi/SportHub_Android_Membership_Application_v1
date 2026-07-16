@@ -3,9 +3,11 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FFFFFF"
     android:clipToPadding="false"
     android:fillViewport="true"
-    android:overScrollMode="never">
+    android:overScrollMode="never"
+    android:paddingBottom="110dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -20,8 +22,6 @@
             android:layout_height="250dp"
             android:orientation="horizontal"
             android:weightSum="2">
-
-            <!-- Basketball -->
 
             <LinearLayout
                 android:id="@+id/cardBasketball"
@@ -67,8 +67,6 @@
                 </LinearLayout>
 
             </LinearLayout>
-
-            <!-- Volleyball -->
 
             <LinearLayout
                 android:id="@+id/cardVolleyball"
@@ -126,8 +124,6 @@
             android:orientation="horizontal"
             android:weightSum="2">
 
-            <!-- Badminton -->
-
             <LinearLayout
                 android:id="@+id/cardBadminton"
                 android:layout_width="0dp"
@@ -172,8 +168,6 @@
                 </LinearLayout>
 
             </LinearLayout>
-
-            <!-- Table tennis -->
 
             <LinearLayout
                 android:id="@+id/cardTableTennis"
@@ -231,8 +225,6 @@
             android:orientation="horizontal"
             android:weightSum="2">
 
-            <!-- Fitness -->
-
             <LinearLayout
                 android:id="@+id/cardFitness"
                 android:layout_width="0dp"
@@ -277,8 +269,6 @@
                 </LinearLayout>
 
             </LinearLayout>
-
-            <!-- Football -->
 
             <LinearLayout
                 android:id="@+id/cardFootball"
