@@ -1,7 +1,10 @@
 package com.example.sporthubandroidmembershipapplicationv1;
 
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -11,7 +14,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
 
 public class HomeActivity extends AppCompatActivity {
@@ -34,6 +39,8 @@ public class HomeActivity extends AppCompatActivity {
 
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_home);
+
+        configureSystemBars();
 
         ViewCompat.setOnApplyWindowInsetsListener(
                 findViewById(R.id.main),
@@ -68,6 +75,7 @@ public class HomeActivity extends AppCompatActivity {
 
         navHome.setOnClickListener(view -> {
             loadFragment(new HomeFragment());
+
             updateSelectedNavigation(
                     navHome,
                     iconHome,
@@ -77,6 +85,7 @@ public class HomeActivity extends AppCompatActivity {
 
         navQr.setOnClickListener(view -> {
             loadFragment(new QrFragment());
+
             updateSelectedNavigation(
                     navQr,
                     iconQr,
@@ -86,6 +95,7 @@ public class HomeActivity extends AppCompatActivity {
 
         navProfile.setOnClickListener(view -> {
             loadFragment(new ProfileFragment());
+
             updateSelectedNavigation(
                     navProfile,
                     iconProfile,
@@ -115,11 +125,41 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+    private void configureSystemBars() {
+
+        Window window = getWindow();
+
+        window.setStatusBarColor(Color.WHITE);
+        window.setNavigationBarColor(Color.WHITE);
+
+        // Removes the grey contrast background Android may add
+        // behind the bottom gesture/navigation area.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.setStatusBarContrastEnforced(false);
+            window.setNavigationBarContrastEnforced(false);
+        }
+
+        WindowInsetsControllerCompat controller =
+                WindowCompat.getInsetsController(
+                        window,
+                        window.getDecorView()
+                );
+
+        controller.setAppearanceLightStatusBars(true);
+        controller.setAppearanceLightNavigationBars(true);
+
+        window.getDecorView().setBackgroundColor(Color.WHITE);
+    }
+
     private void loadFragment(Fragment fragment) {
+
         getSupportFragmentManager()
                 .beginTransaction()
                 .setReorderingAllowed(true)
-                .replace(R.id.fragmentContainer, fragment)
+                .replace(
+                        R.id.fragmentContainer,
+                        fragment
+                )
                 .commit();
     }
 
@@ -139,7 +179,7 @@ public class HomeActivity extends AppCompatActivity {
                 android.R.color.black
         );
 
-        // Reset all bottom navigation backgrounds
+        // Reset navigation backgrounds
         navHome.setBackgroundResource(
                 R.drawable.bottom_nav_unselected_bg
         );
@@ -152,25 +192,23 @@ public class HomeActivity extends AppCompatActivity {
                 R.drawable.bottom_nav_unselected_bg
         );
 
-        // Hide all navigation text
+        // Hide navigation labels
         txtHome.setVisibility(View.GONE);
         txtQr.setVisibility(View.GONE);
         txtProfile.setVisibility(View.GONE);
 
-        // Make all icons white
+        // Reset icons to white
         iconHome.setColorFilter(white);
         iconQr.setColorFilter(white);
         iconProfile.setColorFilter(white);
 
-        // Highlight selected navigation button
+        // Highlight selected navigation item
         selectedNavigation.setBackgroundResource(
                 R.drawable.bottom_nav_selected_bg
         );
 
-        // Make selected icon black
         selectedIcon.setColorFilter(black);
 
-        // Show selected navigation text
         selectedText.setTextColor(black);
         selectedText.setVisibility(View.VISIBLE);
 
