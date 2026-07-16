@@ -1,46 +1,93 @@
 package com.example.sporthubandroidmembershipapplicationv1;
 
-import android.annotation.SuppressLint;
-import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.TextView;
+import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.fragment.app.Fragment;
 
 public class HomeActivity extends AppCompatActivity {
-    String Username;
 
-    @SuppressLint("SetTextI18n")
+    Button btnHomeFragment, btnQrFragment, btnProfileFragment;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_home);
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        Intent i = getIntent();
-        Username = i.getStringExtra("Username");
-        View v = findViewById(R.id.textView);
-        String welcomeMessage = "Welcome " + Username + "!";
-        ((TextView)v).setText(welcomeMessage);
+        btnHomeFragment = findViewById(R.id.btnHomeFragment);
+        btnQrFragment = findViewById(R.id.btnQrFragment);
+        btnProfileFragment = findViewById(R.id.btnProfileFragment);
+
+        btnHomeFragment.setOnClickListener(v -> {
+            loadFragment(new HomeFragment());
+            updateSelectedButton(btnHomeFragment);
+        });
+
+        btnQrFragment.setOnClickListener(v -> {
+            loadFragment(new QrFragment());
+            updateSelectedButton(btnQrFragment);
+        });
+
+        btnProfileFragment.setOnClickListener(v -> {
+            loadFragment(new ProfileFragment());
+            updateSelectedButton(btnProfileFragment);
+        });
+
+        String openFragment = getIntent().getStringExtra("OPEN_FRAGMENT");
+
+        if ("QR".equals(openFragment)) {
+            loadFragment(new QrFragment());
+            updateSelectedButton(btnQrFragment);
+        } else {
+            loadFragment(new HomeFragment());
+            updateSelectedButton(btnHomeFragment);
+        }
     }
 
-    public void Logout(){
-        // Open the login page and clear session
+    private void loadFragment(Fragment fragment) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .commit();
+    }
 
-        // TEMPORARY - MAKE IT MORE SECURE
-        Username = "";
+    private void updateSelectedButton(Button selectedButton) {
+        // Reset all buttons back to the rounded unselected background
+        btnHomeFragment.setBackgroundResource(R.drawable.nav_button_unselected_bg);
+        btnQrFragment.setBackgroundResource(R.drawable.nav_button_unselected_bg);
+        btnProfileFragment.setBackgroundResource(R.drawable.nav_button_unselected_bg);
 
-        Intent i = new Intent(this, LoginActivity.class);
-        startActivity(i);
+        btnHomeFragment.setTextColor(getColor(android.R.color.white));
+        btnQrFragment.setTextColor(getColor(android.R.color.white));
+        btnProfileFragment.setTextColor(getColor(android.R.color.white));
+
+        btnHomeFragment.setAlpha(1f);
+        btnQrFragment.setAlpha(1f);
+        btnProfileFragment.setAlpha(1f);
+
+        // Apply the rounded selected background
+        selectedButton.setBackgroundResource(R.drawable.nav_button_bg);
+        selectedButton.setTextColor(getColor(android.R.color.black));
+
+        selectedButton.animate()
+                .scaleX(1.08f)
+                .scaleY(1.08f)
+                .setDuration(120)
+                .withEndAction(() -> selectedButton.animate()
+                        .scaleX(1f)
+                        .scaleY(1f)
+                        .setDuration(120));
     }
 }

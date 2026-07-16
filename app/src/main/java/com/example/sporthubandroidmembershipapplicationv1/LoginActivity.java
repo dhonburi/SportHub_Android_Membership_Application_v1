@@ -35,13 +35,15 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
     }
-    public void CheckLogin(View v){
+
+    public void CheckLogin(View v) {
         EditText userText = findViewById(R.id.editTextEmailAddress);
         String username = userText.getText().toString();
 
@@ -58,45 +60,47 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-
         for (int i = 0; i < validUsernames.length; i++) {
             if (username.toLowerCase().equals(validUsernames[i]) &&
                     password.equals(validPasswords[i])) {
+
                 LaunchHome(validUsernames[i].substring(0, 1).toUpperCase() + validUsernames[i].substring(1));
                 return;
             }
         }
 
         IncorrectLogin("Incorrect Username or Password");
-
     }
 
-    public void LaunchHome(String username){
-        // Open the home page once Login is good
+    public void LaunchHome(String username) {
         Intent i = new Intent(this, HomeActivity.class);
+
+        // Sends the username to HomeActivity
         i.putExtra("Username", username);
+
+        // This tells HomeActivity to open the QR page first after login
+        i.putExtra("OPEN_FRAGMENT", "QR");
+
         startActivity(i);
+        finish();
     }
 
-    public void IncorrectLogin(String message){
+    public void IncorrectLogin(String message) {
         View v = findViewById(R.id.alertText);
 
-        // show it first
-        ((TextView)v).setText(message);
+        ((TextView) v).setText(message);
         v.setVisibility(View.VISIBLE);
         v.setAlpha(1f);
 
-        // wait 1.5 seconds, then fade out
         v.postDelayed(() -> {
-
             v.animate()
                     .alpha(0f)
-                    .setDuration(500) // fade duration
+                    .setDuration(500)
                     .withEndAction(() -> {
                         v.setVisibility(View.INVISIBLE);
-                        v.setAlpha(1f); // reset for next time
+                        v.setAlpha(1f);
                     });
 
-        }, 1500); // delay before fade starts
+        }, 1500);
     }
 }
