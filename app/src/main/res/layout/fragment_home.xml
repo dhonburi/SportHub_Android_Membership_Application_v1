@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -10,47 +10,19 @@
     android:paddingTop="10dp"
     android:paddingEnd="18dp">
 
-    <!-- Header -->
+    <!-- Shared Header -->
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="82dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
+    <include
+        layout="@layout/view_header" />
 
-        <ImageView
-            android:layout_width="0dp"
-            android:layout_height="66dp"
-            android:layout_weight="1"
-            android:adjustViewBounds="true"
-            android:contentDescription="Synergy Sports logo"
-            android:scaleType="fitStart"
-            app:srcCompat="@drawable/synergy_logo" />
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btnSettings"
-            android:layout_width="112dp"
-            android:layout_height="50dp"
-            android:background="@drawable/settings_button_bg"
-            android:backgroundTint="@null"
-            android:elevation="0dp"
-            android:minWidth="0dp"
-            android:minHeight="0dp"
-            android:stateListAnimator="@null"
-            android:text="Settings"
-            android:textAllCaps="false"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:backgroundTint="@null" />
-
-    </LinearLayout>
+    <!-- Home Section Tabs -->
 
     <!-- News / Trainings / Bookings navigation -->
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="68dp"
+        android:layout_marginTop="4dp"
         android:background="@drawable/home_tabs_container_bg"
         android:gravity="center"
         android:orientation="horizontal"
@@ -70,6 +42,8 @@
             android:minHeight="0dp"
             android:padding="0dp"
             android:stateListAnimator="@null"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
             android:text="News"
             android:textAllCaps="false"
             android:textColor="#FFFFFF"
@@ -90,6 +64,8 @@
             android:minHeight="0dp"
             android:padding="0dp"
             android:stateListAnimator="@null"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
             android:text="Trainings&#10;&amp; Comps"
             android:textAllCaps="false"
             android:textColor="#111111"
@@ -110,6 +86,8 @@
             android:minHeight="0dp"
             android:padding="0dp"
             android:stateListAnimator="@null"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
             android:text="Bookings"
             android:textAllCaps="false"
             android:textColor="#111111"

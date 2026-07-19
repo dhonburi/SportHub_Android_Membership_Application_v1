@@ -23,6 +23,9 @@
         android:background="@android:color/transparent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        android:background="#FFFFFF"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavLayout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -46,6 +49,8 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <!-- HOME -->
+
+        <!-- HOME BUTTON -->
 
         <LinearLayout
             android:id="@+id/navHome"
@@ -81,7 +86,7 @@
 
         </LinearLayout>
 
-        <!-- QR -->
+        <!-- QR BUTTON -->
 
         <LinearLayout
             android:id="@+id/navQr"
@@ -119,7 +124,7 @@
 
         </LinearLayout>
 
-        <!-- PROFILE -->
+        <!-- PROFILE BUTTON -->
 
         <LinearLayout
             android:id="@+id/navProfile"

@@ -75,7 +75,6 @@ public class HomeActivity extends AppCompatActivity {
 
         navHome.setOnClickListener(view -> {
             loadFragment(new HomeFragment());
-
             updateSelectedNavigation(
                     navHome,
                     iconHome,
@@ -85,7 +84,6 @@ public class HomeActivity extends AppCompatActivity {
 
         navQr.setOnClickListener(view -> {
             loadFragment(new QrFragment());
-
             updateSelectedNavigation(
                     navQr,
                     iconQr,
@@ -95,7 +93,6 @@ public class HomeActivity extends AppCompatActivity {
 
         navProfile.setOnClickListener(view -> {
             loadFragment(new ProfileFragment());
-
             updateSelectedNavigation(
                     navProfile,
                     iconProfile,
@@ -156,10 +153,7 @@ public class HomeActivity extends AppCompatActivity {
         getSupportFragmentManager()
                 .beginTransaction()
                 .setReorderingAllowed(true)
-                .replace(
-                        R.id.fragmentContainer,
-                        fragment
-                )
+                .replace(R.id.fragmentContainer, fragment)
                 .commit();
     }
 
@@ -179,7 +173,7 @@ public class HomeActivity extends AppCompatActivity {
                 android.R.color.black
         );
 
-        // Reset navigation backgrounds
+        // Reset all bottom navigation backgrounds
         navHome.setBackgroundResource(
                 R.drawable.bottom_nav_unselected_bg
         );
@@ -192,23 +186,25 @@ public class HomeActivity extends AppCompatActivity {
                 R.drawable.bottom_nav_unselected_bg
         );
 
-        // Hide navigation labels
+        // Hide all navigation text
         txtHome.setVisibility(View.GONE);
         txtQr.setVisibility(View.GONE);
         txtProfile.setVisibility(View.GONE);
 
-        // Reset icons to white
+        // Make all icons white
         iconHome.setColorFilter(white);
         iconQr.setColorFilter(white);
         iconProfile.setColorFilter(white);
 
-        // Highlight selected navigation item
+        // Highlight selected navigation button
         selectedNavigation.setBackgroundResource(
                 R.drawable.bottom_nav_selected_bg
         );
 
+        // Make selected icon black
         selectedIcon.setColorFilter(black);
 
+        // Show selected navigation text
         selectedText.setTextColor(black);
         selectedText.setVisibility(View.VISIBLE);
 
