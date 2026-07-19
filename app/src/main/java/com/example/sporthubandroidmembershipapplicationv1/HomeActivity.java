@@ -1,7 +1,10 @@
 package com.example.sporthubandroidmembershipapplicationv1;
 
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -11,7 +14,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
 
 public class HomeActivity extends AppCompatActivity {
@@ -34,6 +39,8 @@ public class HomeActivity extends AppCompatActivity {
 
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_home);
+
+        configureSystemBars();
 
         ViewCompat.setOnApplyWindowInsetsListener(
                 findViewById(R.id.main),
@@ -115,7 +122,34 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+    private void configureSystemBars() {
+
+        Window window = getWindow();
+
+        window.setStatusBarColor(Color.WHITE);
+        window.setNavigationBarColor(Color.WHITE);
+
+        // Removes the grey contrast background Android may add
+        // behind the bottom gesture/navigation area.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.setStatusBarContrastEnforced(false);
+            window.setNavigationBarContrastEnforced(false);
+        }
+
+        WindowInsetsControllerCompat controller =
+                WindowCompat.getInsetsController(
+                        window,
+                        window.getDecorView()
+                );
+
+        controller.setAppearanceLightStatusBars(true);
+        controller.setAppearanceLightNavigationBars(true);
+
+        window.getDecorView().setBackgroundColor(Color.WHITE);
+    }
+
     private void loadFragment(Fragment fragment) {
+
         getSupportFragmentManager()
                 .beginTransaction()
                 .setReorderingAllowed(true)

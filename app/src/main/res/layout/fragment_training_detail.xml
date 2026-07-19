@@ -4,6 +4,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:clipToPadding="false"
+    android:fillViewport="true"
+    android:overScrollMode="never"
+    android:paddingBottom="110dp">
     android:clipToPadding="false"
     android:fillViewport="true"
     android:overScrollMode="never">
