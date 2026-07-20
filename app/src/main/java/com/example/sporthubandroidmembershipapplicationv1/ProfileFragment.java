@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,15 +13,9 @@ public class ProfileFragment extends Fragment {
 
     private Button btnSettings;
     private Button btnTopUp;
-
-    private TextView txtMemberName;
-    private TextView txtMemberId;
-    private TextView txtBalance;
-    private TextView txtLevel;
-
-    private LinearLayout layoutTransactions;
-    private LinearLayout layoutRewards;
-    private LinearLayout layoutMemberships;
+    private Button btnTransactions;
+    private Button btnRewards;
+    private Button btnMembership;
 
     public ProfileFragment() {
         super(R.layout.fragment_profile);
@@ -38,60 +30,49 @@ public class ProfileFragment extends Fragment {
 
         btnSettings = view.findViewById(R.id.btnSettings);
         btnTopUp = view.findViewById(R.id.btnTopUp);
+        btnTransactions = view.findViewById(R.id.btnTransactions);
+        btnRewards = view.findViewById(R.id.btnRewards);
+        btnMembership = view.findViewById(R.id.btnMembership);
 
-        txtMemberName = view.findViewById(R.id.txtMemberName);
-        txtMemberId = view.findViewById(R.id.txtMemberId);
-        txtBalance = view.findViewById(R.id.txtBalance);
-        txtLevel = view.findViewById(R.id.txtLevel);
+        btnSettings.setOnClickListener(v -> {
 
-        layoutTransactions = view.findViewById(R.id.layoutTransactions);
-        layoutRewards = view.findViewById(R.id.layoutRewards);
-        layoutMemberships = view.findViewById(R.id.layoutMemberships);
+            Intent intent = new Intent(
+                    requireActivity(),
+                    SettingsActivity.class
+            );
 
-        if (txtMemberName != null)
-            txtMemberName.setText("John Smith");
+            startActivity(intent);
 
-        if (txtMemberId != null)
-            txtMemberId.setText("Member ID: 4213477");
+        });
 
-        if (txtBalance != null)
-            txtBalance.setText("$102.34");
+        btnTopUp.setOnClickListener(v -> {
 
-        if (txtLevel != null)
-            txtLevel.setText("LV2");
+            // TODO
+            // Open Top Up page
 
-        if (btnSettings != null) {
-            btnSettings.setOnClickListener(v -> {
-                Intent intent = new Intent(
-                        requireActivity(),
-                        SettingsActivity.class
-                );
-                startActivity(intent);
-            });
-        }
+        });
 
-        if (btnTopUp != null) {
-            btnTopUp.setOnClickListener(v -> {
-                // TODO
-            });
-        }
+        btnTransactions.setOnClickListener(v -> {
 
-        if (layoutTransactions != null) {
-            layoutTransactions.setOnClickListener(v -> {
-                // TODO
-            });
-        }
+            // TODO
+            // Open Transactions page
 
-        if (layoutRewards != null) {
-            layoutRewards.setOnClickListener(v -> {
-                // TODO
-            });
-        }
+        });
 
-        if (layoutMemberships != null) {
-            layoutMemberships.setOnClickListener(v -> {
-                // TODO
-            });
-        }
+        btnRewards.setOnClickListener(v -> {
+
+            // TODO
+            // Open Rewards page
+
+        });
+
+        btnMembership.setOnClickListener(v -> {
+
+            // TODO
+            // Open Membership page
+
+        });
+
     }
+
 }
