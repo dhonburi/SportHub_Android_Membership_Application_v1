@@ -25,7 +25,7 @@
             android:id="@+id/cardQr"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="100dp"
+            android:layout_marginTop="120dp"
             app:cardBackgroundColor="@android:color/white"
             app:cardCornerRadius="48dp"
             app:cardElevation="20dp">
@@ -88,7 +88,7 @@
             android:layout_width="96dp"
             android:layout_height="96dp"
             android:layout_gravity="top|center_horizontal"
-            android:translationY="50dp"
+            android:translationY="70dp"
             app:cardBackgroundColor="@android:color/white"
             app:cardCornerRadius="48dp"
             app:cardElevation="22dp">

@@ -9,12 +9,17 @@
     android:fillViewport="true"
     android:overScrollMode="never"
     android:paddingBottom="110dp">
+    android:clipToPadding="false"
+    android:fillViewport="true"
+    android:overScrollMode="never">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingBottom="28dp">
+
+        <!-- Page heading -->
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -44,6 +49,8 @@
                 android:textStyle="bold" />
 
         </LinearLayout>
+
+        <!-- Register button -->
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnRegisterNow"
