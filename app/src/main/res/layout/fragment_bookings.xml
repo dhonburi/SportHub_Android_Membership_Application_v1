@@ -1,15 +1,191 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/transparent"
-    android:gravity="center"
-    android:orientation="vertical">
+    android:background="#FFFFFF"
+    android:clipToPadding="false"
+    android:fillViewport="true"
+    android:overScrollMode="never"
+    android:paddingBottom="110dp">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Bookings Page"
-        android:textSize="24sp"
-        android:textStyle="bold" />
-</LinearLayout>
+        android:orientation="vertical"
+        android:paddingBottom="32dp">
+
+        <View
+            android:id="@+id/bookingHeroImage"
+            android:layout_width="match_parent"
+            android:layout_height="220dp"
+            android:background="@drawable/booking_hero_placeholder" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:gravity="center"
+            android:text="Venue Booking"
+            android:textColor="#111111"
+            android:textSize="29sp"
+            android:textStyle="bold" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnBookCourt"
+            android:layout_width="230dp"
+            android:layout_height="58dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="20dp"
+            android:background="@drawable/book_court_button_bg"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:text="Book a Court      ↗"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="19sp"
+            android:textStyle="bold"
+            app:backgroundTint="@null" />
+
+        <!-- 44 Portage Road -->
+
+        <LinearLayout
+            android:id="@+id/cardPortage44"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="14dp"
+            android:background="@drawable/booking_card_bg"
+            android:gravity="center_vertical"
+            android:minHeight="165dp"
+            android:orientation="horizontal"
+            android:padding="12dp">
+
+            <View
+                android:layout_width="132dp"
+                android:layout_height="132dp"
+                android:background="@drawable/booking_beige_placeholder" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="44 Portage Road:"
+                    android:textColor="#111111"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:lineSpacingExtra="1dp"
+                    android:text="A versatile multi-sport venue with basketball, volleyball, badminton, pickleball, and more—ideal for games, training, and events."
+                    android:textColor="#666666"
+                    android:textSize="15sp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- 38 Portage Road -->
+
+        <LinearLayout
+            android:id="@+id/cardPortage38"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="14dp"
+            android:background="@drawable/booking_card_bg"
+            android:gravity="center_vertical"
+            android:minHeight="165dp"
+            android:orientation="horizontal"
+            android:padding="12dp">
+
+            <View
+                android:layout_width="132dp"
+                android:layout_height="132dp"
+                android:background="@drawable/booking_green_placeholder" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="38 Portage Road:"
+                    android:textColor="#111111"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:lineSpacingExtra="1dp"
+                    android:text="A dedicated badminton space offering easy booking and a focused environment for casual and regular play."
+                    android:textColor="#666666"
+                    android:textSize="15sp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- 36 Portage Road -->
+
+        <LinearLayout
+            android:id="@+id/cardPortage36"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/booking_card_bg"
+            android:gravity="center_vertical"
+            android:minHeight="165dp"
+            android:orientation="horizontal"
+            android:padding="12dp">
+
+            <View
+                android:layout_width="132dp"
+                android:layout_height="132dp"
+                android:background="@drawable/booking_blue_placeholder" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="36 Portage Road:"
+                    android:textColor="#111111"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:lineSpacingExtra="1dp"
+                    android:text="A flexible training and activity venue suitable for team sessions, community programmes, and indoor sporting events."
+                    android:textColor="#666666"
+                    android:textSize="15sp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>

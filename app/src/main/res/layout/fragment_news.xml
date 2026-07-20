@@ -1,15 +1,343 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/transparent"
-    android:gravity="center"
-    android:orientation="vertical">
+    android:background="#FFFFFF"
+    android:clipToPadding="false"
+    android:fillViewport="true"
+    android:overScrollMode="never"
+    android:paddingBottom="110dp">
+    android:clipToPadding="false"
+    android:fillViewport="true"
+    android:overScrollMode="never">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="News Page"
-        android:textSize="24sp"
-        android:textStyle="bold" />
-</LinearLayout>
+        android:orientation="vertical"
+        android:paddingBottom="28dp">
+
+        <!-- News card 1 -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="145dp"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/news_card_bg"
+            android:orientation="horizontal"
+            android:padding="12dp">
+
+            <View
+                android:layout_width="120dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/news_placeholder_bg" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="13dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="4"
+                    android:text="Whau Chinese New Year Festival celebrates a joyous and successful community day"
+                    android:textColor="#111111"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <Space
+                    android:layout_width="1dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="April 1st 2025"
+                        android:textColor="#777777"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="↗"
+                        android:textColor="#777777"
+                        android:textSize="27sp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- News card 2 -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="145dp"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/news_card_bg"
+            android:orientation="horizontal"
+            android:padding="12dp">
+
+            <View
+                android:layout_width="120dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/news_placeholder_bg" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="13dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="4"
+                    android:text="Congratulations to City Lee Gar for hosting a successful boxing tournament at SportHub"
+                    android:textColor="#111111"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <Space
+                    android:layout_width="1dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="October 23rd 2024"
+                        android:textColor="#777777"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="↗"
+                        android:textColor="#777777"
+                        android:textSize="27sp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- News card 3 -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="145dp"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/news_card_bg"
+            android:orientation="horizontal"
+            android:padding="12dp">
+
+            <View
+                android:layout_width="120dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/news_placeholder_bg" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="13dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="4"
+                    android:text="SportHub is proud to support the AYVA Falcons Volleyball Club"
+                    android:textColor="#111111"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <Space
+                    android:layout_width="1dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="November 2nd 2022"
+                        android:textColor="#777777"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="↗"
+                        android:textColor="#777777"
+                        android:textSize="27sp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- News card 4 -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="145dp"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/news_card_bg"
+            android:orientation="horizontal"
+            android:padding="12dp">
+
+            <View
+                android:layout_width="120dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/news_placeholder_bg" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="13dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="4"
+                    android:text="Girls Got Active Badminton Programme"
+                    android:textColor="#111111"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <Space
+                    android:layout_width="1dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="August 12th 2022"
+                        android:textColor="#777777"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="↗"
+                        android:textColor="#777777"
+                        android:textSize="27sp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- News card 5 -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="145dp"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/news_card_bg"
+            android:orientation="horizontal"
+            android:padding="12dp">
+
+            <View
+                android:layout_width="120dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/news_placeholder_bg" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="13dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="4"
+                    android:text="SportHub social media giveaway competition"
+                    android:textColor="#111111"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <Space
+                    android:layout_width="1dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Latest update"
+                        android:textColor="#777777"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="↗"
+                        android:textColor="#777777"
+                        android:textSize="27sp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>

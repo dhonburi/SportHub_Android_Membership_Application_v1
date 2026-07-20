@@ -1,64 +1,89 @@
 package com.example.sporthubandroidmembershipapplicationv1;
 
 import android.os.Bundle;
+import android.view.View;
+import android.widget.LinearLayout;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link TrainingSessionsFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class TrainingSessionsFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private LinearLayout cardBasketball;
+    private LinearLayout cardVolleyball;
+    private LinearLayout cardBadminton;
+    private LinearLayout cardTableTennis;
+    private LinearLayout cardFitness;
+    private LinearLayout cardFootball;
 
     public TrainingSessionsFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment TrainingSessionsFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static TrainingSessionsFragment newInstance(String param1, String param2) {
-        TrainingSessionsFragment fragment = new TrainingSessionsFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+        super(R.layout.fragment_training_sessions);
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+    public void onViewCreated(
+            @NonNull View view,
+            @Nullable Bundle savedInstanceState
+    ) {
+        super.onViewCreated(view, savedInstanceState);
+
+        cardBasketball = view.findViewById(R.id.cardBasketball);
+        cardVolleyball = view.findViewById(R.id.cardVolleyball);
+        cardBadminton = view.findViewById(R.id.cardBadminton);
+        cardTableTennis = view.findViewById(R.id.cardTableTennis);
+        cardFitness = view.findViewById(R.id.cardFitness);
+        cardFootball = view.findViewById(R.id.cardFootball);
+
+        cardBasketball.setOnClickListener(v ->
+                openTrainingDetails("Basketball")
+        );
+
+        cardVolleyball.setOnClickListener(v ->
+                openTrainingDetails("Volleyball")
+        );
+
+        cardBadminton.setOnClickListener(v ->
+                openTrainingDetails("Badminton")
+        );
+
+        cardTableTennis.setOnClickListener(v ->
+                openTrainingDetails("Table Tennis")
+        );
+
+        cardFitness.setOnClickListener(v ->
+                openTrainingDetails("Fitness")
+        );
+
+        cardFootball.setOnClickListener(v ->
+                openTrainingDetails("Football")
+        );
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_training_sessions, container, false);
+    private void openTrainingDetails(String sportName) {
+
+        TrainingDetailFragment detailFragment =
+                TrainingDetailFragment.newInstance(sportName);
+
+        getParentFragmentManager()
+                .beginTransaction()
+
+                // Opening animation:
+                // Detail page slides in from the right
+                // Training list slides out to the left
+                .setCustomAnimations(
+                        R.anim.slide_in_right,
+                        R.anim.slide_out_left,
+                        R.anim.slide_in_left,
+                        R.anim.slide_out_right
+                )
+
+                .setReorderingAllowed(true)
+                .replace(
+                        R.id.homeInnerFragmentContainer,
+                        detailFragment
+                )
+                .addToBackStack("training_details")
+                .commit();
     }
 }
