@@ -1,10 +1,12 @@
 package com.example.sporthubandroidmembershipapplicationv1;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -32,6 +34,8 @@ public class HomeActivity extends AppCompatActivity {
     private TextView txtHome;
     private TextView txtQr;
     private TextView txtProfile;
+
+    private Button btnSettings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +76,16 @@ public class HomeActivity extends AppCompatActivity {
         txtHome = findViewById(R.id.txtHome);
         txtQr = findViewById(R.id.txtQr);
         txtProfile = findViewById(R.id.txtProfile);
+
+        btnSettings = findViewById(R.id.btnSettings);
+
+        btnSettings.setOnClickListener(view -> {
+            Intent intent = new Intent(
+                    HomeActivity.this,
+                    SettingsActivity.class
+            );
+            startActivity(intent);
+        });
 
         navHome.setOnClickListener(view -> {
             loadFragment(new HomeFragment());
@@ -129,8 +143,6 @@ public class HomeActivity extends AppCompatActivity {
         window.setStatusBarColor(Color.WHITE);
         window.setNavigationBarColor(Color.WHITE);
 
-        // Removes the grey contrast background Android may add
-        // behind the bottom gesture/navigation area.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             window.setStatusBarContrastEnforced(false);
             window.setNavigationBarContrastEnforced(false);

@@ -7,7 +7,7 @@
     android:background="#FFFFFF"
     android:orientation="vertical"
     android:paddingStart="18dp"
-    android:paddingTop="10dp"
+    android:paddingTop="18dp"
     android:paddingEnd="18dp">
 
     <!-- Shared Header -->
@@ -48,8 +48,7 @@
             android:textAllCaps="false"
             android:textColor="#FFFFFF"
             android:textSize="16sp"
-            android:textStyle="bold"
-            app:backgroundTint="@null" />
+            android:textStyle="bold"/>
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnTrainingTab"
@@ -70,8 +69,7 @@
             android:textAllCaps="false"
             android:textColor="#111111"
             android:textSize="14sp"
-            android:textStyle="bold"
-            app:backgroundTint="@null" />
+            android:textStyle="bold"/>
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnBookingsTab"
@@ -92,18 +90,15 @@
             android:textAllCaps="false"
             android:textColor="#111111"
             android:textSize="15sp"
-            android:textStyle="bold"
-            app:backgroundTint="@null" />
+            android:textStyle="bold"/>
 
     </LinearLayout>
-
-    <!-- Inner page content -->
 
     <FrameLayout
         android:id="@+id/homeInnerFragmentContainer"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="12dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"/>
 
 </LinearLayout>
