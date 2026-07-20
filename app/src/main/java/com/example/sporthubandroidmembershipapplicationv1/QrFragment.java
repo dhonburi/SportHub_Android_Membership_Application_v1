@@ -1,6 +1,5 @@
 package com.example.sporthubandroidmembershipapplicationv1;
 
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -9,7 +8,6 @@ import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -30,7 +28,6 @@ import java.util.Map;
 public class QrFragment extends Fragment {
 
     private ImageView imageViewQrCode;
-    private Button btnSettings;
     private TextView textViewTimer;
     private TextView textViewReferenceCode;
 
@@ -51,27 +48,9 @@ public class QrFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // UI CONSISTENCY FIX
-        if (getActivity() != null) {
-            View mainContainer = getActivity().findViewById(R.id.main);
-            if (mainContainer != null) {
-                mainContainer.setBackgroundColor(Color.parseColor("#E9E9E9"));
-            }
-        }
-
         imageViewQrCode = view.findViewById(R.id.imageViewQrCode);
         textViewTimer = view.findViewById(R.id.textViewTimer);
         textViewReferenceCode = view.findViewById(R.id.textViewReferenceCode);
-
-        // Header Settings Button
-        btnSettings = view.findViewById(R.id.btnSettings);
-
-        if (btnSettings != null) {
-            btnSettings.setOnClickListener(v -> {
-                Intent intent = new Intent(requireActivity(), SettingsActivity.class);
-                startActivity(intent);
-            });
-        }
 
         startSystemClockSync();
     }
