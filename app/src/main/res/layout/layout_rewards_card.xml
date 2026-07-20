@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="18dp"
+    app:cardElevation="3dp"
+    app:cardBackgroundColor="#FFFFFF">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Top Row -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Rewards"
+                android:textColor="#000000"
+                android:textSize="22sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/txtLevel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/reward_level_bg"
+                android:paddingStart="16dp"
+                android:paddingTop="6dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="6dp"
+                android:text="LV2"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"/>
+
+        </LinearLayout>
+
+        <!-- Description -->
+
+        <TextView
+            android:id="@+id/txtRewardMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Visit 4 more days to unlock the next reward level."
+            android:textColor="#666666"
+            android:textSize="15sp"/>
+
+        <!-- Reward Image -->
+
+        <ImageView
+            android:id="@+id/imgReward"
+            android:layout_width="match_parent"
+            android:layout_height="140dp"
+            android:layout_marginTop="20dp"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:src="@drawable/reward_stamp"/>
+
+        <!-- Progress -->
+
+        <LinearLayout
+            android:id="@+id/layoutRewardProgress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <View
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_margin="6dp"
+                android:background="@drawable/reward_circle_filled"/>
+
+            <View
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_margin="6dp"
+                android:background="@drawable/reward_circle_filled"/>
+
+            <View
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_margin="6dp"
+                android:background="@drawable/reward_circle_filled"/>
+
+            <View
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_margin="6dp"
+                android:background="@drawable/reward_circle_empty"/>
+
+            <View
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_margin="6dp"
+                android:background="@drawable/reward_circle_empty"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

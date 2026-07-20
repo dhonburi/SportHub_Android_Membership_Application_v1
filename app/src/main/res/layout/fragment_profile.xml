@@ -1,15 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical"
-    android:background="@android:color/transparent">
+    android:background="#FFFFFF"
+    android:fillViewport="true">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Profile Fragment"
-        android:textSize="28sp"
-        android:textStyle="bold" />
-</LinearLayout>
+        android:orientation="vertical"
+        android:paddingStart="18dp"
+        android:paddingTop="18dp"
+        android:paddingEnd="18dp"
+        android:paddingBottom="110dp">
+
+        <!-- Profile Card -->
+
+        <include
+            layout="@layout/layout_profile_card"/>
+
+        <!-- Balance Card -->
+
+        <include
+            layout="@layout/layout_balance_card"
+            android:layout_marginTop="18dp"/>
+
+        <!-- Rewards Card -->
+
+        <include
+            layout="@layout/layout_rewards_card"
+            android:layout_marginTop="18dp"/>
+
+        <!-- Shortcuts -->
+
+        <include
+            layout="@layout/layout_shortcuts"
+            android:layout_marginTop="18dp"/>
+
+    </LinearLayout>
+
+</ScrollView>
