@@ -36,6 +36,7 @@ public class HomeActivity extends AppCompatActivity {
     private TextView txtProfile;
 
     private Button btnSettings;
+    private View headerLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +79,8 @@ public class HomeActivity extends AppCompatActivity {
         txtProfile = findViewById(R.id.txtProfile);
 
         btnSettings = findViewById(R.id.btnSettings);
+
+        headerLayout = findViewById(R.id.headerLayout);
 
         btnSettings.setOnClickListener(view -> {
             Intent intent = new Intent(
@@ -161,6 +164,12 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void loadFragment(Fragment fragment) {
+
+        if (fragment instanceof QrFragment) {
+            headerLayout.setVisibility(View.GONE);
+        } else {
+            headerLayout.setVisibility(View.VISIBLE);
+        }
 
         getSupportFragmentManager()
                 .beginTransaction()
