@@ -52,17 +52,20 @@ public class HomeFragment extends Fragment {
             updateSelectedTab(btnBookingsTab);
         });
 
-        btnSettings.setOnClickListener(v -> {
-            Intent intent = new Intent(
-                    requireActivity(),
-                    SettingsActivity.class
-            );
-
-            startActivity(intent);
-        });
+        // Prevent crash if the Settings button isn't present
+        if (btnSettings != null) {
+            btnSettings.setOnClickListener(v -> {
+                Intent intent = new Intent(
+                        requireActivity(),
+                        SettingsActivity.class
+                );
+                startActivity(intent);
+            });
+        }
     }
 
     private void loadInnerFragment(Fragment fragment) {
+
         getChildFragmentManager()
                 .beginTransaction()
                 .setReorderingAllowed(true)
@@ -85,7 +88,6 @@ public class HomeFragment extends Fragment {
                 android.R.color.white
         );
 
-        // Reset all tabs
         btnNewsTab.setBackgroundResource(
                 R.drawable.home_tab_unselected_bg
         );
@@ -102,7 +104,6 @@ public class HomeFragment extends Fragment {
         btnTrainingTab.setTextColor(black);
         btnBookingsTab.setTextColor(black);
 
-        // Highlight selected tab
         selectedButton.setBackgroundResource(
                 R.drawable.home_tab_selected_bg
         );

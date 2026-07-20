@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -11,22 +12,34 @@
     android:clipToPadding="false"
     tools:context=".HomeActivity">
 
-    <!--
-        Main page content extends underneath the floating navigation bar.
-        This removes the separate grey rectangular section.
-    -->
+    <!-- Fixed Header -->
+
+    <include
+        android:id="@+id/headerLayout"
+        layout="@layout/layout_header"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- Fragment Container -->
 
     <FrameLayout
         android:id="@+id/fragmentContainer"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="@android:color/transparent"
+        app:layout_constraintTop_toBottomOf="@id/headerLayout"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        android:background="#FFFFFF"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavLayout"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Floating bottom navigation -->
+    <!-- Floating Bottom Navigation -->
 
     <LinearLayout
         android:id="@+id/bottomNavLayout"
@@ -42,10 +55,12 @@
         android:padding="8dp"
         android:weightSum="3"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <!-- HOME -->
+
+        <!-- HOME BUTTON -->
 
         <LinearLayout
             android:id="@+id/navHome"
@@ -66,7 +81,7 @@
                 android:layout_height="30dp"
                 android:contentDescription="Home"
                 android:scaleType="fitCenter"
-                app:srcCompat="@drawable/ic_home_white" />
+                app:srcCompat="@drawable/ic_home_white"/>
 
             <TextView
                 android:id="@+id/txtHome"
@@ -77,11 +92,11 @@
                 android:textColor="#111111"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                android:visibility="gone" />
+                android:visibility="gone"/>
 
         </LinearLayout>
 
-        <!-- QR -->
+        <!-- QR BUTTON -->
 
         <LinearLayout
             android:id="@+id/navQr"
@@ -102,9 +117,9 @@
                 android:id="@+id/iconQr"
                 android:layout_width="28dp"
                 android:layout_height="28dp"
-                android:contentDescription="QR access"
+                android:contentDescription="QR"
                 android:scaleType="fitCenter"
-                app:srcCompat="@drawable/ic_grid_white" />
+                app:srcCompat="@drawable/ic_grid_white"/>
 
             <TextView
                 android:id="@+id/txtQr"
@@ -115,11 +130,11 @@
                 android:textColor="#111111"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                android:visibility="gone" />
+                android:visibility="gone"/>
 
         </LinearLayout>
 
-        <!-- PROFILE -->
+        <!-- PROFILE BUTTON -->
 
         <LinearLayout
             android:id="@+id/navProfile"
@@ -140,7 +155,7 @@
                 android:layout_height="28dp"
                 android:contentDescription="Profile"
                 android:scaleType="fitCenter"
-                app:srcCompat="@drawable/ic_profile_white" />
+                app:srcCompat="@drawable/ic_profile_white"/>
 
             <TextView
                 android:id="@+id/txtProfile"
@@ -151,7 +166,7 @@
                 android:textColor="#111111"
                 android:textSize="15sp"
                 android:textStyle="bold"
-                android:visibility="gone" />
+                android:visibility="gone"/>
 
         </LinearLayout>
 
