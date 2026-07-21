@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="245dp"
+    android:layout_height="228dp"
     android:clipChildren="false"
     android:clipToPadding="false">
 
@@ -13,15 +13,11 @@
         android:id="@+id/balanceCard"
         android:layout_width="match_parent"
         android:layout_height="180dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
         android:background="@drawable/profile_dark_card_bg"
         android:paddingStart="24dp"
         android:paddingTop="22dp"
         android:paddingEnd="24dp"
         android:paddingBottom="20dp">
-
-        <!-- Balance icon -->
 
         <ImageView
             android:id="@+id/imgBalanceIcon"
@@ -32,8 +28,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_balance_card" />
-
-        <!-- Balance title -->
 
         <TextView
             android:id="@+id/txtBalanceTitle"
@@ -47,8 +41,6 @@
             app:layout_constraintBottom_toBottomOf="@id/imgBalanceIcon"
             app:layout_constraintStart_toEndOf="@id/imgBalanceIcon"
             app:layout_constraintTop_toTopOf="@id/imgBalanceIcon" />
-
-        <!-- Balance amount -->
 
         <LinearLayout
             android:id="@+id/layoutBalanceAmount"
@@ -83,7 +75,7 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Gold button overlapping the black card -->
+    <!-- Gold Top Up button -->
 
     <LinearLayout
         android:id="@+id/btnTopUpBalance"
@@ -92,13 +84,14 @@
         android:layout_marginStart="44dp"
         android:layout_marginTop="150dp"
         android:layout_marginEnd="44dp"
-        android:background="@drawable/profile_gold_button_bg"
+        android:background="@drawable/profile_gold_button_ripple"
         android:clickable="true"
+        android:clipToOutline="true"
         android:elevation="8dp"
         android:focusable="true"
-        android:foreground="?attr/selectableItemBackground"
         android:gravity="center_vertical"
         android:orientation="horizontal"
+        android:outlineProvider="background"
         android:paddingStart="22dp"
         android:paddingEnd="20dp">
 

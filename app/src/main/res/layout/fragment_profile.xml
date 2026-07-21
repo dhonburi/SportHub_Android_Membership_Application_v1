@@ -20,30 +20,30 @@
         android:paddingEnd="20dp"
         android:paddingBottom="135dp">
 
-        <!-- Profile information moved lower from the header -->
+        <!-- Profile information -->
 
         <include
             layout="@layout/layout_profile_card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <!-- Keeps the gap between profile details and balance section -->
+        <!-- Balance section -->
 
         <include
             layout="@layout/layout_balance_card"
             android:layout_width="match_parent"
-            android:layout_height="245dp"
+            android:layout_height="228dp"
             android:layout_marginTop="20dp" />
 
-        <!-- Rewards section -->
+        <!-- Rewards moved closer to the balance button -->
 
         <include
             layout="@layout/layout_rewards_card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="8dp" />
 
-        <!-- Transactions / Rewards / Memberships -->
+        <!-- Shortcut navigation -->
 
         <include
             layout="@layout/layout_shortcuts"

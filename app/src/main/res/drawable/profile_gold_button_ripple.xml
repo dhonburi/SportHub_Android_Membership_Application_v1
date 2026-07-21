@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="#40FFFFFF">
+
+    <!-- Normal gold button -->
+    <item>
+        <shape android:shape="rectangle">
+
+            <solid android:color="#F2C94C" />
+
+            <corners android:radius="32dp" />
+
+        </shape>
+    </item>
+
+    <!-- Keeps the pressed effect inside the rounded button -->
+    <item android:id="@android:id/mask">
+        <shape android:shape="rectangle">
+
+            <solid android:color="#FFFFFF" />
+
+            <corners android:radius="32dp" />
+
+        </shape>
+    </item>
+
+</ripple>

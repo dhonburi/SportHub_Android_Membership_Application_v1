@@ -6,109 +6,136 @@
     android:background="@drawable/profile_shortcuts_bg"
     android:gravity="center"
     android:orientation="horizontal"
-    android:paddingStart="10dp"
-    android:paddingTop="12dp"
-    android:paddingEnd="10dp"
-    android:paddingBottom="12dp"
+    android:paddingStart="6dp"
+    android:paddingTop="8dp"
+    android:paddingEnd="6dp"
+    android:paddingBottom="8dp"
     android:weightSum="3">
 
-    <!-- Transactions -->
+    <!-- Transactions section -->
 
-    <LinearLayout
-        android:id="@+id/layoutTransactions"
+    <FrameLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:clickable="true"
-        android:focusable="true"
-        android:foreground="?attr/selectableItemBackgroundBorderless"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:padding="8dp">
+        android:layout_weight="1">
 
-        <ImageView
-            android:id="@+id/iconTransactions"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:contentDescription="Transactions"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_transactions_new" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+        <LinearLayout
+            android:id="@+id/layoutTransactions"
+            android:layout_width="112dp"
+            android:layout_height="112dp"
+            android:layout_gravity="center"
+            android:background="@drawable/profile_shortcut_item_ripple"
+            android:clickable="true"
+            android:clipToOutline="true"
+            android:focusable="true"
             android:gravity="center"
-            android:text="Transactions"
-            android:textColor="#111111"
-            android:textSize="14sp" />
+            android:orientation="vertical"
+            android:outlineProvider="background"
+            android:padding="8dp">
 
-    </LinearLayout>
+            <ImageView
+                android:id="@+id/iconTransactions"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:contentDescription="Transactions"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_transactions_new" />
 
-    <!-- Rewards -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="9dp"
+                android:gravity="center"
+                android:text="Transactions"
+                android:textColor="#111111"
+                android:textSize="14sp" />
 
-    <LinearLayout
-        android:id="@+id/layoutRewards"
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <!-- Rewards section -->
+
+    <FrameLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:clickable="true"
-        android:focusable="true"
-        android:foreground="?attr/selectableItemBackgroundBorderless"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:padding="8dp">
+        android:layout_weight="1">
 
-        <ImageView
-            android:id="@+id/iconRewards"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:contentDescription="Rewards"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_rewards_new" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+        <LinearLayout
+            android:id="@+id/layoutRewards"
+            android:layout_width="112dp"
+            android:layout_height="112dp"
+            android:layout_gravity="center"
+            android:background="@drawable/profile_shortcut_item_ripple"
+            android:clickable="true"
+            android:clipToOutline="true"
+            android:focusable="true"
             android:gravity="center"
-            android:text="Rewards"
-            android:textColor="#111111"
-            android:textSize="14sp" />
+            android:orientation="vertical"
+            android:outlineProvider="background"
+            android:padding="8dp">
 
-    </LinearLayout>
+            <ImageView
+                android:id="@+id/iconRewards"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:contentDescription="Rewards"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_rewards_new" />
 
-    <!-- Memberships -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="9dp"
+                android:gravity="center"
+                android:text="Rewards"
+                android:textColor="#111111"
+                android:textSize="14sp" />
 
-    <LinearLayout
-        android:id="@+id/layoutMemberships"
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <!-- Memberships section -->
+
+    <FrameLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:clickable="true"
-        android:focusable="true"
-        android:foreground="?attr/selectableItemBackgroundBorderless"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:padding="8dp">
+        android:layout_weight="1">
 
-        <ImageView
-            android:id="@+id/iconMemberships"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:contentDescription="Memberships"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_memberships_new" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+        <LinearLayout
+            android:id="@+id/layoutMemberships"
+            android:layout_width="112dp"
+            android:layout_height="112dp"
+            android:layout_gravity="center"
+            android:background="@drawable/profile_shortcut_item_ripple"
+            android:clickable="true"
+            android:clipToOutline="true"
+            android:focusable="true"
             android:gravity="center"
-            android:text="Memberships"
-            android:textColor="#111111"
-            android:textSize="14sp" />
+            android:orientation="vertical"
+            android:outlineProvider="background"
+            android:padding="8dp">
 
-    </LinearLayout>
+            <ImageView
+                android:id="@+id/iconMemberships"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:contentDescription="Memberships"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_memberships_new" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="9dp"
+                android:gravity="center"
+                android:text="Memberships"
+                android:textColor="#111111"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+    </FrameLayout>
 
 </LinearLayout>
