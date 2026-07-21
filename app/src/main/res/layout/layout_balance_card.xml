@@ -1,61 +1,122 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<androidx.cardview.widget.CardView
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    app:cardBackgroundColor="#FFFFFF"
-    app:cardCornerRadius="18dp"
-    app:cardElevation="3dp">
+    android:layout_height="245dp"
+    android:clipChildren="false"
+    android:clipToPadding="false">
 
-    <LinearLayout
+    <!-- Black balance card -->
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/balanceCard"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:padding="20dp">
+        android:layout_height="180dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/profile_dark_card_bg"
+        android:paddingStart="24dp"
+        android:paddingTop="22dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="20dp">
 
-        <!-- Left Side -->
+        <!-- Balance icon -->
+
+        <ImageView
+            android:id="@+id/imgBalanceIcon"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="Balance"
+            android:scaleType="fitCenter"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_balance_card" />
+
+        <!-- Balance title -->
+
+        <TextView
+            android:id="@+id/txtBalanceTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="14dp"
+            android:text="Balance"
+            android:textColor="#FFFFFF"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@id/imgBalanceIcon"
+            app:layout_constraintStart_toEndOf="@id/imgBalanceIcon"
+            app:layout_constraintTop_toTopOf="@id/imgBalanceIcon" />
+
+        <!-- Balance amount -->
 
         <LinearLayout
-            android:layout_width="0dp"
+            android:id="@+id/layoutBalanceAmount"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/txtBalanceTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Balance"
-                android:textColor="#888888"
-                android:textSize="16sp"/>
+            android:layout_marginBottom="48dp"
+            android:gravity="bottom"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <TextView
                 android:id="@+id/txtBalance"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="$102.34"
-                android:textColor="#000000"
-                android:textSize="30sp"
-                android:textStyle="bold"/>
+                android:text="14.67"
+                android:textColor="#FFFFFF"
+                android:textSize="38sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txtCurrency"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="7dp"
+                android:layout_marginBottom="6dp"
+                android:text="NZD"
+                android:textColor="#858585"
+                android:textSize="15sp" />
 
         </LinearLayout>
 
-        <!-- Top Up Button -->
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <Button
-            android:id="@+id/btnTopUp"
-            android:layout_width="120dp"
-            android:layout_height="48dp"
-            android:background="@drawable/topup_button_bg"
-            android:text="Top Up"
-            android:textAllCaps="false"
+    <!-- Gold button overlapping the black card -->
+
+    <LinearLayout
+        android:id="@+id/btnTopUpBalance"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginStart="44dp"
+        android:layout_marginTop="150dp"
+        android:layout_marginEnd="44dp"
+        android:background="@drawable/profile_gold_button_bg"
+        android:clickable="true"
+        android:elevation="8dp"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="22dp"
+        android:paddingEnd="20dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Top Up Balance"
             android:textColor="#FFFFFF"
-            android:textStyle="bold"/>
+            android:textSize="19sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:layout_width="23dp"
+            android:layout_height="23dp"
+            android:contentDescription="Top up balance"
+            app:srcCompat="@drawable/ic_arrow_up_right_white" />
 
     </LinearLayout>
 
-</androidx.cardview.widget.CardView>
+</FrameLayout>

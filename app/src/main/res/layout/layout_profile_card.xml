@@ -1,70 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<androidx.cardview.widget.CardView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="8dp"
-    app:cardCornerRadius="18dp"
-    app:cardElevation="3dp"
-    app:cardBackgroundColor="#FFFFFF">
+    android:layout_height="116dp"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingStart="12dp"
+    android:paddingEnd="12dp">
+
+    <ImageView
+        android:id="@+id/imgProfile"
+        android:layout_width="92dp"
+        android:layout_height="92dp"
+        android:background="@drawable/profile_circle_bg"
+        android:contentDescription="Profile picture"
+        android:padding="25dp"
+        android:scaleType="centerInside"
+        app:srcCompat="@drawable/ic_person" />
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="20dp"
-        android:gravity="center_vertical">
+        android:layout_marginStart="18dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
 
-        <!-- Profile Picture -->
-
-        <ImageView
-            android:id="@+id/imgProfile"
-            android:layout_width="72dp"
-            android:layout_height="72dp"
-            android:src="@drawable/ic_profile_placeholder"
-            android:background="@drawable/profile_circle_bg"
-            android:padding="12dp"
-            android:scaleType="centerInside"/>
-
-        <!-- Name + Member ID -->
-
-        <LinearLayout
-            android:layout_width="0dp"
+        <TextView
+            android:id="@+id/txtMemberName"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="18dp"
-            android:orientation="vertical">
+            android:text="Noah Hayes"
+            android:textColor="#111111"
+            android:textSize="23sp"
+            android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/txtMemberName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="John Smith"
-                android:textStyle="bold"
-                android:textColor="#000000"
-                android:textSize="22sp"/>
-
-            <TextView
-                android:id="@+id/txtMemberId"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Member ID: 4213477"
-                android:textColor="#707070"
-                android:textSize="15sp"/>
-
-        </LinearLayout>
-
-        <!-- Arrow -->
-
-        <ImageView
-            android:id="@+id/imgArrow"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@android:drawable/ic_media_next"/>
+        <TextView
+            android:id="@+id/txtMemberId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="ID: 201500067"
+            android:textColor="#6F6F6F"
+            android:textSize="16sp" />
 
     </LinearLayout>
 
-</androidx.cardview.widget.CardView>
+    <FrameLayout
+        android:id="@+id/btnProfileDetails"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
+        android:background="@drawable/profile_open_button_bg"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackgroundBorderless">
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="center"
+            android:contentDescription="Open profile details"
+            app:srcCompat="@drawable/ic_arrow_up_right_white" />
+
+    </FrameLayout>
+
+</LinearLayout>

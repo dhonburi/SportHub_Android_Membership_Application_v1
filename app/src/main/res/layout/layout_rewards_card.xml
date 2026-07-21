@@ -1,115 +1,174 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<androidx.cardview.widget.CardView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    app:cardCornerRadius="18dp"
-    app:cardElevation="3dp"
-    app:cardBackgroundColor="#FFFFFF">
+    android:background="@drawable/profile_dark_card_bg"
+    android:orientation="vertical"
+    android:padding="20dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="20dp">
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
-        <!-- Top Row -->
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Unlock Rewards"
+            android:textColor="#FFFFFF"
+            android:textSize="23sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txtLevel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="LV 2"
+            android:textColor="#F2C94C"
+            android:textSize="20sp" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/txtRewardMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Visit 4 more days and claim bonuses."
+        android:textColor="#FFFFFF"
+        android:textSize="15sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/profile_reward_panel_bg"
+        android:orientation="vertical"
+        android:paddingStart="10dp"
+        android:paddingTop="14dp"
+        android:paddingEnd="10dp"
+        android:paddingBottom="14dp">
+
+        <!-- First row: five completed rewards -->
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical">
+            android:layout_height="58dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:weightSum="5">
 
-            <TextView
+            <ImageView
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="50dp"
                 android:layout_weight="1"
-                android:text="Rewards"
-                android:textColor="#000000"
-                android:textSize="22sp"
-                android:textStyle="bold"/>
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/reward_stamp" />
 
-            <TextView
-                android:id="@+id/txtLevel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/reward_level_bg"
-                android:paddingStart="16dp"
-                android:paddingTop="6dp"
-                android:paddingEnd="16dp"
-                android:paddingBottom="6dp"
-                android:text="LV2"
-                android:textColor="#FFFFFF"
-                android:textStyle="bold"/>
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/reward_stamp" />
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/reward_stamp" />
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/reward_stamp" />
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/reward_stamp" />
 
         </LinearLayout>
 
-        <!-- Description -->
-
-        <TextView
-            android:id="@+id/txtRewardMessage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Visit 4 more days to unlock the next reward level."
-            android:textColor="#666666"
-            android:textSize="15sp"/>
-
-        <!-- Reward Image -->
-
-        <ImageView
-            android:id="@+id/imgReward"
-            android:layout_width="match_parent"
-            android:layout_height="140dp"
-            android:layout_marginTop="20dp"
-            android:adjustViewBounds="true"
-            android:scaleType="fitCenter"
-            android:src="@drawable/reward_stamp"/>
-
-        <!-- Progress -->
+        <!-- Second row: one completed and four empty -->
 
         <LinearLayout
-            android:id="@+id/layoutRewardProgress"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_height="58dp"
             android:gravity="center"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:weightSum="5">
 
-            <View
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:layout_margin="6dp"
-                android:background="@drawable/reward_circle_filled"/>
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/reward_stamp" />
 
-            <View
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:layout_margin="6dp"
-                android:background="@drawable/reward_circle_filled"/>
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1">
 
-            <View
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:layout_margin="6dp"
-                android:background="@drawable/reward_circle_filled"/>
+                <View
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/profile_empty_stamp_bg" />
 
-            <View
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:layout_margin="6dp"
-                android:background="@drawable/reward_circle_empty"/>
+            </FrameLayout>
 
-            <View
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:layout_margin="6dp"
-                android:background="@drawable/reward_circle_empty"/>
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1">
+
+                <View
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/profile_empty_stamp_bg" />
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1">
+
+                <View
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/profile_empty_stamp_bg" />
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1">
+
+                <View
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/profile_empty_stamp_bg" />
+
+            </FrameLayout>
 
         </LinearLayout>
 
     </LinearLayout>
 
-</androidx.cardview.widget.CardView>
+</LinearLayout>

@@ -1,43 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFFFFF"
-    android:fillViewport="true">
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:fillViewport="true"
+    android:overScrollMode="never">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         android:orientation="vertical"
-        android:paddingStart="18dp"
-        android:paddingTop="18dp"
-        android:paddingEnd="18dp"
-        android:paddingBottom="110dp">
+        android:paddingStart="20dp"
+        android:paddingTop="22dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="135dp">
 
-        <!-- Profile Card -->
+        <!-- Profile information moved lower from the header -->
 
         <include
-            layout="@layout/layout_profile_card"/>
+            layout="@layout/layout_profile_card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
-        <!-- Balance Card -->
+        <!-- Keeps the gap between profile details and balance section -->
 
         <include
             layout="@layout/layout_balance_card"
-            android:layout_marginTop="18dp"/>
+            android:layout_width="match_parent"
+            android:layout_height="245dp"
+            android:layout_marginTop="20dp" />
 
-        <!-- Rewards Card -->
+        <!-- Rewards section -->
 
         <include
             layout="@layout/layout_rewards_card"
-            android:layout_marginTop="18dp"/>
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp" />
 
-        <!-- Shortcuts -->
+        <!-- Transactions / Rewards / Memberships -->
 
         <include
             layout="@layout/layout_shortcuts"
-            android:layout_marginTop="18dp"/>
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:layout_marginTop="16dp" />
 
     </LinearLayout>
 

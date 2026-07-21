@@ -1,113 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<androidx.cardview.widget.CardView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    app:cardBackgroundColor="#FFFFFF"
-    app:cardCornerRadius="18dp"
-    app:cardElevation="3dp">
+    android:layout_height="150dp"
+    android:background="@drawable/profile_shortcuts_bg"
+    android:gravity="center"
+    android:orientation="horizontal"
+    android:paddingStart="10dp"
+    android:paddingTop="12dp"
+    android:paddingEnd="10dp"
+    android:paddingBottom="12dp"
+    android:weightSum="3">
+
+    <!-- Transactions -->
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:id="@+id/layoutTransactions"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="8dp">
 
-        <!-- Transactions -->
+        <ImageView
+            android:id="@+id/iconTransactions"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:contentDescription="Transactions"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_transactions_new" />
 
-        <LinearLayout
-            android:id="@+id/layoutTransactions"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
-            android:clickable="true"
-            android:focusable="true">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Transactions"
-                android:textColor="#000000"
-                android:textSize="18sp"/>
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@android:drawable/ic_media_next"/>
-
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#EEEEEE"/>
-
-        <!-- Rewards -->
-
-        <LinearLayout
-            android:id="@+id/layoutRewards"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
-            android:clickable="true"
-            android:focusable="true">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Rewards"
-                android:textColor="#000000"
-                android:textSize="18sp"/>
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@android:drawable/ic_media_next"/>
-
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#EEEEEE"/>
-
-        <!-- Memberships -->
-
-        <LinearLayout
-            android:id="@+id/layoutMemberships"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
-            android:clickable="true"
-            android:focusable="true">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Memberships"
-                android:textColor="#000000"
-                android:textSize="18sp"/>
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@android:drawable/ic_media_next"/>
-
-        </LinearLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:text="Transactions"
+            android:textColor="#111111"
+            android:textSize="14sp" />
 
     </LinearLayout>
 
-</androidx.cardview.widget.CardView>
+    <!-- Rewards -->
+
+    <LinearLayout
+        android:id="@+id/layoutRewards"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <ImageView
+            android:id="@+id/iconRewards"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:contentDescription="Rewards"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_rewards_new" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:text="Rewards"
+            android:textColor="#111111"
+            android:textSize="14sp" />
+
+    </LinearLayout>
+
+    <!-- Memberships -->
+
+    <LinearLayout
+        android:id="@+id/layoutMemberships"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <ImageView
+            android:id="@+id/iconMemberships"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:contentDescription="Memberships"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_memberships_new" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:text="Memberships"
+            android:textColor="#111111"
+            android:textSize="14sp" />
+
+    </LinearLayout>
+
+</LinearLayout>

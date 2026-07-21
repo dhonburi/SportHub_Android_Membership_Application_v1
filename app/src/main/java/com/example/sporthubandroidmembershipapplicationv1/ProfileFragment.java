@@ -1,20 +1,27 @@
 package com.example.sporthubandroidmembershipapplicationv1;
 
-import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+
+import java.util.Locale;
 
 public class ProfileFragment extends Fragment {
 
-    private Button btnSettings;
-    private Button btnTopUp;
+    private View btnProfileDetails;
+
+    // This must be View because the XML uses a LinearLayout
+    private View btnTopUpBalance;
 
     private TextView txtMemberName;
     private TextView txtMemberId;
@@ -24,6 +31,8 @@ public class ProfileFragment extends Fragment {
     private LinearLayout layoutTransactions;
     private LinearLayout layoutRewards;
     private LinearLayout layoutMemberships;
+
+    private double currentBalance = 14.67;
 
     public ProfileFragment() {
         super(R.layout.fragment_profile);
@@ -36,62 +45,222 @@ public class ProfileFragment extends Fragment {
     ) {
         super.onViewCreated(view, savedInstanceState);
 
-        btnSettings = view.findViewById(R.id.btnSettings);
-        btnTopUp = view.findViewById(R.id.btnTopUp);
+        btnProfileDetails =
+                view.findViewById(R.id.btnProfileDetails);
 
-        txtMemberName = view.findViewById(R.id.txtMemberName);
-        txtMemberId = view.findViewById(R.id.txtMemberId);
-        txtBalance = view.findViewById(R.id.txtBalance);
-        txtLevel = view.findViewById(R.id.txtLevel);
+        btnTopUpBalance =
+                view.findViewById(R.id.btnTopUpBalance);
 
-        layoutTransactions = view.findViewById(R.id.layoutTransactions);
-        layoutRewards = view.findViewById(R.id.layoutRewards);
-        layoutMemberships = view.findViewById(R.id.layoutMemberships);
+        txtMemberName =
+                view.findViewById(R.id.txtMemberName);
 
-        if (txtMemberName != null)
-            txtMemberName.setText("John Smith");
+        txtMemberId =
+                view.findViewById(R.id.txtMemberId);
 
-        if (txtMemberId != null)
-            txtMemberId.setText("Member ID: 4213477");
+        txtBalance =
+                view.findViewById(R.id.txtBalance);
 
-        if (txtBalance != null)
-            txtBalance.setText("$102.34");
+        txtLevel =
+                view.findViewById(R.id.txtLevel);
 
-        if (txtLevel != null)
-            txtLevel.setText("LV2");
+        layoutTransactions =
+                view.findViewById(R.id.layoutTransactions);
 
-        if (btnSettings != null) {
-            btnSettings.setOnClickListener(v -> {
-                Intent intent = new Intent(
-                        requireActivity(),
-                        SettingsActivity.class
-                );
-                startActivity(intent);
+        layoutRewards =
+                view.findViewById(R.id.layoutRewards);
+
+        layoutMemberships =
+                view.findViewById(R.id.layoutMemberships);
+
+        setTemporaryMemberInformation();
+        updateBalanceText();
+        setClickListeners();
+    }
+
+    private void setTemporaryMemberInformation() {
+
+        txtMemberName.setText("Noah Hayes");
+        txtMemberId.setText("ID: 201500067");
+        txtLevel.setText("LV 2");
+    }
+
+    private void setClickListeners() {
+
+        btnProfileDetails.setOnClickListener(v -> {
+            Toast.makeText(
+                    requireContext(),
+                    "Profile details will be added later.",
+                    Toast.LENGTH_SHORT
+            ).show();
+        });
+
+        btnTopUpBalance.setOnClickListener(v ->
+                showTopUpDialog()
+        );
+
+        layoutTransactions.setOnClickListener(v -> {
+            Toast.makeText(
+                    requireContext(),
+                    "Transaction history will be added later.",
+                    Toast.LENGTH_SHORT
+            ).show();
+        });
+
+        layoutRewards.setOnClickListener(v -> {
+            Toast.makeText(
+                    requireContext(),
+                    "Rewards details will be added later.",
+                    Toast.LENGTH_SHORT
+            ).show();
+        });
+
+        layoutMemberships.setOnClickListener(v -> {
+            Toast.makeText(
+                    requireContext(),
+                    "Membership management will be added later.",
+                    Toast.LENGTH_SHORT
+            ).show();
+        });
+    }
+
+    private void updateBalanceText() {
+
+        txtBalance.setText(
+                String.format(
+                        Locale.getDefault(),
+                        "%.2f",
+                        currentBalance
+                )
+        );
+    }
+
+    private void showTopUpDialog() {
+
+        EditText amountInput =
+                new EditText(requireContext());
+
+        amountInput.setHint("Enter top-up amount");
+
+        amountInput.setInputType(
+                InputType.TYPE_CLASS_NUMBER
+                        | InputType.TYPE_NUMBER_FLAG_DECIMAL
+        );
+
+        LinearLayout inputContainer =
+                new LinearLayout(requireContext());
+
+        inputContainer.setOrientation(
+                LinearLayout.VERTICAL
+        );
+
+        inputContainer.setPadding(
+                dpToPx(24),
+                dpToPx(8),
+                dpToPx(24),
+                0
+        );
+
+        inputContainer.addView(amountInput);
+
+        AlertDialog topUpDialog =
+                new AlertDialog.Builder(requireContext())
+                        .setTitle("Top Up Balance")
+                        .setMessage(
+                                "Enter the mock amount you would like to add."
+                        )
+                        .setView(inputContainer)
+                        .setNegativeButton(
+                                "Cancel",
+                                null
+                        )
+                        .setPositiveButton(
+                                "Top Up",
+                                null
+                        )
+                        .create();
+
+        topUpDialog.setOnShowListener(dialog -> {
+
+            Button positiveButton =
+                    topUpDialog.getButton(
+                            AlertDialog.BUTTON_POSITIVE
+                    );
+
+            positiveButton.setOnClickListener(v -> {
+
+                String enteredAmount =
+                        amountInput
+                                .getText()
+                                .toString()
+                                .trim();
+
+                if (enteredAmount.isEmpty()) {
+
+                    showMessage(
+                            "Please enter an amount."
+                    );
+
+                    return;
+                }
+
+                try {
+
+                    double topUpAmount =
+                            Double.parseDouble(
+                                    enteredAmount
+                            );
+
+                    if (topUpAmount <= 0) {
+
+                        showMessage(
+                                "Enter an amount greater than zero."
+                        );
+
+                        return;
+                    }
+
+                    currentBalance += topUpAmount;
+
+                    updateBalanceText();
+
+                    showMessage(
+                            String.format(
+                                    Locale.getDefault(),
+                                    "%.2f NZD added successfully.",
+                                    topUpAmount
+                            )
+                    );
+
+                    topUpDialog.dismiss();
+
+                } catch (NumberFormatException exception) {
+
+                    showMessage(
+                            "Please enter a valid amount."
+                    );
+                }
             });
-        }
+        });
 
-        if (btnTopUp != null) {
-            btnTopUp.setOnClickListener(v -> {
-                // TODO
-            });
-        }
+        topUpDialog.show();
+    }
 
-        if (layoutTransactions != null) {
-            layoutTransactions.setOnClickListener(v -> {
-                // TODO
-            });
-        }
+    private int dpToPx(int dp) {
 
-        if (layoutRewards != null) {
-            layoutRewards.setOnClickListener(v -> {
-                // TODO
-            });
-        }
+        float density =
+                getResources()
+                        .getDisplayMetrics()
+                        .density;
 
-        if (layoutMemberships != null) {
-            layoutMemberships.setOnClickListener(v -> {
-                // TODO
-            });
-        }
+        return Math.round(dp * density);
+    }
+
+    private void showMessage(String message) {
+
+        Toast.makeText(
+                requireContext(),
+                message,
+                Toast.LENGTH_SHORT
+        ).show();
     }
 }
