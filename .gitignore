@@ -13,3 +13,13 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+
+# .NET generated files
+**/bin/
+**/obj/
+
+# Visual Studio local files
+.vs/
+*.user
+*.suo

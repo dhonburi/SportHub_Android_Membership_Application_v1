@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="116dp"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingStart="12dp"
+    android:paddingEnd="12dp">
+
+    <!-- Profile picture -->
+
+    <ImageView
+        android:id="@+id/imgProfile"
+        android:layout_width="92dp"
+        android:layout_height="92dp"
+        android:background="@drawable/profile_circle_bg"
+        android:contentDescription="Profile picture"
+        android:padding="25dp"
+        android:scaleType="centerInside"
+        app:srcCompat="@drawable/ic_person" />
+
+    <!-- Name and member ID -->
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="18dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/txtMemberName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Noah Hayes"
+            android:textColor="#111111"
+            android:textSize="23sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txtMemberId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="ID: 201500067"
+            android:textColor="#6F6F6F"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+    <!-- Circular profile details button -->
+
+    <FrameLayout
+        android:id="@+id/btnProfileDetails"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
+        android:background="@drawable/profile_open_button_ripple"
+        android:clickable="true"
+        android:clipToOutline="true"
+        android:focusable="true"
+        android:outlineProvider="background">
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="center"
+            android:contentDescription="Open profile details"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/ic_arrow_up_right_white" />
+
+    </FrameLayout>
+
+</LinearLayout>
