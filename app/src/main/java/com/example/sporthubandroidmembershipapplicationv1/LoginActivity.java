@@ -3,6 +3,7 @@ package com.example.sporthubandroidmembershipapplicationv1;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -16,9 +17,26 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 
+import com.example.sporthubandroidmembershipapplicationv1.models.LoginRequest;
+import com.example.sporthubandroidmembershipapplicationv1.models.LoginResponse;
+import com.example.sporthubandroidmembershipapplicationv1.network.ApiClient;
+
 import java.util.Locale;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class LoginActivity extends AppCompatActivity {
+
+    /*
+     * Keep this false until Dhon's login API is completed
+     * and successfully tested through Swagger or Postman.
+     *
+     * false = use the existing mock accounts
+     * true  = use the real database-backed API
+     */
+    private static final boolean USE_API_LOGIN = false;
 
     private final String[] validUsernames = {
             "kyle",
@@ -35,6 +53,9 @@ public class LoginActivity extends AppCompatActivity {
             "Member123!@",
             "Admin123!@"
     };
+
+    private boolean loginInProgress = false;
+    private Call<LoginResponse> loginCall;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,13 +122,18 @@ public class LoginActivity extends AppCompatActivity {
 
     public void CheckLogin(View view) {
 
+        // Prevent repeated login requests.
+        if (loginInProgress) {
+            return;
+        }
+
         EditText usernameInput =
                 findViewById(R.id.editTextEmailAddress);
 
         EditText passwordInput =
                 findViewById(R.id.editTextPassword);
 
-        String username = usernameInput
+        String usernameOrEmail = usernameInput
                 .getText()
                 .toString()
                 .trim();
@@ -116,9 +142,11 @@ public class LoginActivity extends AppCompatActivity {
                 .getText()
                 .toString();
 
-        if (username.isEmpty()) {
+        if (usernameOrEmail.isEmpty()) {
             IncorrectLogin(
-                    "Please enter a Username/Email"
+                    USE_API_LOGIN
+                            ? "Please enter your email address"
+                            : "Please enter a Username/Email"
             );
             return;
         }
@@ -129,6 +157,41 @@ public class LoginActivity extends AppCompatActivity {
             );
             return;
         }
+
+        /*
+         * The real backend requires an email address.
+         * We only enforce email formatting while API login is enabled,
+         * so the existing mock usernames continue working for now.
+         */
+        if (USE_API_LOGIN
+                && !Patterns.EMAIL_ADDRESS
+                .matcher(usernameOrEmail)
+                .matches()) {
+
+            IncorrectLogin(
+                    "Please enter a valid email address"
+            );
+            return;
+        }
+
+        if (USE_API_LOGIN) {
+            LoginWithApi(
+                    view,
+                    usernameOrEmail,
+                    password
+            );
+        } else {
+            LoginWithMockAccount(
+                    usernameOrEmail,
+                    password
+            );
+        }
+    }
+
+    private void LoginWithMockAccount(
+            String username,
+            String password
+    ) {
 
         String lowercaseUsername =
                 username.toLowerCase(Locale.ROOT);
@@ -154,6 +217,192 @@ public class LoginActivity extends AppCompatActivity {
         );
     }
 
+    private void LoginWithApi(
+            View loginButton,
+            String email,
+            String password
+    ) {
+
+        SetLoginLoading(
+                loginButton,
+                true
+        );
+
+        LoginRequest loginRequest =
+                new LoginRequest(
+                        email,
+                        password
+                );
+
+        loginCall = ApiClient
+                .getAuthApiService()
+                .login(loginRequest);
+
+        loginCall.enqueue(
+                new Callback<LoginResponse>() {
+
+                    @Override
+                    public void onResponse(
+                            Call<LoginResponse> call,
+                            Response<LoginResponse> response
+                    ) {
+
+                        if (isFinishing() || isDestroyed()) {
+                            return;
+                        }
+
+                        SetLoginLoading(
+                                loginButton,
+                                false
+                        );
+
+                        LoginResponse loginResponse =
+                                response.body();
+
+                        if (response.isSuccessful()
+                                && loginResponse != null
+                                && loginResponse.isSuccess()) {
+
+                            LaunchHomeFromApi(
+                                    email,
+                                    loginResponse
+                            );
+
+                            return;
+                        }
+
+                        String errorMessage =
+                                "Invalid email or password";
+
+                        if (loginResponse != null
+                                && loginResponse.getMessage() != null
+                                && !loginResponse
+                                .getMessage()
+                                .trim()
+                                .isEmpty()) {
+
+                            errorMessage =
+                                    loginResponse.getMessage();
+                        }
+
+                        IncorrectLogin(errorMessage);
+                    }
+
+                    @Override
+                    public void onFailure(
+                            Call<LoginResponse> call,
+                            Throwable throwable
+                    ) {
+
+                        if (call.isCanceled()
+                                || isFinishing()
+                                || isDestroyed()) {
+
+                            return;
+                        }
+
+                        SetLoginLoading(
+                                loginButton,
+                                false
+                        );
+
+                        IncorrectLogin(
+                                "Unable to connect to the server. Please try again."
+                        );
+                    }
+                }
+        );
+    }
+
+    private void SetLoginLoading(
+            View loginButton,
+            boolean loading
+    ) {
+
+        loginInProgress = loading;
+
+        loginButton.setEnabled(!loading);
+
+        loginButton.setAlpha(
+                loading ? 0.6f : 1f
+        );
+    }
+
+    private void LaunchHomeFromApi(
+            String email,
+            LoginResponse loginResponse
+    ) {
+
+        String displayName =
+                FormatDisplayNameFromEmail(email);
+
+        Intent intent = new Intent(
+                LoginActivity.this,
+                HomeActivity.class
+        );
+
+        intent.putExtra(
+                "Username",
+                displayName
+        );
+
+        if (loginResponse.getUserId() != null) {
+            intent.putExtra(
+                    "UserId",
+                    loginResponse.getUserId()
+            );
+        }
+
+        if (loginResponse.getMemberId() != null) {
+            intent.putExtra(
+                    "MemberId",
+                    loginResponse.getMemberId()
+            );
+        }
+
+        if (loginResponse.getMemberNumber() != null) {
+            intent.putExtra(
+                    "MemberNumber",
+                    loginResponse.getMemberNumber()
+            );
+        }
+
+        intent.putExtra(
+                "OPEN_FRAGMENT",
+                "QR"
+        );
+
+        startActivity(intent);
+        finish();
+    }
+
+    private String FormatDisplayNameFromEmail(
+            String email
+    ) {
+
+        String displayName = email;
+
+        int atPosition =
+                displayName.indexOf("@");
+
+        if (atPosition > 0) {
+            displayName =
+                    displayName.substring(
+                            0,
+                            atPosition
+                    );
+        }
+
+        if (displayName.isEmpty()) {
+            return "Member";
+        }
+
+        return displayName
+                .substring(0, 1)
+                .toUpperCase(Locale.ROOT)
+                + displayName.substring(1);
+    }
+
     public void LaunchHome(String username) {
 
         Intent intent = new Intent(
@@ -166,7 +415,7 @@ public class LoginActivity extends AppCompatActivity {
                 username
         );
 
-        // Keeps your current login → QR behaviour
+        // Keeps your current login → QR behaviour.
         intent.putExtra(
                 "OPEN_FRAGMENT",
                 "QR"
@@ -200,5 +449,17 @@ public class LoginActivity extends AppCompatActivity {
 
                 1500
         );
+    }
+
+    @Override
+    protected void onDestroy() {
+
+        if (loginCall != null
+                && !loginCall.isCanceled()) {
+
+            loginCall.cancel();
+        }
+
+        super.onDestroy();
     }
 }
