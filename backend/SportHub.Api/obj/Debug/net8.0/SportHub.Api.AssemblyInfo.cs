@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SportHub.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+897bcc04c0693308a1a06d355224bc9ccfad0794")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c0fda22af0659cc7ca09cca22799a830b2ca8212")]
 [assembly: System.Reflection.AssemblyProductAttribute("SportHub.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SportHub.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
