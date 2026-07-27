@@ -6,13 +6,13 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public final class ApiClient {
 
     /*
-     * 10.0.2.2 allows the Android emulator to access a backend
-     * running on this Mac.
+     * Dhon's Windows laptop address while both computers
+     * are connected to the same phone hotspot.
      *
-     * Later, when connecting to Dhon's Windows backend,
-     * replace this with Dhon's IPv4 address and API port.
+     * This IP may change after reconnecting to the hotspot.
      */
-    private static final String BASE_URL = "http://10.0.2.2:5097/";
+    private static final String BASE_URL =
+            "http://172.20.10.3:5097/";
 
     private static Retrofit retrofit;
 
@@ -24,7 +24,9 @@ public final class ApiClient {
         if (retrofit == null) {
             retrofit = new Retrofit.Builder()
                     .baseUrl(BASE_URL)
-                    .addConverterFactory(GsonConverterFactory.create())
+                    .addConverterFactory(
+                            GsonConverterFactory.create()
+                    )
                     .build();
         }
 
@@ -32,6 +34,8 @@ public final class ApiClient {
     }
 
     public static AuthApiService getAuthApiService() {
-        return getClient().create(AuthApiService.class);
+        return getClient().create(
+                AuthApiService.class
+        );
     }
 }

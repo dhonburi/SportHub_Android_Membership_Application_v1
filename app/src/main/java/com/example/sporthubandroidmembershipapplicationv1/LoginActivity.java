@@ -36,7 +36,7 @@ public class LoginActivity extends AppCompatActivity {
      * false = use the existing mock accounts
      * true  = use the real database-backed API
      */
-    private static final boolean USE_API_LOGIN = false;
+    private static final boolean USE_API_LOGIN = true;
 
     private final String[] validUsernames = {
             "kyle",
