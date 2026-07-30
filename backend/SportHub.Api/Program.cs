@@ -6,12 +6,15 @@ using SportHub.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add controller support.
 builder.Services.AddControllers();
 
+// Add Swagger/OpenAPI support.
 builder.Services.AddEndpointsApiExplorer();
-
 builder.Services.AddSwaggerGen();
 
+// Configure Entity Framework Core to use the connection string
+// named "SportHubDatabase".
 builder.Services.AddDbContext<SportHubDbContext>(
     options =>
         options.UseSqlServer(
@@ -21,11 +24,13 @@ builder.Services.AddDbContext<SportHubDbContext>(
         )
 );
 
+// Register the password hasher used for user passwords.
 builder.Services.AddScoped<
     IPasswordHasher<User>,
     PasswordHasher<User>
 >();
 
+// Register the authentication service.
 builder.Services.AddScoped<AuthService>();
 
 var app = builder.Build();
@@ -63,8 +68,10 @@ if (seedRequested)
                 IPasswordHasher<User>
             >();
 
+    // Apply any pending migrations before seeding.
     await dbContext.Database.MigrateAsync();
 
+    // Insert the test member and user account if they do not exist.
     await DbSeeder.SeedAsync(
         dbContext,
         passwordHasher
@@ -73,16 +80,14 @@ if (seedRequested)
     return;
 }
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-
-    app.UseSwaggerUI();
-}
+// Enable Swagger in both local development and Azure.
+// This lets you access /swagger after deployment.
+app.UseSwagger();
+app.UseSwaggerUI();
 
 /*
- * Local Android testing will use development HTTP.
- * Production should use HTTPS.
+ * Local Android testing may use HTTP.
+ * Azure App Service uses HTTPS.
  */
 if (!app.Environment.IsDevelopment())
 {
