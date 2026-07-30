@@ -6,13 +6,12 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public final class ApiClient {
 
     /*
-     * Dhon's Windows laptop address while both computers
-     * are connected to the same phone hotspot.
+     * Azure-hosted SportHub API.
      *
-     * This IP may change after reconnecting to the hotspot.
+     * The final forward slash is required by Retrofit.
      */
     private static final String BASE_URL =
-            "http://172.20.10.3:5097/";
+            "https://sporthub-api-jp-dfcndsfgh5d0bydt.japaneast-01.azurewebsites.net/";
 
     private static Retrofit retrofit;
 
