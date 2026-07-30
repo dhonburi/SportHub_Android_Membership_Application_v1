@@ -8,7 +8,7 @@ public final class ApiClient {
     /*
      * Azure-hosted SportHub API.
      *
-     * The final forward slash is required by Retrofit.
+     * Retrofit requires the final forward slash.
      */
     private static final String BASE_URL =
             "https://sporthub-api-jp-dfcndsfgh5d0bydt.japaneast-01.azurewebsites.net/";

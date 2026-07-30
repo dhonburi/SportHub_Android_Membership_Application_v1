@@ -3,6 +3,7 @@ package com.example.sporthubandroidmembershipapplicationv1;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
@@ -29,12 +30,11 @@ import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
+    private static final String LOG_TAG = "SPORT_HUB_LOGIN";
+
     /*
-     * Keep this false until Dhon's login API is completed
-     * and successfully tested through Swagger or Postman.
-     *
-     * false = use the existing mock accounts
-     * true  = use the real database-backed API
+     * false = use existing mock accounts
+     * true  = use the Azure database-backed API
      */
     private static final boolean USE_API_LOGIN = true;
 
@@ -159,9 +159,7 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         /*
-         * The real backend requires an email address.
-         * We only enforce email formatting while API login is enabled,
-         * so the existing mock usernames continue working for now.
+         * The Azure backend requires an email address.
          */
         if (USE_API_LOGIN
                 && !Patterns.EMAIL_ADDRESS
@@ -228,6 +226,11 @@ public class LoginActivity extends AppCompatActivity {
                 true
         );
 
+        Log.d(
+                LOG_TAG,
+                "Starting Azure login request for: " + email
+        );
+
         LoginRequest loginRequest =
                 new LoginRequest(
                         email,
@@ -256,12 +259,24 @@ public class LoginActivity extends AppCompatActivity {
                                 false
                         );
 
+                        Log.d(
+                                LOG_TAG,
+                                "Received HTTP response: "
+                                        + response.code()
+                        );
+
                         LoginResponse loginResponse =
                                 response.body();
 
                         if (response.isSuccessful()
                                 && loginResponse != null
                                 && loginResponse.isSuccess()) {
+
+                            Log.d(
+                                    LOG_TAG,
+                                    "Login successful. Member number: "
+                                            + loginResponse.getMemberNumber()
+                            );
 
                             LaunchHomeFromApi(
                                     email,
@@ -285,6 +300,14 @@ public class LoginActivity extends AppCompatActivity {
                                     loginResponse.getMessage();
                         }
 
+                        Log.e(
+                                LOG_TAG,
+                                "Login rejected. HTTP status: "
+                                        + response.code()
+                                        + ". Message: "
+                                        + errorMessage
+                        );
+
                         IncorrectLogin(errorMessage);
                     }
 
@@ -306,9 +329,27 @@ public class LoginActivity extends AppCompatActivity {
                                 false
                         );
 
-                        IncorrectLogin(
-                                "Unable to connect to the server. Please try again."
+                        Log.e(
+                                LOG_TAG,
+                                "Azure login request failed",
+                                throwable
                         );
+
+                        String errorMessage =
+                                "Unable to connect to the server.";
+
+                        if (throwable.getMessage() != null
+                                && !throwable
+                                .getMessage()
+                                .trim()
+                                .isEmpty()) {
+
+                            errorMessage =
+                                    "Connection error: "
+                                            + throwable.getMessage();
+                        }
+
+                        IncorrectLogin(errorMessage);
                     }
                 }
         );
@@ -415,7 +456,6 @@ public class LoginActivity extends AppCompatActivity {
                 username
         );
 
-        // Keeps your current login → QR behaviour.
         intent.putExtra(
                 "OPEN_FRAGMENT",
                 "QR"
@@ -447,7 +487,7 @@ public class LoginActivity extends AppCompatActivity {
                                     alertText.setAlpha(1f);
                                 }),
 
-                1500
+                3000
         );
     }
 
