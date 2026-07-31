@@ -12,6 +12,8 @@ public class Member
 
     public string? Phone { get; set; }
 
+    public string? Gender { get; set; }
+
     public DateTime? DateOfBirth { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

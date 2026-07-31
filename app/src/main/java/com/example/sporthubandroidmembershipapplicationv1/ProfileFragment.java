@@ -1,5 +1,6 @@
 package com.example.sporthubandroidmembershipapplicationv1;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.View;
@@ -216,41 +217,36 @@ public class ProfileFragment extends Fragment {
     }
 
     private void setClickListeners() {
-        btnProfileDetails.setOnClickListener(v -> {
-            Toast.makeText(
+        btnProfileDetails.setOnClickListener(view -> {
+            Intent intent = new Intent(
                     requireContext(),
-                    "Profile details will be added later.",
-                    Toast.LENGTH_SHORT
-            ).show();
+                    ProfileDetailsActivity.class
+            );
+
+            startActivity(intent);
         });
 
-        btnTopUpBalance.setOnClickListener(v ->
+        btnTopUpBalance.setOnClickListener(view ->
                 showTopUpDialog()
         );
 
-        layoutTransactions.setOnClickListener(v -> {
-            Toast.makeText(
-                    requireContext(),
-                    "Transaction history will be added later.",
-                    Toast.LENGTH_SHORT
-            ).show();
-        });
+        layoutTransactions.setOnClickListener(view ->
+                showMessage(
+                        "Transaction history will be added later."
+                )
+        );
 
-        layoutRewards.setOnClickListener(v -> {
-            Toast.makeText(
-                    requireContext(),
-                    "Rewards details will be added later.",
-                    Toast.LENGTH_SHORT
-            ).show();
-        });
+        layoutRewards.setOnClickListener(view ->
+                showMessage(
+                        "Rewards details will be added later."
+                )
+        );
 
-        layoutMemberships.setOnClickListener(v -> {
-            Toast.makeText(
-                    requireContext(),
-                    "Membership management will be added later.",
-                    Toast.LENGTH_SHORT
-            ).show();
-        });
+        layoutMemberships.setOnClickListener(view ->
+                showMessage(
+                        "Membership management will be added later."
+                )
+        );
     }
 
     private void updateBalanceText() {
@@ -313,7 +309,7 @@ public class ProfileFragment extends Fragment {
                             AlertDialog.BUTTON_POSITIVE
                     );
 
-            positiveButton.setOnClickListener(v -> {
+            positiveButton.setOnClickListener(view -> {
                 String enteredAmount =
                         amountInput
                                 .getText()
@@ -324,7 +320,6 @@ public class ProfileFragment extends Fragment {
                     showMessage(
                             "Please enter an amount."
                     );
-
                     return;
                 }
 
@@ -338,7 +333,6 @@ public class ProfileFragment extends Fragment {
                         showMessage(
                                 "Enter an amount greater than zero."
                         );
-
                         return;
                     }
 
