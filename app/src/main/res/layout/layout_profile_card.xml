@@ -9,8 +9,6 @@
     android:paddingStart="12dp"
     android:paddingEnd="12dp">
 
-    <!-- Profile picture -->
-
     <ImageView
         android:id="@+id/imgProfile"
         android:layout_width="92dp"
@@ -20,8 +18,6 @@
         android:padding="25dp"
         android:scaleType="centerInside"
         app:srcCompat="@drawable/ic_person" />
-
-    <!-- Name and member ID -->
 
     <LinearLayout
         android:layout_width="0dp"
@@ -34,7 +30,7 @@
             android:id="@+id/txtMemberName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Noah Hayes"
+            android:text="Loading profile..."
             android:textColor="#111111"
             android:textSize="23sp"
             android:textStyle="bold" />
@@ -44,18 +40,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="ID: 201500067"
+            android:text="ID: —"
             android:textColor="#6F6F6F"
             android:textSize="16sp" />
 
     </LinearLayout>
 
-    <!-- Circular profile details button -->
-
     <FrameLayout
         android:id="@+id/btnProfileDetails"
-        android:layout_width="42dp"
-        android:layout_height="42dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:background="@drawable/profile_open_button_ripple"
         android:clickable="true"
         android:clipToOutline="true"

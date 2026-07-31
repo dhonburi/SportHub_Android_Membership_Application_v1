@@ -21,6 +21,7 @@ import androidx.core.view.WindowInsetsControllerCompat;
 import com.example.sporthubandroidmembershipapplicationv1.models.LoginRequest;
 import com.example.sporthubandroidmembershipapplicationv1.models.LoginResponse;
 import com.example.sporthubandroidmembershipapplicationv1.network.ApiClient;
+import com.example.sporthubandroidmembershipapplicationv1.session.MemberSession;
 
 import java.util.Locale;
 
@@ -122,7 +123,6 @@ public class LoginActivity extends AppCompatActivity {
 
     public void CheckLogin(View view) {
 
-        // Prevent repeated login requests.
         if (loginInProgress) {
             return;
         }
@@ -158,9 +158,6 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        /*
-         * The Azure backend requires an email address.
-         */
         if (USE_API_LOGIN
                 && !Patterns.EMAIL_ADDRESS
                 .matcher(usernameOrEmail)
@@ -190,7 +187,6 @@ public class LoginActivity extends AppCompatActivity {
             String username,
             String password
     ) {
-
         String lowercaseUsername =
                 username.toLowerCase(Locale.ROOT);
 
@@ -220,7 +216,6 @@ public class LoginActivity extends AppCompatActivity {
             String email,
             String password
     ) {
-
         SetLoginLoading(
                 loginButton,
                 true
@@ -249,7 +244,6 @@ public class LoginActivity extends AppCompatActivity {
                             Call<LoginResponse> call,
                             Response<LoginResponse> response
                     ) {
-
                         if (isFinishing() || isDestroyed()) {
                             return;
                         }
@@ -316,7 +310,6 @@ public class LoginActivity extends AppCompatActivity {
                             Call<LoginResponse> call,
                             Throwable throwable
                     ) {
-
                         if (call.isCanceled()
                                 || isFinishing()
                                 || isDestroyed()) {
@@ -359,7 +352,6 @@ public class LoginActivity extends AppCompatActivity {
             View loginButton,
             boolean loading
     ) {
-
         loginInProgress = loading;
 
         loginButton.setEnabled(!loading);
@@ -373,6 +365,27 @@ public class LoginActivity extends AppCompatActivity {
             String email,
             LoginResponse loginResponse
     ) {
+        if (loginResponse.getMemberId() == null
+                || loginResponse.getMemberNumber() == null
+                || loginResponse
+                .getMemberNumber()
+                .trim()
+                .isEmpty()) {
+
+            IncorrectLogin(
+                    "Your member profile could not be loaded."
+            );
+
+            return;
+        }
+
+        MemberSession memberSession =
+                new MemberSession(this);
+
+        memberSession.save(
+                loginResponse.getMemberId(),
+                loginResponse.getMemberNumber()
+        );
 
         String displayName =
                 FormatDisplayNameFromEmail(email);
@@ -394,19 +407,15 @@ public class LoginActivity extends AppCompatActivity {
             );
         }
 
-        if (loginResponse.getMemberId() != null) {
-            intent.putExtra(
-                    "MemberId",
-                    loginResponse.getMemberId()
-            );
-        }
+        intent.putExtra(
+                "MemberId",
+                loginResponse.getMemberId()
+        );
 
-        if (loginResponse.getMemberNumber() != null) {
-            intent.putExtra(
-                    "MemberNumber",
-                    loginResponse.getMemberNumber()
-            );
-        }
+        intent.putExtra(
+                "MemberNumber",
+                loginResponse.getMemberNumber()
+        );
 
         intent.putExtra(
                 "OPEN_FRAGMENT",
@@ -420,7 +429,6 @@ public class LoginActivity extends AppCompatActivity {
     private String FormatDisplayNameFromEmail(
             String email
     ) {
-
         String displayName = email;
 
         int atPosition =
@@ -445,7 +453,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void LaunchHome(String username) {
-
         Intent intent = new Intent(
                 LoginActivity.this,
                 HomeActivity.class
@@ -466,7 +473,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void IncorrectLogin(String message) {
-
         TextView alertText =
                 findViewById(R.id.alertText);
 
@@ -475,7 +481,6 @@ public class LoginActivity extends AppCompatActivity {
         alertText.setAlpha(1f);
 
         alertText.postDelayed(() ->
-
                         alertText.animate()
                                 .alpha(0f)
                                 .setDuration(500)
@@ -486,14 +491,12 @@ public class LoginActivity extends AppCompatActivity {
 
                                     alertText.setAlpha(1f);
                                 }),
-
                 3000
         );
     }
 
     @Override
     protected void onDestroy() {
-
         if (loginCall != null
                 && !loginCall.isCanceled()) {
 
