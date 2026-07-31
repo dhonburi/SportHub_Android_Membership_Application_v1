@@ -37,4 +37,10 @@ public final class ApiClient {
                 AuthApiService.class
         );
     }
+
+    public static MemberApiService getMemberApiService() {
+        return getClient().create(
+                MemberApiService.class
+        );
+    }
 }
