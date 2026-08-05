@@ -23,3 +23,6 @@ local.properties
 .vs/
 *.user
 *.suo
+
+# Backend deployment output
+/backend/SportHub.Api/publish/
