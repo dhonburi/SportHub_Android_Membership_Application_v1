@@ -39,7 +39,12 @@ public class MembersController : ControllerBase
                         MemberId = member.MemberId,
                         MemberNumber = member.MemberNumber,
                         FirstName = member.FirstName,
-                        LastName = member.LastName
+                        LastName = member.LastName,
+                        Email = member.User == null
+                            ? null
+                            : member.User.Email,
+                        Phone = member.Phone,
+                        Gender = member.Gender
                     }
                 )
                 .SingleOrDefaultAsync();
@@ -52,5 +57,71 @@ public class MembersController : ControllerBase
         }
 
         return Ok(memberProfile);
+    }
+
+    [HttpGet("{memberId:int}/membership")]
+    public async Task<ActionResult<MemberMembershipResponseDto>>
+        GetMemberMembership(int memberId)
+    {
+        if (memberId <= 0)
+        {
+            return BadRequest(
+                "A valid member ID is required."
+            );
+        }
+
+        MemberMembershipResponseDto? membership =
+            await _dbContext.MemberMemberships
+                .AsNoTracking()
+                .Where(memberMembership =>
+                    memberMembership.MemberId == memberId
+                )
+                .OrderByDescending(memberMembership =>
+                    memberMembership.Status == "Active"
+                )
+                .ThenByDescending(memberMembership =>
+                    memberMembership.StartDate
+                )
+                .Select(memberMembership =>
+                    new MemberMembershipResponseDto
+                    {
+                        MemberMembershipId =
+                            memberMembership.MemberMembershipId,
+
+                        MemberNumber =
+                            memberMembership.Member.MemberNumber,
+
+                        PlanName =
+                            memberMembership.MembershipPlan.PlanName,
+
+                        Price =
+                            memberMembership.MembershipPlan.Price,
+
+                        Description =
+                            memberMembership.MembershipPlan.Description,
+
+                        Status =
+                            memberMembership.Status,
+
+                        StartDate =
+                            memberMembership.StartDate,
+
+                        ExpiryDate =
+                            memberMembership.ExpiryDate,
+
+                        RemainingEntries =
+                            memberMembership.RemainingEntries
+                    }
+                )
+                .FirstOrDefaultAsync();
+
+        if (membership == null)
+        {
+            return NotFound(
+                "No membership was found for this member."
+            );
+        }
+
+        return Ok(membership);
     }
 }

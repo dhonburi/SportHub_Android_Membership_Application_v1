@@ -242,11 +242,23 @@ public class ProfileFragment extends Fragment {
                 )
         );
 
-        layoutMemberships.setOnClickListener(view ->
-                showMessage(
-                        "Membership management will be added later."
-                )
-        );
+        layoutMemberships.setOnClickListener(view -> {
+            getParentFragmentManager()
+                    .beginTransaction()
+                    .setReorderingAllowed(true)
+                    .setCustomAnimations(
+                            R.anim.slide_in_right,
+                            R.anim.slide_out_left,
+                            R.anim.slide_in_left,
+                            R.anim.slide_out_right
+                    )
+                    .replace(
+                            R.id.fragmentContainer,
+                            new MembershipFragment()
+                    )
+                    .addToBackStack("membership")
+                    .commit();
+        });
     }
 
     private void updateBalanceText() {

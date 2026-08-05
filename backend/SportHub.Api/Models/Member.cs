@@ -19,4 +19,7 @@ public class Member
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public User? User { get; set; }
+
+    public ICollection<MemberMembership> Memberships { get; set; } =
+        new List<MemberMembership>();
 }

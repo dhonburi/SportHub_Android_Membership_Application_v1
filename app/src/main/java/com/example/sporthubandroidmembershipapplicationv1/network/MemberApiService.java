@@ -1,5 +1,6 @@
 package com.example.sporthubandroidmembershipapplicationv1.network;
 
+import com.example.sporthubandroidmembershipapplicationv1.models.MemberMembershipResponse;
 import com.example.sporthubandroidmembershipapplicationv1.models.MemberProfileResponse;
 
 import retrofit2.Call;
@@ -10,6 +11,11 @@ public interface MemberApiService {
 
     @GET("api/members/{memberId}")
     Call<MemberProfileResponse> getMemberProfile(
+            @Path("memberId") int memberId
+    );
+
+    @GET("api/members/{memberId}/membership")
+    Call<MemberMembershipResponse> getMemberMembership(
             @Path("memberId") int memberId
     );
 }
