@@ -159,11 +159,18 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/rowProfileDetailsName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="22dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:contentDescription="Edit name"
+                android:focusable="true"
                 android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp">
 
                 <TextView
                     android:layout_width="96dp"
@@ -182,6 +189,14 @@
                     android:textColor="#FFFFFF"
                     android:textSize="18sp" />
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="✎"
+                    android:textColor="#F2C94C"
+                    android:textSize="18sp" />
+
             </LinearLayout>
 
             <View
@@ -192,11 +207,18 @@
                 android:background="#6B6B6B" />
 
             <LinearLayout
+                android:id="@+id/rowProfileDetailsEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:contentDescription="Edit email"
+                android:focusable="true"
                 android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp">
 
                 <TextView
                     android:layout_width="96dp"
@@ -217,6 +239,14 @@
                     android:textColorLink="#FFFFFF"
                     android:textSize="18sp" />
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="✎"
+                    android:textColor="#F2C94C"
+                    android:textSize="18sp" />
+
             </LinearLayout>
 
             <View
@@ -227,11 +257,18 @@
                 android:background="#6B6B6B" />
 
             <LinearLayout
+                android:id="@+id/rowProfileDetailsPhone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:contentDescription="Edit phone"
+                android:focusable="true"
                 android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp">
 
                 <TextView
                     android:layout_width="96dp"
@@ -252,6 +289,14 @@
                     android:textColorLink="#FFFFFF"
                     android:textSize="18sp" />
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="✎"
+                    android:textColor="#F2C94C"
+                    android:textSize="18sp" />
+
             </LinearLayout>
 
             <View
@@ -262,11 +307,18 @@
                 android:background="#6B6B6B" />
 
             <LinearLayout
+                android:id="@+id/rowProfileDetailsGender"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:contentDescription="Edit gender"
+                android:focusable="true"
                 android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp">
 
                 <TextView
                     android:layout_width="96dp"
@@ -283,6 +335,14 @@
                     android:layout_weight="1"
                     android:text="Not provided"
                     android:textColor="#FFFFFF"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="✎"
+                    android:textColor="#F2C94C"
                     android:textSize="18sp" />
 
             </LinearLayout>
