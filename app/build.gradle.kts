@@ -12,13 +12,16 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.sporthubandroidmembershipapplicationv1"
+        applicationId =
+            "com.example.sporthubandroidmembershipapplicationv1"
+
         minSdk = 24
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner =
+            "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -26,7 +29,9 @@ android {
             isMinifyEnabled = false
 
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
+                getDefaultProguardFile(
+                    "proguard-android-optimize.txt"
+                ),
                 "proguard-rules.pro"
             )
         }
@@ -46,11 +51,17 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.constraintlayout)
 
-    // Retrofit for communicating with the ASP.NET Core API
-    implementation("com.squareup.retrofit2:retrofit:3.0.0")
+    implementation(
+        "androidx.viewpager2:viewpager2:1.1.0"
+    )
 
-    // Gson converter for converting JSON into Java objects
-    implementation("com.squareup.retrofit2:converter-gson:3.0.0")
+    implementation(
+        "com.squareup.retrofit2:retrofit:3.0.0"
+    )
+
+    implementation(
+        "com.squareup.retrofit2:converter-gson:3.0.0"
+    )
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)

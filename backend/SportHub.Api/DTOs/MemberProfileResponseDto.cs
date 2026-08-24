@@ -15,4 +15,6 @@ public class MemberProfileResponseDto
     public string? Phone { get; set; }
 
     public string? Gender { get; set; }
+
+    public decimal Balance { get; set; }
 }

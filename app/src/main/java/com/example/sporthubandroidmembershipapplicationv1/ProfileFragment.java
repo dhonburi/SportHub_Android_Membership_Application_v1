@@ -16,6 +16,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import com.example.sporthubandroidmembershipapplicationv1.models.MemberProfileResponse;
+import com.example.sporthubandroidmembershipapplicationv1.models.TopUpBalanceRequest;
+import com.example.sporthubandroidmembershipapplicationv1.models.TopUpBalanceResponse;
 import com.example.sporthubandroidmembershipapplicationv1.network.ApiClient;
 import com.example.sporthubandroidmembershipapplicationv1.session.MemberSession;
 
@@ -39,9 +41,10 @@ public class ProfileFragment extends Fragment {
     private LinearLayout layoutRewards;
     private LinearLayout layoutMemberships;
 
-    private double currentBalance = 14.67;
+    private double currentBalance = 0.00;
 
     private Call<MemberProfileResponse> memberProfileCall;
+    private Call<TopUpBalanceResponse> topUpBalanceCall;
 
     public ProfileFragment() {
         super(R.layout.fragment_profile);
@@ -81,9 +84,9 @@ public class ProfileFragment extends Fragment {
         layoutMemberships =
                 view.findViewById(R.id.layoutMemberships);
 
-        loadMemberProfile();
         updateBalanceText();
         setClickListeners();
+        loadMemberProfile();
     }
 
     private void loadMemberProfile() {
@@ -180,6 +183,9 @@ public class ProfileFragment extends Fragment {
 
         txtMemberName.setText(fullName);
         setMemberNumberText(profile.getMemberNumber());
+
+        currentBalance = profile.getBalance();
+        updateBalanceText();
     }
 
     private String cleanProfileValue(String value) {
@@ -348,18 +354,23 @@ public class ProfileFragment extends Fragment {
                         return;
                     }
 
-                    currentBalance += topUpAmount;
-                    updateBalanceText();
+                    double roundedAmount =
+                            Math.round(
+                                    topUpAmount * 100.0
+                            ) / 100.0;
 
-                    showMessage(
-                            String.format(
-                                    Locale.getDefault(),
-                                    "%.2f NZD added successfully.",
-                                    topUpAmount
-                            )
+                    if (roundedAmount != topUpAmount) {
+                        showMessage(
+                                "Use no more than two decimal places."
+                        );
+                        return;
+                    }
+
+                    submitBalanceTopUp(
+                            roundedAmount,
+                            topUpDialog,
+                            positiveButton
                     );
-
-                    topUpDialog.dismiss();
 
                 } catch (NumberFormatException exception) {
                     showMessage(
@@ -370,6 +381,119 @@ public class ProfileFragment extends Fragment {
         });
 
         topUpDialog.show();
+    }
+
+    private void submitBalanceTopUp(
+            double amount,
+            AlertDialog topUpDialog,
+            Button positiveButton
+    ) {
+        MemberSession memberSession =
+                new MemberSession(requireContext());
+
+        int memberId =
+                memberSession.getMemberId();
+
+        if (memberId <= 0) {
+            showMessage(
+                    "No logged-in member was found."
+            );
+            return;
+        }
+
+        positiveButton.setEnabled(false);
+        positiveButton.setText("Adding...");
+
+        TopUpBalanceRequest request =
+                new TopUpBalanceRequest(amount);
+
+        topUpBalanceCall =
+                ApiClient
+                        .getMemberApiService()
+                        .topUpMemberBalance(
+                                memberId,
+                                request
+                        );
+
+        topUpBalanceCall.enqueue(
+                new Callback<TopUpBalanceResponse>() {
+
+                    @Override
+                    public void onResponse(
+                            Call<TopUpBalanceResponse> call,
+                            Response<TopUpBalanceResponse> response
+                    ) {
+                        if (!isAdded()
+                                || getView() == null) {
+                            return;
+                        }
+
+                        TopUpBalanceResponse topUpResponse =
+                                response.body();
+
+                        if (response.isSuccessful()
+                                && topUpResponse != null) {
+
+                            currentBalance =
+                                    topUpResponse.getBalance();
+
+                            updateBalanceText();
+
+                            showMessage(
+                                    String.format(
+                                            Locale.getDefault(),
+                                            "%.2f NZD added successfully.",
+                                            topUpResponse.getAmountAdded()
+                                    )
+                            );
+
+                            topUpDialog.dismiss();
+                            return;
+                        }
+
+                        positiveButton.setEnabled(true);
+                        positiveButton.setText("Top Up");
+
+                        if (response.code() == 400) {
+                            showMessage(
+                                    "The top-up amount is invalid."
+                            );
+                            return;
+                        }
+
+                        if (response.code() == 404) {
+                            showMessage(
+                                    "Member profile was not found."
+                            );
+                            return;
+                        }
+
+                        showMessage(
+                                "Unable to add balance."
+                        );
+                    }
+
+                    @Override
+                    public void onFailure(
+                            Call<TopUpBalanceResponse> call,
+                            Throwable throwable
+                    ) {
+                        if (call.isCanceled()
+                                || !isAdded()
+                                || getView() == null) {
+
+                            return;
+                        }
+
+                        positiveButton.setEnabled(true);
+                        positiveButton.setText("Top Up");
+
+                        showMessage(
+                                "Unable to connect to the API."
+                        );
+                    }
+                }
+        );
     }
 
     private int dpToPx(int dp) {
@@ -395,6 +519,12 @@ public class ProfileFragment extends Fragment {
                 && !memberProfileCall.isCanceled()) {
 
             memberProfileCall.cancel();
+        }
+
+        if (topUpBalanceCall != null
+                && !topUpBalanceCall.isCanceled()) {
+
+            topUpBalanceCall.cancel();
         }
 
         super.onDestroyView();

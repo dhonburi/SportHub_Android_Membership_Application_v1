@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingStart="3dp"
+    android:paddingEnd="3dp"
+    android:paddingBottom="4dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/membership_current_card_bg"
+        android:orientation="vertical"
+        android:paddingStart="22dp"
+        android:paddingTop="24dp"
+        android:paddingEnd="22dp"
+        android:paddingBottom="24dp">
+
+        <TextView
+            android:id="@+id/txtPagerPlanName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Community"
+            android:textColor="#090909"
+            android:textSize="30sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txtPagerStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="9dp"
+            android:background="@drawable/membership_status_active_bg"
+            android:gravity="center"
+            android:minHeight="34dp"
+            android:paddingStart="17dp"
+            android:paddingEnd="17dp"
+            android:text="Active"
+            android:textColor="#176B39"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txtPagerMemberNumber"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="9dp"
+            android:gravity="center"
+            android:text="Member TEST-0001"
+            android:textColor="#666666"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/txtPagerPrice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="7dp"
+            android:gravity="center"
+            android:text="100.00 NZD"
+            android:textColor="#B48600"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txtPagerDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="13dp"
+            android:gravity="center"
+            android:lineSpacingExtra="3dp"
+            android:text="Membership description"
+            android:textColor="#4B4B4B"
+            android:textSize="14sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="START DATE"
+                    android:textColor="#777777"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txtPagerStartDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="25 Aug 2026"
+                    android:textColor="#111111"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="EXPIRY DATE"
+                    android:textColor="#777777"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txtPagerExpiryDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="24 Aug 2027"
+                    android:textColor="#111111"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="23dp"
+            android:text="MEMBERSHIP DURATION"
+            android:textColor="#777777"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+        <ProgressBar
+            android:id="@+id/progressPagerDuration"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="18dp"
+            android:layout_marginTop="8dp"
+            android:max="100"
+            android:progress="0"
+            android:progressDrawable="@drawable/membership_duration_progress" />
+
+        <TextView
+            android:id="@+id/txtPagerDuration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="end"
+            android:text="364 days remaining"
+            android:textColor="#B48600"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txtPagerRemainingEntries"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center"
+            android:text="10 entries remaining"
+            android:textColor="#111111"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+</FrameLayout>

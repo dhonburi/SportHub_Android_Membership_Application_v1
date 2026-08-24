@@ -9,6 +9,7 @@ public class MemberProfileResponse {
     private String email;
     private String phone;
     private String gender;
+    private double balance;
 
     public int getMemberId() {
         return memberId;
@@ -64,5 +65,13 @@ public class MemberProfileResponse {
 
     public void setGender(String gender) {
         this.gender = gender;
+    }
+
+    public double getBalance() {
+        return balance;
+    }
+
+    public void setBalance(double balance) {
+        this.balance = balance;
     }
 }

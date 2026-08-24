@@ -16,6 +16,8 @@ public class Member
 
     public DateTime? DateOfBirth { get; set; }
 
+    public decimal Balance { get; set; } = 0.00m;
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public User? User { get; set; }

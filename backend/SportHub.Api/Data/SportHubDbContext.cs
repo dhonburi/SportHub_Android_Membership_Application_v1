@@ -29,6 +29,19 @@ public class SportHubDbContext : DbContext
             .HasIndex(member => member.MemberNumber)
             .IsUnique();
 
+        modelBuilder.Entity<Member>()
+            .Property(member => member.Balance)
+            .HasPrecision(10, 2)
+            .HasDefaultValue(0.00m);
+
+        modelBuilder.Entity<Member>()
+            .ToTable(
+                table => table.HasCheckConstraint(
+                    "CK_Members_Balance",
+                    "[Balance] >= 0"
+                )
+            );
+
         modelBuilder.Entity<User>()
             .HasIndex(user => user.Email)
             .IsUnique();

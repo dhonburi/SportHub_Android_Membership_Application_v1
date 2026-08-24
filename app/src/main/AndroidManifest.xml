@@ -12,7 +12,8 @@
         android:label="SportHub Android Membership Application v1"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.SportHubAndroidMembershipApplicationV1">
+        android:theme="@style/Theme.SportHubAndroidMembershipApplicationV1"
+        android:usesCleartextTraffic="true">
 
         <activity
             android:name=".ProfileDetailsActivity"
