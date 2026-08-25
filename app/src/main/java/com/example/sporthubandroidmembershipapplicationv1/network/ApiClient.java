@@ -6,13 +6,13 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public final class ApiClient {
 
     /*
-     * Local ASP.NET Core API.
+     * Deployed Azure SportHub API.
      *
-     * From the Android emulator, 10.0.2.2 points to
-     * the Mac running Android Studio.
+     * The API connects to Azure SQL.
+     * Retrofit requires the final forward slash.
      */
     private static final String BASE_URL =
-            "http://10.0.2.2:5097/";
+            "https://sporthub-api-jp-dfcndsfgh5d0bydt.japaneast-01.azurewebsites.net/";
 
     private static Retrofit retrofit;
 
