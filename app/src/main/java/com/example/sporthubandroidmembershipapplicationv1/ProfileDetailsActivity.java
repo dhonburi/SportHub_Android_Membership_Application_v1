@@ -14,6 +14,8 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,12 +37,32 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import java.util.regex.Pattern;
+
 public class ProfileDetailsActivity extends AppCompatActivity {
 
     private static final String FIELD_EMAIL = "email";
     private static final String FIELD_PHONE = "phone";
-    private static final String FIELD_GENDER = "gender";
     private static final String NOT_PROVIDED = "Not provided";
+
+    private static final int MINIMUM_NAME_LENGTH = 2;
+    private static final int MAXIMUM_NAME_LENGTH = 50;
+    private static final int MAXIMUM_PHONE_LENGTH = 11;
+
+    private static final Pattern NAME_PATTERN = Pattern.compile(
+            "^[\\p{L} ]+$"
+    );
+
+    private static final Pattern PHONE_PATTERN = Pattern.compile(
+            "^\\d{9,11}$"
+    );
+
+    private static final String[] GENDER_OPTIONS = {
+            "Select gender",
+            "Male",
+            "Female",
+            "Rather Not Say"
+    };
 
     private TextView txtHeaderName;
     private TextView txtHeaderMemberId;
@@ -106,24 +128,14 @@ public class ProfileDetailsActivity extends AppCompatActivity {
                 showEditFieldDialog(
                         "Edit phone",
                         txtPhone,
-                        InputType.TYPE_CLASS_PHONE,
+                        InputType.TYPE_CLASS_NUMBER,
                         false,
                         FIELD_PHONE,
-                        30
+                        MAXIMUM_PHONE_LENGTH
                 )
         );
 
-        rowGender.setOnClickListener(view ->
-                showEditFieldDialog(
-                        "Edit gender",
-                        txtGender,
-                        InputType.TYPE_CLASS_TEXT
-                                | InputType.TYPE_TEXT_FLAG_CAP_WORDS,
-                        false,
-                        FIELD_GENDER,
-                        50
-                )
-        );
+        rowGender.setOnClickListener(view -> showEditGenderDialog());
     }
 
     private void showEditNameDialog() {
@@ -140,7 +152,9 @@ public class ProfileDetailsActivity extends AppCompatActivity {
                         | InputType.TYPE_TEXT_FLAG_CAP_WORDS
         );
         firstNameInput.setFilters(
-                new InputFilter[]{new InputFilter.LengthFilter(100)}
+                new InputFilter[]{
+                        new InputFilter.LengthFilter(MAXIMUM_NAME_LENGTH)
+                }
         );
         firstNameInput.setText(cleanValue(currentProfile.getFirstName()));
 
@@ -152,7 +166,9 @@ public class ProfileDetailsActivity extends AppCompatActivity {
                         | InputType.TYPE_TEXT_FLAG_CAP_WORDS
         );
         lastNameInput.setFilters(
-                new InputFilter[]{new InputFilter.LengthFilter(100)}
+                new InputFilter[]{
+                        new InputFilter.LengthFilter(MAXIMUM_NAME_LENGTH)
+                }
         );
         lastNameInput.setText(cleanValue(currentProfile.getLastName()));
 
@@ -179,22 +195,27 @@ public class ProfileDetailsActivity extends AppCompatActivity {
         dialog.setOnShowListener(dialogInterface ->
                 dialog.getButton(DialogInterface.BUTTON_POSITIVE)
                         .setOnClickListener(saveClick -> {
-                            String firstName = firstNameInput
-                                    .getText().toString().trim();
-                            String lastName = lastNameInput
-                                    .getText().toString().trim();
+                            String firstName = normalizeName(
+                                    firstNameInput.getText().toString()
+                            );
 
-                            if (firstName.isEmpty()) {
-                                firstNameInput.setError(
-                                        "First name can't be empty"
-                                );
-                                return;
-                            }
+                            String lastName = normalizeName(
+                                    lastNameInput.getText().toString()
+                            );
 
-                            if (lastName.isEmpty()) {
-                                lastNameInput.setError(
-                                        "Last name can't be empty"
-                                );
+                            boolean firstNameValid = validateName(
+                                    firstNameInput,
+                                    firstName,
+                                    "First name"
+                            );
+
+                            boolean lastNameValid = validateName(
+                                    lastNameInput,
+                                    lastName,
+                                    "Last name"
+                            );
+
+                            if (!firstNameValid || !lastNameValid) {
                                 return;
                             }
 
@@ -262,23 +283,18 @@ public class ProfileDetailsActivity extends AppCompatActivity {
                             String newValue = input
                                     .getText().toString().trim();
 
-                            if (required && newValue.isEmpty()) {
-                                input.setError("This field can't be empty");
-                                return;
-                            }
-
                             if (FIELD_EMAIL.equals(fieldKind)
-                                    && !Patterns.EMAIL_ADDRESS
-                                    .matcher(newValue).matches()) {
-                                input.setError("Enter a valid email address");
+                                    && !validateEmail(input, newValue)) {
                                 return;
                             }
 
                             if (FIELD_PHONE.equals(fieldKind)
-                                    && !newValue.isEmpty()
-                                    && !Patterns.PHONE
-                                    .matcher(newValue).matches()) {
-                                input.setError("Enter a valid phone number");
+                                    && !validatePhone(input, newValue)) {
+                                return;
+                            }
+
+                            if (required && newValue.isEmpty()) {
+                                input.setError("This field is required.");
                                 return;
                             }
 
@@ -296,8 +312,6 @@ public class ProfileDetailsActivity extends AppCompatActivity {
                                 email = newValue;
                             } else if (FIELD_PHONE.equals(fieldKind)) {
                                 phone = newValue;
-                            } else if (FIELD_GENDER.equals(fieldKind)) {
-                                gender = newValue;
                             }
 
                             saveProfileUpdate(
@@ -308,6 +322,90 @@ public class ProfileDetailsActivity extends AppCompatActivity {
                                     email,
                                     phone,
                                     gender
+                            );
+                        })
+        );
+
+        dialog.show();
+    }
+
+    private void showEditGenderDialog() {
+        if (currentProfile == null) {
+            showToast("Load the member profile before editing it.");
+            return;
+        }
+
+        Spinner genderSpinner = new Spinner(this);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_spinner_item,
+                GENDER_OPTIONS
+        );
+
+        adapter.setDropDownViewResource(
+                android.R.layout.simple_spinner_dropdown_item
+        );
+
+        genderSpinner.setAdapter(adapter);
+        genderSpinner.setSelection(
+                findGenderSelection(currentProfile.getGender())
+        );
+
+        TextView errorMessage = new TextView(this);
+        errorMessage.setTextColor(Color.parseColor("#B00020"));
+        errorMessage.setTextSize(12);
+        errorMessage.setVisibility(View.GONE);
+
+        LinearLayout inputContainer = new LinearLayout(this);
+        inputContainer.setOrientation(LinearLayout.VERTICAL);
+
+        int paddingPx = getDialogPaddingPx();
+        inputContainer.setPadding(
+                paddingPx,
+                paddingPx / 2,
+                paddingPx,
+                0
+        );
+
+        inputContainer.addView(genderSpinner);
+        inputContainer.addView(errorMessage);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Edit gender")
+                .setView(inputContainer)
+                .setPositiveButton("Save", null)
+                .setNegativeButton("Cancel", null)
+                .create();
+
+        dialog.setOnShowListener(dialogInterface ->
+                dialog.getButton(DialogInterface.BUTTON_POSITIVE)
+                        .setOnClickListener(saveClick -> {
+                            int selectedPosition =
+                                    genderSpinner.getSelectedItemPosition();
+
+                            if (selectedPosition <= 0) {
+                                errorMessage.setText(
+                                        "Please select a gender."
+                                );
+                                errorMessage.setVisibility(View.VISIBLE);
+                                return;
+                            }
+
+                            errorMessage.setVisibility(View.GONE);
+
+                            String selectedGender = GENDER_OPTIONS[
+                                    selectedPosition
+                                    ];
+
+                            saveProfileUpdate(
+                                    dialog,
+                                    null,
+                                    cleanValue(currentProfile.getFirstName()),
+                                    cleanValue(currentProfile.getLastName()),
+                                    cleanValue(currentProfile.getEmail()),
+                                    cleanValue(currentProfile.getPhone()),
+                                    selectedGender
                             );
                         })
         );
@@ -327,14 +425,20 @@ public class ProfileDetailsActivity extends AppCompatActivity {
         int memberId = memberSession.getMemberId();
 
         if (memberId <= 0) {
-            errorInput.setError("No logged-in member was found");
+            showFieldError(
+                    errorInput,
+                    "No logged-in member was found."
+            );
             return;
         }
 
         if (firstName.isEmpty()
                 || lastName.isEmpty()
                 || email.isEmpty()) {
-            errorInput.setError("Reload the profile before saving changes");
+            showFieldError(
+                    errorInput,
+                    "Reload the profile before saving changes."
+            );
             return;
         }
 
@@ -377,12 +481,14 @@ public class ProfileDetailsActivity extends AppCompatActivity {
                                 .setEnabled(true);
 
                         if (response.code() == 409) {
-                            errorInput.setError(
-                                    "That email is already used by another account"
+                            showFieldError(
+                                    errorInput,
+                                    "That email is already used by another account."
                             );
                         } else if (response.code() == 400) {
-                            errorInput.setError(
-                                    "Check the value and try again"
+                            showFieldError(
+                                    errorInput,
+                                    "Check the field value and try again."
                             );
                         } else if (response.code() == 404) {
                             showToast("Member profile not found.");
@@ -653,6 +759,122 @@ public class ProfileDetailsActivity extends AppCompatActivity {
 
     private String cleanValue(String value) {
         return value == null ? "" : value.trim();
+    }
+
+    private String normalizeName(String value) {
+        return cleanValue(value).replaceAll("\\s+", " ");
+    }
+
+    private boolean validateName(
+            EditText input,
+            String value,
+            String fieldLabel
+    ) {
+        if (value.isEmpty()) {
+            input.setError(fieldLabel + " is required.");
+            return false;
+        }
+
+        if (!NAME_PATTERN.matcher(value).matches()) {
+            input.setError(
+                    fieldLabel + " must only contain letters and spaces."
+            );
+            return false;
+        }
+
+        if (value.length() < MINIMUM_NAME_LENGTH
+                || value.length() > MAXIMUM_NAME_LENGTH) {
+            input.setError(
+                    fieldLabel
+                            + " must be between 2 and 50 characters."
+            );
+            return false;
+        }
+
+        input.setError(null);
+        return true;
+    }
+
+    private boolean validateEmail(EditText input, String value) {
+        if (value.isEmpty()) {
+            input.setError("Email address is required.");
+            return false;
+        }
+
+        if (containsWhitespace(value)
+                || !hasRequiredEmailParts(value)
+                || !Patterns.EMAIL_ADDRESS.matcher(value).matches()) {
+            input.setError(
+                    "Email must include @ and a valid domain, "
+                            + "such as name@example.com."
+            );
+            return false;
+        }
+
+        input.setError(null);
+        return true;
+    }
+
+    private boolean validatePhone(EditText input, String value) {
+        if (value.isEmpty()) {
+            input.setError(null);
+            return true;
+        }
+
+        if (!value.matches("\\d+")) {
+            input.setError("Phone number must only contain numbers.");
+            return false;
+        }
+
+        if (!PHONE_PATTERN.matcher(value).matches()) {
+            input.setError(
+                    "Phone number must contain between 9 and 11 digits."
+            );
+            return false;
+        }
+
+        input.setError(null);
+        return true;
+    }
+
+    private boolean containsWhitespace(String value) {
+        for (int index = 0; index < value.length(); index++) {
+            if (Character.isWhitespace(value.charAt(index))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean hasRequiredEmailParts(String value) {
+        int atIndex = value.indexOf('@');
+        int finalDotIndex = value.lastIndexOf('.');
+
+        return atIndex > 0
+                && finalDotIndex > atIndex + 1
+                && finalDotIndex < value.length() - 1;
+    }
+
+    private int findGenderSelection(String currentGender) {
+        String cleanedGender = cleanValue(currentGender);
+
+        for (int index = 1; index < GENDER_OPTIONS.length; index++) {
+            if (GENDER_OPTIONS[index].equalsIgnoreCase(cleanedGender)) {
+                return index;
+            }
+        }
+
+        return 0;
+    }
+
+    private void showFieldError(EditText input, String message) {
+        if (input != null) {
+            input.setError(message);
+            return;
+        }
+
+        showToast(message);
     }
 
     private String emptyToNull(String value) {
