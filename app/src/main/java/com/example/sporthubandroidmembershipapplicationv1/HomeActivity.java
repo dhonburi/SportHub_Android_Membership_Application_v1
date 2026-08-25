@@ -201,6 +201,81 @@ public class HomeActivity extends AppCompatActivity {
                 .commit();
     }
 
+    /**
+     * Opens the existing Profile page and immediately presses its existing
+     * Top Up Balance button. This reuses the same Azure-backed top-up popup
+     * rather than creating a second top-up implementation for the QR page.
+     */
+    public void openProfileAndShowTopUp() {
+        clearChildPageBackStack();
+        headerLayout.setVisibility(View.VISIBLE);
+
+        getSupportFragmentManager()
+                .beginTransaction()
+                .setReorderingAllowed(true)
+                .replace(
+                        R.id.fragmentContainer,
+                        new ProfileFragment()
+                )
+                .commitNow();
+
+        updateSelectedNavigation(
+                navProfile,
+                iconProfile,
+                txtProfile
+        );
+
+        View topUpButton =
+                findViewById(R.id.btnTopUpBalance);
+
+        if (topUpButton != null) {
+            topUpButton.performClick();
+        }
+    }
+
+    /**
+     * Opens Membership as a child of Profile. Pressing the Membership back
+     * arrow therefore returns the member to the Profile page.
+     */
+    public void openMembershipFromQr() {
+        clearChildPageBackStack();
+        headerLayout.setVisibility(View.VISIBLE);
+
+        FragmentManager fragmentManager =
+                getSupportFragmentManager();
+
+        fragmentManager
+                .beginTransaction()
+                .setReorderingAllowed(true)
+                .replace(
+                        R.id.fragmentContainer,
+                        new ProfileFragment()
+                )
+                .commitNow();
+
+        fragmentManager
+                .beginTransaction()
+                .setReorderingAllowed(true)
+                .setCustomAnimations(
+                        R.anim.slide_in_right,
+                        R.anim.slide_out_left,
+                        R.anim.slide_in_left,
+                        R.anim.slide_out_right
+                )
+                .replace(
+                        R.id.fragmentContainer,
+                        new MembershipFragment()
+                )
+                .addToBackStack("membership")
+                .commit();
+
+        updateSelectedNavigation(
+                navProfile,
+                iconProfile,
+                txtProfile
+        );
+    }
+
     private void updateSelectedNavigation(
             LinearLayout selectedNavigation,
             ImageView selectedIcon,

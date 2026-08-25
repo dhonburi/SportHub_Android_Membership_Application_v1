@@ -40,6 +40,9 @@ public class QrFragment extends Fragment {
     private TextView textViewReferenceCode;
     private TextView textViewTitle;
 
+    private View cardCreditTopUp;
+    private View cardPurchaseMembership;
+
     private Handler refreshHandler = new Handler(Looper.getMainLooper());
     private Runnable refreshRunnable;
     private long lastWindowGenerated = -1;
@@ -64,8 +67,30 @@ public class QrFragment extends Fragment {
         textViewReferenceCode = view.findViewById(R.id.textViewReferenceCode);
         textViewTitle = view.findViewById(R.id.textViewTitle);
 
+        cardCreditTopUp = view.findViewById(R.id.cardCreditTopUp);
+        cardPurchaseMembership =
+                view.findViewById(R.id.cardPurchaseMembership);
+
+        setShortcutClickListeners();
+
         startSystemClockSync();
         loadMembershipType();
+    }
+
+    private void setShortcutClickListeners() {
+        cardCreditTopUp.setOnClickListener(view -> {
+            if (getActivity() instanceof HomeActivity) {
+                ((HomeActivity) getActivity())
+                        .openProfileAndShowTopUp();
+            }
+        });
+
+        cardPurchaseMembership.setOnClickListener(view -> {
+            if (getActivity() instanceof HomeActivity) {
+                ((HomeActivity) getActivity())
+                        .openMembershipFromQr();
+            }
+        });
     }
 
     private void loadMembershipType() {
