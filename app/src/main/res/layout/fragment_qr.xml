@@ -44,7 +44,7 @@
                     android:id="@+id/textViewTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Your Membership QR"
+                    android:text="Loading..."
                     android:textColor="#D8AE43"
                     android:textSize="21sp"
                     android:textStyle="bold" />
@@ -73,7 +73,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:text="Updating in 60s..."
+                    android:text="Updating in -s..."
                     android:textColor="#777777"
                     android:textSize="14sp" />
 

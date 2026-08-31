@@ -15,6 +15,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.sporthubandroidmembershipapplicationv1.models.MemberMembershipResponse;
+import com.example.sporthubandroidmembershipapplicationv1.network.ApiClient;
+import com.example.sporthubandroidmembershipapplicationv1.session.MemberSession;
+
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.WriterException;
@@ -25,15 +29,25 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class QrFragment extends Fragment {
 
     private ImageView imageViewQrCode;
     private TextView textViewTimer;
     private TextView textViewReferenceCode;
+    private TextView textViewTitle;
+
+    private View cardCreditTopUp;
+    private View cardPurchaseMembership;
 
     private Handler refreshHandler = new Handler(Looper.getMainLooper());
     private Runnable refreshRunnable;
     private long lastWindowGenerated = -1;
+
+    private Call<MemberMembershipResponse> membershipCall;
 
     public QrFragment() {
     }
@@ -51,8 +65,96 @@ public class QrFragment extends Fragment {
         imageViewQrCode = view.findViewById(R.id.imageViewQrCode);
         textViewTimer = view.findViewById(R.id.textViewTimer);
         textViewReferenceCode = view.findViewById(R.id.textViewReferenceCode);
+        textViewTitle = view.findViewById(R.id.textViewTitle);
+
+        cardCreditTopUp = view.findViewById(R.id.cardCreditTopUp);
+        cardPurchaseMembership =
+                view.findViewById(R.id.cardPurchaseMembership);
+
+        setShortcutClickListeners();
 
         startSystemClockSync();
+        loadMembershipType();
+    }
+
+    private void setShortcutClickListeners() {
+        cardCreditTopUp.setOnClickListener(view -> {
+            if (getActivity() instanceof HomeActivity) {
+                ((HomeActivity) getActivity())
+                        .openProfileAndShowTopUp();
+            }
+        });
+
+        cardPurchaseMembership.setOnClickListener(view -> {
+            if (getActivity() instanceof HomeActivity) {
+                ((HomeActivity) getActivity())
+                        .openMembershipFromQr();
+            }
+        });
+    }
+
+    private void loadMembershipType() {
+
+        MemberSession memberSession =
+                new MemberSession(requireContext());
+
+        int memberId = memberSession.getMemberId();
+
+        if (memberId <= 0) {
+            // No logged-in member found — leave the default
+            // "Your Membership QR" label in place.
+            return;
+        }
+
+        membershipCall = ApiClient
+                .getMemberApiService()
+                .getMemberMembership(memberId);
+
+        membershipCall.enqueue(
+                new Callback<MemberMembershipResponse>() {
+                    @Override
+                    public void onResponse(
+                            Call<MemberMembershipResponse> call,
+                            Response<MemberMembershipResponse> response
+                    ) {
+                        if (!isAdded() || getView() == null) {
+                            return;
+                        }
+
+                        MemberMembershipResponse membership =
+                                response.body();
+
+                        if (response.isSuccessful()
+                                && membership != null) {
+
+                            String planName = membership.getPlanName();
+
+                            if (planName != null
+                                    && !planName.trim().isEmpty()) {
+
+                                textViewTitle.setText(
+                                        String.format(
+                                                Locale.getDefault(),
+                                                "%s Plan",
+                                                planName.trim()
+                                        )
+                                );
+                            }
+                        }
+
+                        // On 404 / no membership, keep the default label.
+                    }
+
+                    @Override
+                    public void onFailure(
+                            Call<MemberMembershipResponse> call,
+                            Throwable throwable
+                    ) {
+                        // Network/server error — keep the default label
+                        // so the gate code still works while offline.
+                    }
+                }
+        );
     }
 
     private void startSystemClockSync() {
@@ -158,6 +260,10 @@ public class QrFragment extends Fragment {
 
         if (refreshHandler != null && refreshRunnable != null) {
             refreshHandler.removeCallbacks(refreshRunnable);
+        }
+
+        if (membershipCall != null && !membershipCall.isCanceled()) {
+            membershipCall.cancel();
         }
     }
 }
