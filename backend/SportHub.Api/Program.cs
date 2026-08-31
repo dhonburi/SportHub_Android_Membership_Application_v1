@@ -25,13 +25,19 @@ builder.Services.AddDbContext<SportHubDbContext>(
 );
 
 // Register the password hasher used for user passwords.
-builder.Services.AddScoped<
+builder.Services.AddScoped
     IPasswordHasher<User>,
     PasswordHasher<User>
 >();
 
 // Register the authentication service.
 builder.Services.AddScoped<AuthService>();
+
+// Register the shared QR token service (US-09 issuance,
+// US-10 validation). Singleton: holds only an immutable
+// signing key read once from configuration, no DbContext
+// dependency.
+builder.Services.AddSingleton<QrTokenService>();
 
 var app = builder.Build();
 
@@ -64,7 +70,7 @@ if (seedRequested)
 
     IPasswordHasher<User> passwordHasher =
         scope.ServiceProvider
-            .GetRequiredService<
+            .GetRequiredService
                 IPasswordHasher<User>
             >();
 
