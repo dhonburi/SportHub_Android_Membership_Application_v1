@@ -18,7 +18,7 @@
         android:paddingStart="20dp"
         android:paddingTop="22dp"
         android:paddingEnd="20dp"
-        android:paddingBottom="135dp">
+        android:paddingBottom="145dp">
 
         <!-- Profile information -->
 
@@ -32,7 +32,7 @@
         <include
             layout="@layout/layout_balance_card"
             android:layout_width="match_parent"
-            android:layout_height="228dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="20dp" />
 
         <!-- Rewards moved closer to the balance button -->
@@ -48,7 +48,7 @@
         <include
             layout="@layout/layout_shortcuts"
             android:layout_width="match_parent"
-            android:layout_height="150dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="16dp" />
 
     </LinearLayout>
