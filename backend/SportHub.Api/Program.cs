@@ -25,10 +25,7 @@ builder.Services.AddDbContext<SportHubDbContext>(
 );
 
 // Register the password hasher used for user passwords.
-builder.Services.AddScoped
-    IPasswordHasher<User>,
-    PasswordHasher<User>
->();
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
 // Register the authentication service.
 builder.Services.AddScoped<AuthService>();
@@ -69,10 +66,7 @@ if (seedRequested)
             .GetRequiredService<SportHubDbContext>();
 
     IPasswordHasher<User> passwordHasher =
-        scope.ServiceProvider
-            .GetRequiredService
-                IPasswordHasher<User>
-            >();
+        scope.ServiceProvider.GetRequiredService<IPasswordHasher<User>>();
 
     // Apply any pending migrations before seeding.
     await dbContext.Database.MigrateAsync();

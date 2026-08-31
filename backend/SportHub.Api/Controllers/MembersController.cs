@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using SportHub.Api.Data;
 using SportHub.Api.DTOs;
 using SportHub.Api.Models;
+using SportHub.Api.Services;
 
 namespace SportHub.Api.Controllers;
 
@@ -16,9 +17,15 @@ public class MembersController : ControllerBase
 
     private readonly SportHubDbContext _dbContext;
 
-    public MembersController(SportHubDbContext dbContext)
+    private readonly QrTokenService _qrTokenService;
+
+    public MembersController(
+        SportHubDbContext dbContext,
+        QrTokenService qrTokenService
+    )
     {
         _dbContext = dbContext;
+        _qrTokenService = qrTokenService;
     }
 
     [HttpGet("{memberId:int}")]
@@ -586,6 +593,121 @@ public class MembersController : ControllerBase
         return Ok(memberships);
     }
 
+    [HttpGet("{memberId:int}/memberships/{memberMembershipId:int}/qr-code")]
+    public async Task<ActionResult<MembershipQrCodeResponseDto>>
+        GetMembershipQrCode(int memberId, int memberMembershipId)
+    {
+        if (memberId <= 0)
+        {
+            return BadRequest(
+                "A valid member ID is required."
+            );
+        }
+
+        if (memberMembershipId <= 0)
+        {
+            return BadRequest(
+                "A valid membership ID is required."
+            );
+        }
+
+        bool memberExists =
+            await _dbContext.Members
+                .AsNoTracking()
+                .AnyAsync(member =>
+                    member.MemberId == memberId
+                );
+
+        if (!memberExists)
+        {
+            return NotFound(
+                "Member profile was not found."
+            );
+        }
+
+        MemberMembership? membership =
+            await _dbContext.MemberMemberships
+                .Include(memberMembership =>
+                    memberMembership.MembershipPlan
+                )
+                .SingleOrDefaultAsync(memberMembership =>
+                    memberMembership.MemberMembershipId ==
+                    memberMembershipId
+                    && memberMembership.MemberId == memberId
+                );
+
+        if (membership == null)
+        {
+            return NotFound(
+                "Membership was not found for this member."
+            );
+        }
+
+        DateTime today = GetNewZealandToday();
+
+        bool isExpired =
+            string.Equals(
+                membership.Status,
+                "Expired",
+                StringComparison.OrdinalIgnoreCase
+            )
+            || (
+                membership.ExpiryDate.HasValue
+                && membership.ExpiryDate.Value < today
+            );
+
+        if (isExpired)
+        {
+            return Conflict(
+                "Membership has expired."
+            );
+        }
+
+        bool isActive =
+            string.Equals(
+                membership.Status,
+                "Active",
+                StringComparison.OrdinalIgnoreCase
+            );
+
+        if (!isActive)
+        {
+            return Conflict(
+                "Membership is not active."
+            );
+        }
+
+        QrTokenResult tokenResult =
+            _qrTokenService.IssueToken(
+                membership.MemberMembershipId
+            );
+
+        var response =
+            new MembershipQrCodeResponseDto
+            {
+                MemberMembershipId =
+                    membership.MemberMembershipId,
+
+                PlanName =
+                    membership.MembershipPlan.PlanName,
+
+                Status = membership.Status,
+
+                QrToken = tokenResult.Token,
+
+                IssuedAtUtc =
+                    FormatUtc(tokenResult.IssuedAtUtc),
+
+                ExpiresAtUtc =
+                    FormatUtc(tokenResult.ExpiresAtUtc),
+
+                ValiditySeconds =
+                    tokenResult.ValiditySeconds
+            };
+
+        return Ok(response);
+    }
+
     private static DateTime GetNewZealandToday()
     {
         TimeZoneInfo newZealandTimeZone =
@@ -597,5 +719,13 @@ public class MembersController : ControllerBase
             DateTime.UtcNow,
             newZealandTimeZone
         ).Date;
+    }
+
+    private static string FormatUtc(DateTime value)
+    {
+        return value.ToString(
+            "yyyy-MM-ddTHH:mm:ssZ",
+            System.Globalization.CultureInfo.InvariantCulture
+        );
     }
 }
