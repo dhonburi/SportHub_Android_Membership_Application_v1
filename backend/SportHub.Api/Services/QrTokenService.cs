@@ -9,15 +9,29 @@ namespace SportHub.Api.Services;
 /*
  * Shared HMAC-SHA256 QR token issuance and validation.
  *
- * US-09 (Dhon) calls IssueToken to generate a member's QR code.
- * US-10 (Solomon) calls TryValidate to check a scanned code.
+ * US-09 (Dhon) calls IssueToken to generate a member's QR code -
+ * either for a specific membership, or, when no active membership
+ * exists, a balance-deduction fallback tied to the member directly.
+ *
+ * US-10 (Solomon) calls TryValidate to check a scanned code, and
+ * must branch on the returned QrTokenType to know whether it is
+ * reading a MemberMembershipId or a MemberId.
  *
  * Both sides must use this one implementation - do not fork
  * or duplicate the token format anywhere else.
  */
+public enum QrTokenType
+{
+    Membership,
+    Member
+}
+
 public class QrTokenService
 {
-    private const int TokenVersion = 1;
+    private const int TokenVersion = 2;
+
+    private const string MembershipTypeValue = "membership";
+    private const string MemberTypeValue = "member";
 
     private readonly byte[] _signingKey;
 
@@ -39,7 +53,8 @@ public class QrTokenService
     }
 
     public QrTokenResult IssueToken(
-        int memberMembershipId,
+        QrTokenType type,
+        int id,
         int validitySeconds = 60
     )
     {
@@ -49,7 +64,8 @@ public class QrTokenService
         var payload = new QrTokenPayload
         {
             V = TokenVersion,
-            Mid = memberMembershipId,
+            Typ = ToTypeValue(type),
+            Id = id,
             Iat = issuedAt.ToUnixTimeSeconds(),
             Exp = expiresAt.ToUnixTimeSeconds()
         };
@@ -70,9 +86,14 @@ public class QrTokenService
         };
     }
 
-    public bool TryValidate(string? token, out int memberMembershipId)
+    public bool TryValidate(
+        string? token,
+        out QrTokenType type,
+        out int id
+    )
     {
-        memberMembershipId = 0;
+        type = default;
+        id = 0;
 
         if (string.IsNullOrWhiteSpace(token))
         {
@@ -118,6 +139,11 @@ public class QrTokenService
             return false;
         }
 
+        if (!TryFromTypeValue(payload.Typ, out QrTokenType parsedType))
+        {
+            return false;
+        }
+
         long nowUnix = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
         if (nowUnix > payload.Exp)
@@ -125,8 +151,37 @@ public class QrTokenService
             return false;
         }
 
-        memberMembershipId = payload.Mid;
+        type = parsedType;
+        id = payload.Id;
         return true;
+    }
+
+    private static string ToTypeValue(QrTokenType type)
+    {
+        return type == QrTokenType.Member
+            ? MemberTypeValue
+            : MembershipTypeValue;
+    }
+
+    private static bool TryFromTypeValue(
+        string? value,
+        out QrTokenType type
+    )
+    {
+        if (string.Equals(value, MembershipTypeValue, StringComparison.Ordinal))
+        {
+            type = QrTokenType.Membership;
+            return true;
+        }
+
+        if (string.Equals(value, MemberTypeValue, StringComparison.Ordinal))
+        {
+            type = QrTokenType.Member;
+            return true;
+        }
+
+        type = default;
+        return false;
     }
 
     private string Sign(string payloadSegment)
@@ -172,8 +227,11 @@ public class QrTokenService
         [JsonPropertyName("v")]
         public int V { get; set; }
 
-        [JsonPropertyName("mid")]
-        public int Mid { get; set; }
+        [JsonPropertyName("typ")]
+        public string Typ { get; set; } = string.Empty;
+
+        [JsonPropertyName("id")]
+        public int Id { get; set; }
 
         [JsonPropertyName("iat")]
         public long Iat { get; set; }

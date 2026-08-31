@@ -1,6 +1,7 @@
 using System.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using SportHub.Api.Data;
 using SportHub.Api.DTOs;
 using SportHub.Api.Models;
@@ -19,13 +20,17 @@ public class MembersController : ControllerBase
 
     private readonly QrTokenService _qrTokenService;
 
+    private readonly IConfiguration _configuration;
+
     public MembersController(
         SportHubDbContext dbContext,
-        QrTokenService qrTokenService
+        QrTokenService qrTokenService,
+        IConfiguration configuration
     )
     {
         _dbContext = dbContext;
         _qrTokenService = qrTokenService;
+        _configuration = configuration;
     }
 
     [HttpGet("{memberId:int}")]
@@ -247,6 +252,71 @@ public class MembersController : ControllerBase
                 Balance = member.Balance,
                 Currency = "NZD",
                 Message = "Mock balance added successfully."
+            };
+
+        return Ok(response);
+    }
+
+    [HttpGet("{memberId:int}/balance/qr-code")]
+    public async Task<ActionResult<BalanceQrCodeResponseDto>>
+        GetBalanceQrCode(int memberId)
+    {
+        if (memberId <= 0)
+        {
+            return BadRequest(
+                "A valid member ID is required."
+            );
+        }
+
+        Member? member =
+            await _dbContext.Members
+                .AsNoTracking()
+                .SingleOrDefaultAsync(existingMember =>
+                    existingMember.MemberId == memberId
+                );
+
+        if (member == null)
+        {
+            return NotFound(
+                "Member profile was not found."
+            );
+        }
+
+        decimal minimumBalance =
+            _configuration.GetValue(
+                "Qr:MinimumBalanceForBalanceQrCode",
+                0m
+            );
+
+        if (member.Balance <= minimumBalance)
+        {
+            return Conflict(
+                "Insufficient balance to generate an entry QR code."
+            );
+        }
+
+        QrTokenResult tokenResult =
+            _qrTokenService.IssueToken(
+                QrTokenType.Member,
+                member.MemberId
+            );
+
+        var response =
+            new BalanceQrCodeResponseDto
+            {
+                MemberId = member.MemberId,
+                Balance = member.Balance,
+                Currency = "NZD",
+                QrToken = tokenResult.Token,
+
+                IssuedAtUtc =
+                    FormatUtc(tokenResult.IssuedAtUtc),
+
+                ExpiresAtUtc =
+                    FormatUtc(tokenResult.ExpiresAtUtc),
+
+                ValiditySeconds =
+                    tokenResult.ValiditySeconds
             };
 
         return Ok(response);
@@ -679,6 +749,7 @@ public class MembersController : ControllerBase
 
         QrTokenResult tokenResult =
             _qrTokenService.IssueToken(
+                QrTokenType.Membership,
                 membership.MemberMembershipId
             );
 
