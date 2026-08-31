@@ -1,5 +1,6 @@
 package com.example.sporthubandroidmembershipapplicationv1.network;
 
+import com.example.sporthubandroidmembershipapplicationv1.models.BalanceQrCodeResponse;
 import com.example.sporthubandroidmembershipapplicationv1.models.MemberMembershipResponse;
 import com.example.sporthubandroidmembershipapplicationv1.models.MemberProfileResponse;
 import com.example.sporthubandroidmembershipapplicationv1.models.MembershipPlanResponse;
@@ -36,6 +37,11 @@ public interface MemberApiService {
     Call<TopUpBalanceResponse> topUpMemberBalance(
             @Path("memberId") int memberId,
             @Body TopUpBalanceRequest request
+    );
+
+    @GET("api/members/{memberId}/balance/qr-code")
+    Call<BalanceQrCodeResponse> getBalanceQrCode(
+            @Path("memberId") int memberId
     );
 
     @GET("api/members/{memberId}/membership-plans")
