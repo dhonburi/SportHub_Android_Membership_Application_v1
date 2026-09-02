@@ -1,5 +1,6 @@
 package com.example.sporthubandroidmembershipapplicationv1;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.widget.Button;
@@ -14,6 +15,7 @@ import androidx.core.view.WindowInsetsCompat;
 public class SettingsActivity extends AppCompatActivity {
 
     Button btnGeneralTab, btnAlertsTab, btnSecurityTab, btnHelpTab;
+    Button btnOpenStaffQrScanner;
     TextView txtSettingsContent, btnBackSettings;
 
     @Override
@@ -26,6 +28,9 @@ public class SettingsActivity extends AppCompatActivity {
         btnAlertsTab = findViewById(R.id.btnAlertsTab);
         btnSecurityTab = findViewById(R.id.btnSecurityTab);
         btnHelpTab = findViewById(R.id.btnHelpTab);
+        btnOpenStaffQrScanner = findViewById(
+                R.id.btnOpenStaffQrScanner
+        );
 
         txtSettingsContent = findViewById(R.id.txtSettingsContent);
         btnBackSettings = findViewById(R.id.btnBackSettings);
@@ -55,34 +60,67 @@ public class SettingsActivity extends AppCompatActivity {
 
         btnBackSettings.setOnClickListener(v -> finish());
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.settingsMain), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
+        btnOpenStaffQrScanner.setOnClickListener(v -> {
+            Intent intent = new Intent(
+                    SettingsActivity.this,
+                    StaffQrScannerActivity.class
+            );
+
+            startActivity(intent);
         });
+
+        ViewCompat.setOnApplyWindowInsetsListener(
+                findViewById(R.id.settingsMain),
+                (v, insets) -> {
+                    Insets systemBars = insets.getInsets(
+                            WindowInsetsCompat.Type.systemBars()
+                    );
+
+                    v.setPadding(
+                            systemBars.left,
+                            systemBars.top,
+                            systemBars.right,
+                            systemBars.bottom
+                    );
+
+                    return insets;
+                }
+        );
     }
 
     private void updateSelectedTab(Button selectedButton) {
-        btnGeneralTab.setBackgroundColor(Color.parseColor("#E5E5E5"));
-        btnAlertsTab.setBackgroundColor(Color.parseColor("#E5E5E5"));
-        btnSecurityTab.setBackgroundColor(Color.parseColor("#E5E5E5"));
-        btnHelpTab.setBackgroundColor(Color.parseColor("#E5E5E5"));
+        btnGeneralTab.setBackgroundColor(
+                Color.parseColor("#E5E5E5")
+        );
+        btnAlertsTab.setBackgroundColor(
+                Color.parseColor("#E5E5E5")
+        );
+        btnSecurityTab.setBackgroundColor(
+                Color.parseColor("#E5E5E5")
+        );
+        btnHelpTab.setBackgroundColor(
+                Color.parseColor("#E5E5E5")
+        );
 
         btnGeneralTab.setTextColor(Color.BLACK);
         btnAlertsTab.setTextColor(Color.BLACK);
         btnSecurityTab.setTextColor(Color.BLACK);
         btnHelpTab.setTextColor(Color.BLACK);
 
-        selectedButton.setBackgroundColor(Color.parseColor("#111111"));
+        selectedButton.setBackgroundColor(
+                Color.parseColor("#111111")
+        );
         selectedButton.setTextColor(Color.WHITE);
 
         selectedButton.animate()
                 .scaleX(1.08f)
                 .scaleY(1.08f)
                 .setDuration(120)
-                .withEndAction(() -> selectedButton.animate()
-                        .scaleX(1f)
-                        .scaleY(1f)
-                        .setDuration(120));
+                .withEndAction(() ->
+                        selectedButton.animate()
+                                .scaleX(1f)
+                                .scaleY(1f)
+                                .setDuration(120)
+                );
     }
 }

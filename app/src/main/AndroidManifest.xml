@@ -3,11 +3,17 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-feature
+        android:name="android.hardware.camera.any"
+        android:required="false" />
 
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
+        android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="SportHub Android Membership Application v1"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -17,6 +23,10 @@
 
         <activity
             android:name=".ProfileDetailsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".StaffQrScannerActivity"
             android:exported="false" />
 
         <activity
