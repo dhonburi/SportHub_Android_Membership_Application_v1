@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,14 +32,10 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -84,7 +81,7 @@ public class QrFragment extends Fragment {
 
     private Runnable balanceCountdownRunnable;
     private Bitmap balanceQrBitmap;
-    private long balanceQrExpiresAtMillis = -1;
+    private long balanceQrExpiresAtElapsedRealtime = -1;
 
     /*
      * Each membership receives its own cached QR image and expiry time.
@@ -97,14 +94,15 @@ public class QrFragment extends Fragment {
     private static class CachedQrCode {
 
         private final Bitmap bitmap;
-        private final long expiresAtMillis;
+        private final long expiresAtElapsedRealtime;
 
         CachedQrCode(
                 Bitmap bitmap,
-                long expiresAtMillis
+                long expiresAtElapsedRealtime
         ) {
             this.bitmap = bitmap;
-            this.expiresAtMillis = expiresAtMillis;
+            this.expiresAtElapsedRealtime =
+                    expiresAtElapsedRealtime;
         }
     }
 
@@ -435,8 +433,8 @@ public class QrFragment extends Fragment {
          * its original backend expiry.
          */
         if (cachedQrCode != null
-                && cachedQrCode.expiresAtMillis
-                > System.currentTimeMillis()) {
+                && cachedQrCode.expiresAtElapsedRealtime
+                > SystemClock.elapsedRealtime()) {
 
             showCachedQrCode(
                     position,
@@ -644,21 +642,17 @@ public class QrFragment extends Fragment {
             return;
         }
 
-        Long expiresAtMillis =
-                parseIsoUtcToMillis(
-                        qr.getExpiresAtUtc()
-                );
+        int validitySeconds =
+                qr.getValiditySeconds() > 0
+                        ? Math.min(
+                        qr.getValiditySeconds(),
+                        60
+                )
+                        : 60;
 
-        if (expiresAtMillis == null) {
-            int validitySeconds =
-                    qr.getValiditySeconds() > 0
-                            ? qr.getValiditySeconds()
-                            : 60;
-
-            expiresAtMillis =
-                    System.currentTimeMillis()
-                            + (validitySeconds * 1000L);
-        }
+        long expiresAtElapsedRealtime =
+                SystemClock.elapsedRealtime()
+                        + (validitySeconds * 1000L);
 
         activeQrPosition = position;
 
@@ -674,7 +668,7 @@ public class QrFragment extends Fragment {
         CachedQrCode cachedQrCode =
                 new CachedQrCode(
                         bitmap,
-                        expiresAtMillis
+                        expiresAtElapsedRealtime
                 );
 
         cachedQrCodes.put(
@@ -698,8 +692,9 @@ public class QrFragment extends Fragment {
                 Math.max(
                         0,
                         (
-                                cachedQrCode.expiresAtMillis
-                                        - System.currentTimeMillis()
+                                cachedQrCode
+                                        .expiresAtElapsedRealtime
+                                        - SystemClock.elapsedRealtime()
                                         + 999
                         ) / 1000
                 );
@@ -754,8 +749,9 @@ public class QrFragment extends Fragment {
                         }
 
                         long remainingMillis =
-                                cachedQrCode.expiresAtMillis
-                                        - System.currentTimeMillis();
+                                cachedQrCode
+                                        .expiresAtElapsedRealtime
+                                        - SystemClock.elapsedRealtime();
 
                         if (remainingMillis <= 0) {
                             cachedQrCodes.remove(
@@ -885,22 +881,21 @@ public class QrFragment extends Fragment {
             return;
         }
 
-        Long expiresAtMillis =
-                parseIsoUtcToMillis(balanceQr.getExpiresAtUtc());
+        int validitySeconds =
+                balanceQr.getValiditySeconds() > 0
+                        ? Math.min(
+                        balanceQr.getValiditySeconds(),
+                        60
+                )
+                        : 60;
 
-        if (expiresAtMillis == null) {
-            int validitySeconds =
-                    balanceQr.getValiditySeconds() > 0
-                            ? balanceQr.getValiditySeconds()
-                            : 60;
-
-            expiresAtMillis =
-                    System.currentTimeMillis()
-                            + (validitySeconds * 1000L);
-        }
+        long expiresAtElapsedRealtime =
+                SystemClock.elapsedRealtime()
+                        + (validitySeconds * 1000L);
 
         balanceQrBitmap = bitmap;
-        balanceQrExpiresAtMillis = expiresAtMillis;
+        balanceQrExpiresAtElapsedRealtime =
+                expiresAtElapsedRealtime;
 
         showBalanceQrReady(balanceQr.getBalance());
         startBalanceCountdown();
@@ -935,7 +930,11 @@ public class QrFragment extends Fragment {
 
         long remainingSeconds = Math.max(
                 0,
-                (balanceQrExpiresAtMillis - System.currentTimeMillis() + 999) / 1000
+                (
+                        balanceQrExpiresAtElapsedRealtime
+                                - SystemClock.elapsedRealtime()
+                                + 999
+                ) / 1000
         );
 
         txtBalanceQrRemaining.setText(formatRemainingLabel(remainingSeconds));
@@ -976,7 +975,7 @@ public class QrFragment extends Fragment {
 
         cardBalanceQr.setVisibility(View.INVISIBLE);
         balanceQrBitmap = null;
-        balanceQrExpiresAtMillis = -1;
+        balanceQrExpiresAtElapsedRealtime = -1;
 
         if (balanceQrCodeCall != null
                 && !balanceQrCodeCall.isCanceled()) {
@@ -994,7 +993,8 @@ public class QrFragment extends Fragment {
                 }
 
                 long remainingMillis =
-                        balanceQrExpiresAtMillis - System.currentTimeMillis();
+                        balanceQrExpiresAtElapsedRealtime
+                                - SystemClock.elapsedRealtime();
 
                 if (remainingMillis <= 0) {
                     loadBalanceQrCode();
@@ -1031,43 +1031,6 @@ public class QrFragment extends Fragment {
                 "Refreshing in %ds...",
                 remainingSeconds
         );
-    }
-
-    private Long parseIsoUtcToMillis(
-            String value
-    ) {
-        String cleanValue =
-                value == null
-                        ? ""
-                        : value.trim();
-
-        if (cleanValue.isEmpty()) {
-            return null;
-        }
-
-        try {
-            SimpleDateFormat format =
-                    new SimpleDateFormat(
-                            "yyyy-MM-dd'T'HH:mm:ss'Z'",
-                            Locale.US
-                    );
-
-            format.setTimeZone(
-                    TimeZone.getTimeZone("UTC")
-            );
-
-            format.setLenient(false);
-
-            Date parsed =
-                    format.parse(cleanValue);
-
-            return parsed == null
-                    ? null
-                    : parsed.getTime();
-
-        } catch (ParseException exception) {
-            return null;
-        }
     }
 
     private Bitmap generateQrCodeBitmap(
@@ -1332,7 +1295,7 @@ public class QrFragment extends Fragment {
         loadingMemberMembershipId = null;
 
         balanceQrBitmap = null;
-        balanceQrExpiresAtMillis = -1;
+        balanceQrExpiresAtElapsedRealtime = -1;
 
         cachedQrCodes.clear();
 
