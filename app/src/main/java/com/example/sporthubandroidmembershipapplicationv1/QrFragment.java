@@ -43,6 +43,14 @@ import retrofit2.Response;
 
 public class QrFragment extends Fragment {
 
+    public static final String BALANCE_CHANGED_REQUEST_KEY =
+            "sporthub_member_balance_changed";
+
+    public static final String BALANCE_CHANGED_MEMBER_ID =
+            "member_id";
+
+    private boolean usingBalanceQr = false;
+
     private ViewPager2 viewPagerQr;
     private LinearLayout layoutQrDots;
 
@@ -141,9 +149,31 @@ public class QrFragment extends Fragment {
                 savedInstanceState
         );
 
+        usingBalanceQr = false;
+
         bindViews(view);
         configureQrPager();
         setShortcutClickListeners();
+
+        getParentFragmentManager().setFragmentResultListener(
+                BALANCE_CHANGED_REQUEST_KEY,
+                getViewLifecycleOwner(),
+                (requestKey, result) -> {
+                    if (!isAdded()
+                            || getView() == null
+                            || result.getInt(BALANCE_CHANGED_MEMBER_ID, -1)
+                            != getLoggedInMemberId()) {
+
+                        return;
+                    }
+
+                    // Fetch authoritative balance and eligibility from the API.
+                    // Active membership QR codes and their timers stay unchanged.
+                    if (usingBalanceQr) {
+                        loadBalanceQrCode();
+                    }
+                }
+        );
 
         btnRetryQrMemberships.setOnClickListener(
                 clickedView -> loadMemberships()
@@ -154,6 +184,23 @@ public class QrFragment extends Fragment {
         );
 
         loadMemberships();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // Recover a stale insufficient-funds or connection-error state
+        // when returning to QR, without resetting a valid QR countdown.
+        if (usingBalanceQr
+                && getView() != null
+                && balanceQrCodeCall == null
+                && (txtBalanceQrInsufficientMessage.getVisibility()
+                == View.VISIBLE
+                || txtBalanceQrError.getVisibility() == View.VISIBLE)) {
+
+            loadBalanceQrCode();
+        }
     }
 
     private void bindViews(View view) {
@@ -361,7 +408,9 @@ public class QrFragment extends Fragment {
                 memberships
         );
 
-        if (!hasActiveMembership(memberships)) {
+        usingBalanceQr = !hasActiveMembership(memberships);
+
+        if (usingBalanceQr) {
             viewPagerQr.setVisibility(
                     View.INVISIBLE
             );
@@ -796,6 +845,10 @@ public class QrFragment extends Fragment {
     // ---- Balance QR fallback ----
 
     private void loadBalanceQrCode() {
+        if (!isAdded() || getView() == null || !usingBalanceQr) {
+            return;
+        }
+
         stopBalanceCountdown();
 
         cardBalanceQr.setVisibility(View.VISIBLE);
@@ -825,9 +878,16 @@ public class QrFragment extends Fragment {
                             Call<BalanceQrCodeResponse> call,
                             Response<BalanceQrCodeResponse> response
                     ) {
-                        if (!isAdded() || getView() == null) {
+                        if (call.isCanceled()
+                                || call != balanceQrCodeCall
+                                || !isAdded()
+                                || getView() == null
+                                || !usingBalanceQr) {
+
                             return;
                         }
+
+                        balanceQrCodeCall = null;
 
                         BalanceQrCodeResponse balanceQr =
                                 response.body();
@@ -859,11 +919,15 @@ public class QrFragment extends Fragment {
                             Throwable throwable
                     ) {
                         if (call.isCanceled()
+                                || call != balanceQrCodeCall
                                 || !isAdded()
-                                || getView() == null) {
+                                || getView() == null
+                                || !usingBalanceQr) {
 
                             return;
                         }
+
+                        balanceQrCodeCall = null;
 
                         showBalanceQrError(
                                 "Unable to connect to the server."
@@ -971,6 +1035,8 @@ public class QrFragment extends Fragment {
     }
 
     private void hideBalanceQrCard() {
+        usingBalanceQr = false;
+
         stopBalanceCountdown();
 
         cardBalanceQr.setVisibility(View.INVISIBLE);
@@ -1263,6 +1329,8 @@ public class QrFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
+        usingBalanceQr = false;
+
         stopCountdown();
         stopBalanceCountdown();
 
@@ -1289,6 +1357,8 @@ public class QrFragment extends Fragment {
 
             balanceQrCodeCall.cancel();
         }
+
+        balanceQrCodeCall = null;
 
         qrPagerAdapter = null;
         activeQrPosition = -1;

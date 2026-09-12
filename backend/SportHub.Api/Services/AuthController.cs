@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using SportHub.Api.DTOs;
 using SportHub.Api.Services;
 
@@ -9,10 +11,12 @@ namespace SportHub.Api.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly AuthService _authService;
+    private readonly ILogger<AuthController> _logger;
 
-    public AuthController(AuthService authService)
+    public AuthController(AuthService authService, ILogger<AuthController> logger)
     {
         _authService = authService;
+        _logger = logger;
     }
 
     [HttpPost("login")]
@@ -23,5 +27,43 @@ public class AuthController : ControllerBase
             await _authService.LoginAsync(request);
 
         return Ok(response);
+    }
+
+    [HttpPost("register")]
+    [RequestSizeLimit(16 * 1024)]
+    public async Task<ActionResult<RegisterResponseDto>> Register(
+        RegisterRequestDto request,
+        CancellationToken cancellationToken)
+    {
+        // [ApiController] validates the DTO and returns field-specific HTTP 400
+        // errors before this method runs when the request is invalid.
+        try
+        {
+            RegisterResponseDto response =
+                await _authService.RegisterAsync(request, cancellationToken);
+
+            int statusCode = response.Success
+                ? StatusCodes.Status201Created
+                : response.Code == "duplicate_email"
+                    ? StatusCodes.Status409Conflict
+                    : StatusCodes.Status503ServiceUnavailable;
+
+            return StatusCode(statusCode, response);
+        }
+        catch (Exception exception) when (
+            exception is DbUpdateException or SqlException or TimeoutException)
+        {
+            // Do not log request values, passwords, SQL messages or credentials.
+            _logger.LogWarning("Registration database operation failed ({FailureType}).",
+                exception.GetType().Name);
+
+            return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                new RegisterResponseDto
+                {
+                    Code = "temporarily_unavailable",
+                    Message = "We could not confirm account creation. " +
+                        "Please try again, or sign in if you already submitted."
+                });
+        }
     }
 }

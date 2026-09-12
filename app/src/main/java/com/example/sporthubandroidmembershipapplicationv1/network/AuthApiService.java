@@ -2,6 +2,8 @@ package com.example.sporthubandroidmembershipapplicationv1.network;
 
 import com.example.sporthubandroidmembershipapplicationv1.models.LoginRequest;
 import com.example.sporthubandroidmembershipapplicationv1.models.LoginResponse;
+import com.example.sporthubandroidmembershipapplicationv1.models.RegisterRequest;
+import com.example.sporthubandroidmembershipapplicationv1.models.RegisterResponse;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -13,4 +15,7 @@ public interface AuthApiService {
     Call<LoginResponse> login(
             @Body LoginRequest loginRequest
     );
+
+    @POST("api/Auth/register")
+    Call<RegisterResponse> register(@Body RegisterRequest registerRequest);
 }

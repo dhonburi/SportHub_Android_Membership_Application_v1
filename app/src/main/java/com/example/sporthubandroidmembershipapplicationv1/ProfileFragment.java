@@ -1,6 +1,7 @@
 package com.example.sporthubandroidmembershipapplicationv1;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.View;
@@ -31,6 +32,7 @@ public class ProfileFragment extends Fragment {
 
     private View btnProfileDetails;
     private View btnTopUpBalance;
+    private View btnLogOut;
 
     private TextView txtMemberName;
     private TextView txtMemberId;
@@ -46,6 +48,9 @@ public class ProfileFragment extends Fragment {
     private Call<MemberProfileResponse> memberProfileCall;
     private Call<TopUpBalanceResponse> topUpBalanceCall;
 
+    private AlertDialog logOutDialog;
+    private boolean isLoggingOut = false;
+
     public ProfileFragment() {
         super(R.layout.fragment_profile);
     }
@@ -57,11 +62,16 @@ public class ProfileFragment extends Fragment {
     ) {
         super.onViewCreated(view, savedInstanceState);
 
+        isLoggingOut = false;
+
         btnProfileDetails =
                 view.findViewById(R.id.btnProfileDetails);
 
         btnTopUpBalance =
                 view.findViewById(R.id.btnTopUpBalance);
+
+        btnLogOut =
+                view.findViewById(R.id.btnLogOut);
 
         txtMemberName =
                 view.findViewById(R.id.txtMemberName);
@@ -123,7 +133,9 @@ public class ProfileFragment extends Fragment {
                             Call<MemberProfileResponse> call,
                             Response<MemberProfileResponse> response
                     ) {
-                        if (!isAdded()
+                        if (isLoggingOut
+                                || call.isCanceled()
+                                || !isAdded()
                                 || getView() == null) {
                             return;
                         }
@@ -149,7 +161,8 @@ public class ProfileFragment extends Fragment {
                             Call<MemberProfileResponse> call,
                             Throwable throwable
                     ) {
-                        if (call.isCanceled()
+                        if (isLoggingOut
+                                || call.isCanceled()
                                 || !isAdded()
                                 || getView() == null) {
 
@@ -234,6 +247,10 @@ public class ProfileFragment extends Fragment {
 
         btnTopUpBalance.setOnClickListener(view ->
                 showTopUpDialog()
+        );
+
+        btnLogOut.setOnClickListener(view ->
+                showLogOutConfirmation()
         );
 
         layoutTransactions.setOnClickListener(view ->
@@ -423,7 +440,9 @@ public class ProfileFragment extends Fragment {
                             Call<TopUpBalanceResponse> call,
                             Response<TopUpBalanceResponse> response
                     ) {
-                        if (!isAdded()
+                        if (isLoggingOut
+                                || call.isCanceled()
+                                || !isAdded()
                                 || getView() == null) {
                             return;
                         }
@@ -448,6 +467,7 @@ public class ProfileFragment extends Fragment {
                             );
 
                             topUpDialog.dismiss();
+                            notifyBalanceChanged(memberId);
                             return;
                         }
 
@@ -478,7 +498,8 @@ public class ProfileFragment extends Fragment {
                             Call<TopUpBalanceResponse> call,
                             Throwable throwable
                     ) {
-                        if (call.isCanceled()
+                        if (isLoggingOut
+                                || call.isCanceled()
                                 || !isAdded()
                                 || getView() == null) {
 
@@ -494,6 +515,88 @@ public class ProfileFragment extends Fragment {
                     }
                 }
         );
+    }
+
+    private void notifyBalanceChanged(int memberId) {
+        Bundle result = new Bundle();
+
+        result.putInt(
+                QrFragment.BALANCE_CHANGED_MEMBER_ID,
+                memberId
+        );
+
+        getParentFragmentManager().setFragmentResult(
+                QrFragment.BALANCE_CHANGED_REQUEST_KEY,
+                result
+        );
+    }
+
+    private void showLogOutConfirmation() {
+        if (!isAdded()
+                || getView() == null
+                || isLoggingOut
+                || (logOutDialog != null
+                && logOutDialog.isShowing())) {
+            return;
+        }
+
+        logOutDialog =
+                new AlertDialog.Builder(requireContext())
+                        .setTitle("Log out?")
+                        .setMessage(
+                                "Are you sure you want to log out? "
+                                        + "Your account and balance will be kept."
+                        )
+                        .setNegativeButton("Cancel", null)
+                        .setPositiveButton(
+                                "Log out",
+                                (dialog, which) -> logOut()
+                        )
+                        .create();
+
+        logOutDialog.setOnDismissListener(dialog ->
+                logOutDialog = null
+        );
+
+        logOutDialog.show();
+
+        logOutDialog.getButton(
+                AlertDialog.BUTTON_POSITIVE
+        ).setTextColor(Color.rgb(179, 38, 30));
+    }
+
+    private void logOut() {
+        if (!isAdded()
+                || getActivity() == null
+                || isLoggingOut) {
+            return;
+        }
+
+        isLoggingOut = true;
+        btnLogOut.setEnabled(false);
+
+        if (memberProfileCall != null) {
+            memberProfileCall.cancel();
+        }
+
+        if (topUpBalanceCall != null) {
+            topUpBalanceCall.cancel();
+        }
+
+        new MemberSession(requireContext()).clear();
+
+        Intent intent = new Intent(
+                requireContext(),
+                LoginActivity.class
+        );
+
+        intent.addFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_CLEAR_TASK
+        );
+
+        startActivity(intent);
+        requireActivity().finish();
     }
 
     private int dpToPx(int dp) {
@@ -515,6 +618,11 @@ public class ProfileFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
+        if (logOutDialog != null) {
+            logOutDialog.dismiss();
+            logOutDialog = null;
+        }
+
         if (memberProfileCall != null
                 && !memberProfileCall.isCanceled()) {
 
