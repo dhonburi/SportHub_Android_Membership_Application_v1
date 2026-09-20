@@ -14,6 +14,9 @@ public class MemberSession {
     private static final String KEY_MEMBER_NUMBER =
             "member_number";
 
+    private static final String KEY_IS_ADMIN =
+            "is_admin";
+
     private final SharedPreferences preferences;
 
     public MemberSession(Context context) {
@@ -25,12 +28,14 @@ public class MemberSession {
 
     public void save(
             int memberId,
-            String memberNumber
+            String memberNumber,
+            boolean isAdmin
     ) {
         preferences
                 .edit()
                 .putInt(KEY_MEMBER_ID, memberId)
                 .putString(KEY_MEMBER_NUMBER, memberNumber)
+                .putBoolean(KEY_IS_ADMIN, isAdmin)
                 .apply();
     }
 
@@ -45,6 +50,13 @@ public class MemberSession {
         return preferences.getString(
                 KEY_MEMBER_NUMBER,
                 null
+        );
+    }
+
+    public boolean isAdmin() {
+        return preferences.getBoolean(
+                KEY_IS_ADMIN,
+                false
         );
     }
 

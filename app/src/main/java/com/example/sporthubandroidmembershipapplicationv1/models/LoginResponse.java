@@ -6,6 +6,7 @@ public class LoginResponse {
     private Integer userId;
     private Integer memberId;
     private String memberNumber;
+    private boolean isAdmin;
     private String message;
 
     public LoginResponse() {
@@ -41,6 +42,14 @@ public class LoginResponse {
 
     public void setMemberNumber(String memberNumber) {
         this.memberNumber = memberNumber;
+    }
+
+    public boolean isAdmin() {
+        return isAdmin;
+    }
+
+    public void setAdmin(boolean admin) {
+        isAdmin = admin;
     }
 
     public String getMessage() {

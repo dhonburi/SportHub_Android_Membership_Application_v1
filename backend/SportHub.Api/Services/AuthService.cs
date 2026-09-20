@@ -64,6 +64,7 @@ public class AuthService
             UserId = user.UserId,
             MemberId = user.MemberId,
             MemberNumber = user.Member.MemberNumber,
+            IsAdmin = user.IsAdmin,
             Message = "Login successful"
         };
     }
@@ -77,6 +78,7 @@ public class AuthService
             UserId = null,
             MemberId = null,
             MemberNumber = null,
+            IsAdmin = false,
             Message = "Invalid email or password"
         };
     }
@@ -86,20 +88,26 @@ public class AuthService
         CancellationToken cancellationToken = default)
     {
         if (await _dbContext.Users.AsNoTracking().AnyAsync(
-                user => user.Email == request.Email, cancellationToken))
+                user => user.Email == request.Email,
+                cancellationToken))
         {
             return DuplicateEmailResponse();
         }
 
-        // The unique indexes remain the final guard against concurrent requests.
+        // The unique indexes remain the final guard against
+        // concurrent registration requests.
         for (int attempt = 0; attempt < 3; attempt++)
         {
             DateTime createdAt = DateTime.UtcNow;
 
             var member = new Member
             {
-                MemberNumber = "SH-" + Guid.NewGuid().ToString("N")[..12]
-                    .ToUpperInvariant(),
+                MemberNumber =
+                    "SH-" +
+                    Guid.NewGuid()
+                        .ToString("N")[..12]
+                        .ToUpperInvariant(),
+
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 Phone = request.Phone,
@@ -114,40 +122,57 @@ public class AuthService
                 Email = request.Email,
                 Member = member,
                 IsActive = true,
+                IsAdmin = false,
                 CreatedAt = createdAt
             };
 
             member.User = user;
-            user.PasswordHash = _passwordHasher.HashPassword(user, request.Password);
+
+            user.PasswordHash =
+                _passwordHasher.HashPassword(
+                    user,
+                    request.Password
+                );
+
             _dbContext.Users.Add(user);
 
             try
             {
-                // SQL Server wraps this single save in a transaction: both linked
-                // records are committed together, or neither is committed.
-                await _dbContext.SaveChangesAsync(cancellationToken);
+                await _dbContext.SaveChangesAsync(
+                    cancellationToken
+                );
 
                 return new RegisterResponseDto
                 {
                     Success = true,
                     Code = "registered",
-                    Message = "Account created successfully. You can now sign in.",
+                    Message =
+                        "Account created successfully. " +
+                        "You can now sign in.",
+
                     MemberId = member.MemberId,
                     MemberNumber = member.MemberNumber
                 };
             }
             catch (DbUpdateException exception) when (
-                exception.InnerException is SqlException sqlException &&
-                sqlException.Errors.Cast<SqlError>().Any(
-                    error => error.Number is 2601 or 2627))
+                exception.InnerException
+                    is SqlException sqlException &&
+                sqlException.Errors
+                    .Cast<SqlError>()
+                    .Any(error =>
+                        error.Number is 2601 or 2627))
             {
-                // This request owns the scoped context. Discard the failed graph
-                // before checking a duplicate email or trying a new member number.
                 _dbContext.ChangeTracker.Clear();
 
-                if (await _dbContext.Users.AsNoTracking().AnyAsync(
-                        account => account.Email == request.Email,
-                        cancellationToken))
+                if (await _dbContext.Users
+                        .AsNoTracking()
+                        .AnyAsync(
+                            account =>
+                                account.Email ==
+                                request.Email,
+
+                            cancellationToken
+                        ))
                 {
                     return DuplicateEmailResponse();
                 }
@@ -157,13 +182,17 @@ public class AuthService
         return new RegisterResponseDto
         {
             Code = "temporarily_unavailable",
-            Message = "Account creation is temporarily unavailable. Please try again."
+            Message =
+                "Account creation is temporarily unavailable. " +
+                "Please try again."
         };
     }
 
-    private static RegisterResponseDto DuplicateEmailResponse()
+    private static RegisterResponseDto
+        DuplicateEmailResponse()
     {
-        const string message = "An account already uses this email. " +
+        const string message =
+            "An account already uses this email. " +
             "If you already submitted this form, try signing in.";
 
         return new RegisterResponseDto

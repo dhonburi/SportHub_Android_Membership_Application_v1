@@ -10,5 +10,7 @@ public class LoginResponseDto
 
     public string? MemberNumber { get; set; }
 
+    public bool IsAdmin { get; set; }
+
     public string Message { get; set; } = string.Empty;
 }

@@ -12,6 +12,8 @@ public class User
 
     public bool IsActive { get; set; } = true;
 
+    public bool IsAdmin { get; set; } = false;
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public Member Member { get; set; } = null!;

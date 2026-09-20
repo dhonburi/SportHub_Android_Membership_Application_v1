@@ -10,8 +10,11 @@ public static class DbSeeder
         SportHubDbContext dbContext,
         IPasswordHasher<User> passwordHasher)
     {
-        const string testEmail = "member.test@sporthub.local";
-        const string testPassword = "Test123!";
+        const string testEmail =
+            "member.test@sporthub.local";
+
+        const string testPassword =
+            "Test123!";
 
         bool testUserAlreadyExists =
             await dbContext.Users.AnyAsync(
@@ -41,6 +44,7 @@ public static class DbSeeder
         {
             Email = testEmail,
             IsActive = true,
+            IsAdmin = false,
             CreatedAt = DateTime.UtcNow,
             Member = member
         };

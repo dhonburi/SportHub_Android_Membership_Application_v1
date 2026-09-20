@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
@@ -26,6 +27,7 @@ import androidx.core.view.WindowInsetsControllerCompat;
 import com.example.sporthubandroidmembershipapplicationv1.models.MembershipQrValidationRequest;
 import com.example.sporthubandroidmembershipapplicationv1.models.MembershipQrValidationResponse;
 import com.example.sporthubandroidmembershipapplicationv1.network.ApiClient;
+import com.example.sporthubandroidmembershipapplicationv1.session.MemberSession;
 import com.google.android.material.button.MaterialButton;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanIntentResult;
@@ -69,6 +71,20 @@ public class StaffQrScannerActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        MemberSession memberSession =
+                new MemberSession(this);
+
+        if (!memberSession.isAdmin()) {
+            Toast.makeText(
+                    this,
+                    "Administrator access is required.",
+                    Toast.LENGTH_SHORT
+            ).show();
+
+            finish();
+            return;
+        }
 
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_staff_qr_scanner);

@@ -50,6 +50,8 @@ public class HomeActivity extends AppCompatActivity {
     private Fragment qrTabFragment;
     private Fragment profileTabFragment;
 
+    private String activeTabTag = TAG_HOME;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -113,6 +115,11 @@ public class HomeActivity extends AppCompatActivity {
 
             startActivity(intent);
         });
+
+        getSupportFragmentManager()
+                .addOnBackStackChangedListener(
+                        this::updateHeaderForActiveScreen
+                );
 
         navHome.setOnClickListener(view -> {
             showTab(TAG_HOME, true);
@@ -191,7 +198,7 @@ public class HomeActivity extends AppCompatActivity {
         controller.setAppearanceLightNavigationBars(true);
 
         window.getDecorView()
-                .setBackgroundColor(Color.TRANSPARENT);
+                .setBackgroundColor(Color.WHITE);
     }
 
     private int dpToPx(int dp) {
@@ -260,6 +267,8 @@ public class HomeActivity extends AppCompatActivity {
             String tabTag,
             boolean clearBackStack
     ) {
+        activeTabTag = tabTag;
+
         if (clearBackStack) {
             clearChildPageBackStack();
         }
@@ -269,13 +278,7 @@ public class HomeActivity extends AppCompatActivity {
         Fragment targetFragment =
                 getTabFragment(tabTag);
 
-        if (TAG_QR.equals(tabTag)) {
-            headerLayout.setVisibility(View.GONE);
-            updateNavigationBarIcons(false);
-        } else {
-            headerLayout.setVisibility(View.VISIBLE);
-            updateNavigationBarIcons(true);
-        }
+        updateHeaderForActiveScreen();
 
         FragmentTransaction transaction =
                 getSupportFragmentManager()
@@ -329,6 +332,27 @@ public class HomeActivity extends AppCompatActivity {
         );
 
         transaction.commitNow();
+    }
+
+    private void updateHeaderForActiveScreen() {
+        boolean isQrTab = TAG_QR.equals(activeTabTag);
+
+        headerLayout.setVisibility(
+                isQrTab ? View.GONE : View.VISIBLE
+        );
+
+        updateNavigationBarIcons(!isQrTab);
+
+        boolean isMainProfilePage =
+                TAG_PROFILE.equals(activeTabTag)
+                        && getSupportFragmentManager()
+                        .getBackStackEntryCount() == 0;
+
+        btnSettings.setVisibility(
+                isMainProfilePage
+                        ? View.VISIBLE
+                        : View.GONE
+        );
     }
 
     public void openProfileAndShowTopUp() {
