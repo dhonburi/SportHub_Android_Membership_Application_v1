@@ -205,6 +205,16 @@ public class MembersController : ControllerBase
             );
         }
 
+        if (!Guid.TryParse(
+                request.OperationId,
+                out Guid operationId
+            ))
+        {
+            return BadRequest(
+                "A valid operation ID is required."
+            );
+        }
+
         decimal roundedAmount =
             decimal.Round(
                 request.Amount,
@@ -216,6 +226,49 @@ public class MembersController : ControllerBase
         {
             return BadRequest(
                 "The top-up amount cannot contain more than two decimal places."
+            );
+        }
+
+        string normalizedOperationId =
+            operationId.ToString("D");
+
+        await using var databaseTransaction =
+            await _dbContext.Database.BeginTransactionAsync(
+                IsolationLevel.Serializable
+            );
+
+        MemberTransaction? existingTransaction =
+            await _dbContext.Transactions
+                .AsNoTracking()
+                .SingleOrDefaultAsync(transaction =>
+                    transaction.MemberId == memberId
+                    && transaction.OperationId ==
+                    normalizedOperationId
+                );
+
+        if (existingTransaction != null)
+        {
+            bool matchesRequest =
+                existingTransaction.TransactionType ==
+                    MemberTransaction.BalanceTopUpType
+                && existingTransaction.Amount == roundedAmount;
+
+            if (!matchesRequest)
+            {
+                return Conflict(
+                    "The operation ID has already been used for another request."
+                );
+            }
+
+            return Ok(
+                new TopUpBalanceResponseDto
+                {
+                    MemberId = memberId,
+                    AmountAdded = existingTransaction.Amount,
+                    Balance = existingTransaction.BalanceAfter,
+                    Currency = "NZD",
+                    Message = "Mock balance was already added successfully."
+                }
             );
         }
 
@@ -242,7 +295,22 @@ public class MembersController : ControllerBase
 
         member.Balance += roundedAmount;
 
+        _dbContext.Transactions.Add(
+            new MemberTransaction
+            {
+                MemberId = member.MemberId,
+                OperationId = normalizedOperationId,
+                TransactionType =
+                    MemberTransaction.BalanceTopUpType,
+                Description = "Balance Top Up",
+                Amount = roundedAmount,
+                BalanceAfter = member.Balance,
+                OccurredAtUtc = DateTime.UtcNow
+            }
+        );
+
         await _dbContext.SaveChangesAsync();
+        await databaseTransaction.CommitAsync();
 
         var response =
             new TopUpBalanceResponseDto
@@ -255,6 +323,63 @@ public class MembersController : ControllerBase
             };
 
         return Ok(response);
+    }
+
+    [HttpGet("{memberId:int}/transactions")]
+    public async Task<ActionResult<List<MemberTransactionResponseDto>>>
+        GetMemberTransactions(int memberId)
+    {
+        if (memberId <= 0)
+        {
+            return BadRequest(
+                "A valid member ID is required."
+            );
+        }
+
+        bool memberExists =
+            await _dbContext.Members
+                .AsNoTracking()
+                .AnyAsync(member =>
+                    member.MemberId == memberId
+                );
+
+        if (!memberExists)
+        {
+            return NotFound(
+                "Member profile was not found."
+            );
+        }
+
+        List<MemberTransactionResponseDto> transactions =
+            await _dbContext.Transactions
+                .AsNoTracking()
+                .Where(transaction =>
+                    transaction.MemberId == memberId
+                )
+                .OrderByDescending(transaction =>
+                    transaction.OccurredAtUtc
+                )
+                .ThenByDescending(transaction =>
+                    transaction.TransactionId
+                )
+                .Select(transaction =>
+                    new MemberTransactionResponseDto
+                    {
+                        TransactionId = transaction.TransactionId,
+                        MemberId = transaction.MemberId,
+                        TransactionType =
+                            transaction.TransactionType,
+                        Description = transaction.Description,
+                        Amount = transaction.Amount,
+                        BalanceAfter = transaction.BalanceAfter,
+                        Currency = "NZD",
+                        OccurredAtUtc =
+                            FormatUtc(transaction.OccurredAtUtc)
+                    }
+                )
+                .ToListAsync();
+
+        return Ok(transactions);
     }
 
     [HttpGet("{memberId:int}/balance/qr-code")]
@@ -402,10 +527,67 @@ public class MembersController : ControllerBase
             );
         }
 
+        if (!Guid.TryParse(
+                request.OperationId,
+                out Guid operationId
+            ))
+        {
+            return BadRequest(
+                "A valid operation ID is required."
+            );
+        }
+
+        string normalizedOperationId =
+            operationId.ToString("D");
+
         await using var transaction =
             await _dbContext.Database.BeginTransactionAsync(
                 IsolationLevel.Serializable
             );
+
+        MemberTransaction? existingTransaction =
+            await _dbContext.Transactions
+                .AsNoTracking()
+                .Include(existing =>
+                    existing.MemberMembership
+                )
+                .ThenInclude(membership =>
+                    membership!.MembershipPlan
+                )
+                .SingleOrDefaultAsync(existing =>
+                    existing.MemberId == memberId
+                    && existing.OperationId ==
+                    normalizedOperationId
+                );
+
+        if (existingTransaction != null)
+        {
+            MemberMembership? savedMembership =
+                existingTransaction.MemberMembership;
+
+            bool matchesRequest =
+                existingTransaction.TransactionType ==
+                    MemberTransaction.MembershipPurchaseType
+                && savedMembership != null
+                && savedMembership.MembershipPlanId ==
+                    request.MembershipPlanId;
+
+            if (!matchesRequest)
+            {
+                return Conflict(
+                    "The operation ID has already been used for another request."
+                );
+            }
+
+            return Ok(
+                CreatePurchaseResponse(
+                    savedMembership!,
+                    savedMembership!.MembershipPlan,
+                    existingTransaction.BalanceAfter,
+                    "Membership purchase was already completed."
+                )
+            );
+        }
 
         Member? member =
             await _dbContext.Members
@@ -490,30 +672,32 @@ public class MembersController : ControllerBase
 
         _dbContext.MemberMemberships.Add(membership);
 
+        _dbContext.Transactions.Add(
+            new MemberTransaction
+            {
+                MemberId = member.MemberId,
+                MemberMembership = membership,
+                OperationId = normalizedOperationId,
+                TransactionType =
+                    MemberTransaction.MembershipPurchaseType,
+                Description =
+                    $"{plan.PlanName} Purchase",
+                Amount = -plan.Price,
+                BalanceAfter = member.Balance,
+                OccurredAtUtc = DateTime.UtcNow
+            }
+        );
+
         await _dbContext.SaveChangesAsync();
         await transaction.CommitAsync();
 
-        var response =
-            new PurchaseMembershipResponseDto
-            {
-                MemberMembershipId =
-                    membership.MemberMembershipId,
-
-                MemberId = member.MemberId,
-                MembershipPlanId = plan.MembershipPlanId,
-                PlanName = plan.PlanName,
-                PricePaid = plan.Price,
-                Balance = member.Balance,
-                Currency = "NZD",
-                Status = membership.Status,
-                StartDate = membership.StartDate,
-                ExpiryDate = membership.ExpiryDate,
-                RemainingEntries =
-                    membership.RemainingEntries,
-
-                Message =
-                    "Membership purchased successfully."
-            };
+        PurchaseMembershipResponseDto response =
+            CreatePurchaseResponse(
+                membership,
+                plan,
+                member.Balance,
+                "Membership purchased successfully."
+            );
 
         return Ok(response);
     }
@@ -790,6 +974,32 @@ public class MembersController : ControllerBase
             DateTime.UtcNow,
             newZealandTimeZone
         ).Date;
+    }
+
+    private static PurchaseMembershipResponseDto
+        CreatePurchaseResponse(
+            MemberMembership membership,
+            MembershipPlan plan,
+            decimal balance,
+            string message
+        )
+    {
+        return new PurchaseMembershipResponseDto
+        {
+            MemberMembershipId =
+                membership.MemberMembershipId,
+            MemberId = membership.MemberId,
+            MembershipPlanId = plan.MembershipPlanId,
+            PlanName = plan.PlanName,
+            PricePaid = plan.Price,
+            Balance = balance,
+            Currency = "NZD",
+            Status = membership.Status,
+            StartDate = membership.StartDate,
+            ExpiryDate = membership.ExpiryDate,
+            RemainingEntries = membership.RemainingEntries,
+            Message = message
+        };
     }
 
     private static string FormatUtc(DateTime value)

@@ -4,8 +4,14 @@ public class PurchaseMembershipRequest {
 
     private int membershipPlanId;
 
-    public PurchaseMembershipRequest(int membershipPlanId) {
+    private String operationId;
+
+    public PurchaseMembershipRequest(
+            int membershipPlanId,
+            String operationId
+    ) {
         this.membershipPlanId = membershipPlanId;
+        this.operationId = operationId;
     }
 
     public int getMembershipPlanId() {
@@ -14,5 +20,13 @@ public class PurchaseMembershipRequest {
 
     public void setMembershipPlanId(int membershipPlanId) {
         this.membershipPlanId = membershipPlanId;
+    }
+
+    public String getOperationId() {
+        return operationId;
+    }
+
+    public void setOperationId(String operationId) {
+        this.operationId = operationId;
     }
 }

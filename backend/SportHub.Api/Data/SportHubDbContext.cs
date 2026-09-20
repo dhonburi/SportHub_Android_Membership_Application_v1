@@ -21,6 +21,9 @@ public class SportHubDbContext : DbContext
     public DbSet<MemberMembership> MemberMemberships =>
         Set<MemberMembership>();
 
+    public DbSet<MemberTransaction> Transactions =>
+        Set<MemberTransaction>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -84,6 +87,62 @@ public class SportHubDbContext : DbContext
                 )
             );
 
+        modelBuilder.Entity<MemberTransaction>()
+            .HasKey(transaction => transaction.TransactionId);
+
+        modelBuilder.Entity<MemberTransaction>()
+            .Property(transaction => transaction.OperationId)
+            .HasMaxLength(36)
+            .IsRequired();
+
+        modelBuilder.Entity<MemberTransaction>()
+            .Property(transaction => transaction.TransactionType)
+            .HasMaxLength(30)
+            .IsRequired();
+
+        modelBuilder.Entity<MemberTransaction>()
+            .Property(transaction => transaction.Description)
+            .HasMaxLength(200)
+            .IsRequired();
+
+        modelBuilder.Entity<MemberTransaction>()
+            .Property(transaction => transaction.Amount)
+            .HasPrecision(10, 2);
+
+        modelBuilder.Entity<MemberTransaction>()
+            .Property(transaction => transaction.BalanceAfter)
+            .HasPrecision(10, 2);
+
+        modelBuilder.Entity<MemberTransaction>()
+            .HasIndex(transaction => new
+            {
+                transaction.MemberId,
+                transaction.OperationId
+            })
+            .IsUnique();
+
+        modelBuilder.Entity<MemberTransaction>()
+            .HasIndex(transaction => new
+            {
+                transaction.MemberId,
+                transaction.OccurredAtUtc
+            });
+
+        modelBuilder.Entity<MemberTransaction>()
+            .HasIndex(transaction =>
+                transaction.MemberMembershipId
+            )
+            .IsUnique()
+            .HasFilter("[MemberMembershipId] IS NOT NULL");
+
+        modelBuilder.Entity<MemberTransaction>()
+            .ToTable(
+                table => table.HasCheckConstraint(
+                    "CK_Transactions_Amount",
+                    "[Amount] <> 0"
+                )
+            );
+
         modelBuilder.Entity<Member>()
             .HasOne(member => member.User)
             .WithOne(user => user.Member)
@@ -100,6 +159,20 @@ public class SportHubDbContext : DbContext
             .HasOne(membership => membership.MembershipPlan)
             .WithMany(plan => plan.MemberMemberships)
             .HasForeignKey(membership => membership.MembershipPlanId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<MemberTransaction>()
+            .HasOne(transaction => transaction.Member)
+            .WithMany(member => member.Transactions)
+            .HasForeignKey(transaction => transaction.MemberId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<MemberTransaction>()
+            .HasOne(transaction => transaction.MemberMembership)
+            .WithMany()
+            .HasForeignKey(transaction =>
+                transaction.MemberMembershipId
+            )
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

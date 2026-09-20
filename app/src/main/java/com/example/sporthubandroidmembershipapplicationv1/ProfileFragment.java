@@ -23,6 +23,7 @@ import com.example.sporthubandroidmembershipapplicationv1.network.ApiClient;
 import com.example.sporthubandroidmembershipapplicationv1.session.MemberSession;
 
 import java.util.Locale;
+import java.util.UUID;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -253,11 +254,23 @@ public class ProfileFragment extends Fragment {
                 showLogOutConfirmation()
         );
 
-        layoutTransactions.setOnClickListener(view ->
-                showMessage(
-                        "Transaction history will be added later."
-                )
-        );
+        layoutTransactions.setOnClickListener(view -> {
+            getParentFragmentManager()
+                    .beginTransaction()
+                    .setReorderingAllowed(true)
+                    .setCustomAnimations(
+                            R.anim.slide_in_right,
+                            R.anim.slide_out_left,
+                            R.anim.slide_in_left,
+                            R.anim.slide_out_right
+                    )
+                    .replace(
+                            R.id.fragmentContainer,
+                            new TransactionsFragment()
+                    )
+                    .addToBackStack("transactions")
+                    .commit();
+        });
 
         layoutRewards.setOnClickListener(view ->
                 showMessage(
@@ -295,6 +308,9 @@ public class ProfileFragment extends Fragment {
     }
 
     private void showTopUpDialog() {
+        String operationId =
+                UUID.randomUUID().toString();
+
         EditText amountInput =
                 new EditText(requireContext());
 
@@ -385,6 +401,7 @@ public class ProfileFragment extends Fragment {
 
                     submitBalanceTopUp(
                             roundedAmount,
+                            operationId,
                             topUpDialog,
                             positiveButton
                     );
@@ -402,6 +419,7 @@ public class ProfileFragment extends Fragment {
 
     private void submitBalanceTopUp(
             double amount,
+            String operationId,
             AlertDialog topUpDialog,
             Button positiveButton
     ) {
@@ -422,7 +440,10 @@ public class ProfileFragment extends Fragment {
         positiveButton.setText("Adding...");
 
         TopUpBalanceRequest request =
-                new TopUpBalanceRequest(amount);
+                new TopUpBalanceRequest(
+                        amount,
+                        operationId
+                );
 
         topUpBalanceCall =
                 ApiClient

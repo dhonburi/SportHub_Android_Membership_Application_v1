@@ -18,10 +18,14 @@ public class Member
 
     public decimal Balance { get; set; } = 0.00m;
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } =
+        DateTime.UtcNow;
 
     public User? User { get; set; }
 
     public ICollection<MemberMembership> Memberships { get; set; } =
         new List<MemberMembership>();
+
+    public ICollection<MemberTransaction> Transactions { get; set; } =
+        new List<MemberTransaction>();
 }
