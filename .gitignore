@@ -26,3 +26,6 @@ local.properties
 
 # Backend deployment output
 /backend/SportHub.Api/publish/
+
+/backend/SportHub.Api.US12.publish/
+/backend/SportHub.Api.US12.deploy.zip

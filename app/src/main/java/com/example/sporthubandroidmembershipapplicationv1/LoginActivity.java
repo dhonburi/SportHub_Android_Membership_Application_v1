@@ -488,7 +488,8 @@ public class LoginActivity extends AppCompatActivity {
         memberSession.save(
                 loginResponse.getMemberId(),
                 loginResponse.getMemberNumber(),
-                loginResponse.isAdmin()
+                loginResponse.isAdmin(),
+                loginResponse.getStaffAccessToken()
         );
 
         String displayName =

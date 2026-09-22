@@ -7,6 +7,9 @@ public class MemberTransaction
     public const string MembershipPurchaseType =
         "MembershipPurchase";
 
+    public const string GateEntryChargeType =
+        "GateEntryCharge";
+
     public int TransactionId { get; set; }
 
     public int MemberId { get; set; }

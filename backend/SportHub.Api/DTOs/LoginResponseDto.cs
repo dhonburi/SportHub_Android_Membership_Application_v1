@@ -12,5 +12,9 @@ public class LoginResponseDto
 
     public bool IsAdmin { get; set; }
 
+    public string? StaffAccessToken { get; set; }
+
+    public DateTime? StaffAccessTokenExpiresAtUtc { get; set; }
+
     public string Message { get; set; } = string.Empty;
 }

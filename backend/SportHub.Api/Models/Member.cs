@@ -28,4 +28,7 @@ public class Member
 
     public ICollection<MemberTransaction> Transactions { get; set; } =
         new List<MemberTransaction>();
+
+    public ICollection<GateEntryProcessing> GateEntryProcessings { get; set; } =
+        new List<GateEntryProcessing>();
 }
