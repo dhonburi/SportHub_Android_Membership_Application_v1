@@ -51,4 +51,11 @@ public final class ApiClient {
                 MembershipQrApiService.class
         );
     }
+
+    public static GateEntryApiService
+    getGateEntryApiService() {
+        return getClient().create(
+                GateEntryApiService.class
+        );
+    }
 }

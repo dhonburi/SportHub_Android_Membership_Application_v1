@@ -24,6 +24,9 @@ public class SportHubDbContext : DbContext
     public DbSet<MemberTransaction> Transactions =>
         Set<MemberTransaction>();
 
+    public DbSet<GateEntryProcessing> GateEntryProcessings =>
+        Set<GateEntryProcessing>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -143,6 +146,60 @@ public class SportHubDbContext : DbContext
                 )
             );
 
+        modelBuilder.Entity<GateEntryProcessing>()
+            .Property(entry => entry.TokenHash)
+            .HasMaxLength(64)
+            .IsRequired();
+
+        modelBuilder.Entity<GateEntryProcessing>()
+            .Property(entry => entry.AccessMethod)
+            .HasMaxLength(30)
+            .IsRequired();
+
+        modelBuilder.Entity<GateEntryProcessing>()
+            .Property(entry => entry.AmountCharged)
+            .HasPrecision(10, 2);
+
+        modelBuilder.Entity<GateEntryProcessing>()
+            .Property(entry => entry.BalanceAfter)
+            .HasPrecision(10, 2);
+
+        modelBuilder.Entity<GateEntryProcessing>()
+            .Property(entry => entry.Status)
+            .HasMaxLength(20)
+            .IsRequired();
+
+        modelBuilder.Entity<GateEntryProcessing>()
+            .HasIndex(entry => entry.ProcessingId)
+            .IsUnique();
+
+        modelBuilder.Entity<GateEntryProcessing>()
+            .HasIndex(entry => entry.TokenHash)
+            .IsUnique();
+
+        modelBuilder.Entity<GateEntryProcessing>()
+            .HasIndex(entry => new
+            {
+                entry.MemberId,
+                entry.ProcessedAtUtc
+            });
+
+        modelBuilder.Entity<GateEntryProcessing>()
+            .ToTable(
+                table =>
+                {
+                    table.HasCheckConstraint(
+                        "CK_GateEntryProcessings_AmountCharged",
+                        "[AmountCharged] IS NULL OR [AmountCharged] >= 0"
+                    );
+
+                    table.HasCheckConstraint(
+                        "CK_GateEntryProcessings_EntriesDeducted",
+                        "[EntriesDeducted] IS NULL OR [EntriesDeducted] >= 0"
+                    );
+                }
+            );
+
         modelBuilder.Entity<Member>()
             .HasOne(member => member.User)
             .WithOne(user => user.Member)
@@ -173,6 +230,18 @@ public class SportHubDbContext : DbContext
             .HasForeignKey(transaction =>
                 transaction.MemberMembershipId
             )
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<GateEntryProcessing>()
+            .HasOne(entry => entry.Member)
+            .WithMany(member => member.GateEntryProcessings)
+            .HasForeignKey(entry => entry.MemberId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<GateEntryProcessing>()
+            .HasOne(entry => entry.MemberMembership)
+            .WithMany()
+            .HasForeignKey(entry => entry.MemberMembershipId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -22,6 +22,75 @@ namespace SportHub.Api.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("SportHub.Api.Models.GateEntryProcessing", b =>
+                {
+                    b.Property<int>("GateEntryProcessingId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("GateEntryProcessingId"));
+
+                    b.Property<string>("AccessMethod")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<decimal?>("AmountCharged")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<decimal>("BalanceAfter")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<int?>("EntriesDeducted")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MemberId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("MemberMembershipId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ProcessedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ProcessingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("RemainingEntriesAfter")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.HasKey("GateEntryProcessingId");
+
+                    b.HasIndex("MemberMembershipId");
+
+                    b.HasIndex("ProcessingId")
+                        .IsUnique();
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.HasIndex("MemberId", "ProcessedAtUtc");
+
+                    b.ToTable("GateEntryProcessings", t =>
+                        {
+                            t.HasCheckConstraint("CK_GateEntryProcessings_AmountCharged", "[AmountCharged] IS NULL OR [AmountCharged] >= 0");
+
+                            t.HasCheckConstraint("CK_GateEntryProcessings_EntriesDeducted", "[EntriesDeducted] IS NULL OR [EntriesDeducted] >= 0");
+                        });
+                });
+
             modelBuilder.Entity("SportHub.Api.Models.Member", b =>
                 {
                     b.Property<int>("MemberId")
@@ -245,6 +314,24 @@ namespace SportHub.Api.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("SportHub.Api.Models.GateEntryProcessing", b =>
+                {
+                    b.HasOne("SportHub.Api.Models.Member", "Member")
+                        .WithMany("GateEntryProcessings")
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SportHub.Api.Models.MemberMembership", "MemberMembership")
+                        .WithMany()
+                        .HasForeignKey("MemberMembershipId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Member");
+
+                    b.Navigation("MemberMembership");
+                });
+
             modelBuilder.Entity("SportHub.Api.Models.MemberMembership", b =>
                 {
                     b.HasOne("SportHub.Api.Models.Member", "Member")
@@ -295,6 +382,8 @@ namespace SportHub.Api.Migrations
 
             modelBuilder.Entity("SportHub.Api.Models.Member", b =>
                 {
+                    b.Navigation("GateEntryProcessings");
+
                     b.Navigation("Memberships");
 
                     b.Navigation("Transactions");

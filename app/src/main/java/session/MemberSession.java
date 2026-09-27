@@ -17,6 +17,9 @@ public class MemberSession {
     private static final String KEY_IS_ADMIN =
             "is_admin";
 
+    // Kept in process memory, not written to SharedPreferences.
+    private static volatile String staffAccessToken;
+
     private final SharedPreferences preferences;
 
     public MemberSession(Context context) {
@@ -31,12 +34,28 @@ public class MemberSession {
             String memberNumber,
             boolean isAdmin
     ) {
+        save(memberId, memberNumber, isAdmin, null);
+    }
+
+    public void save(
+            int memberId,
+            String memberNumber,
+            boolean isAdmin,
+            String newStaffAccessToken
+    ) {
         preferences
                 .edit()
                 .putInt(KEY_MEMBER_ID, memberId)
                 .putString(KEY_MEMBER_NUMBER, memberNumber)
                 .putBoolean(KEY_IS_ADMIN, isAdmin)
                 .apply();
+
+        staffAccessToken =
+                isAdmin
+                        && newStaffAccessToken != null
+                        && !newStaffAccessToken.trim().isEmpty()
+                        ? newStaffAccessToken
+                        : null;
     }
 
     public int getMemberId() {
@@ -60,7 +79,13 @@ public class MemberSession {
         );
     }
 
+    public String getStaffAccessToken() {
+        return isAdmin() ? staffAccessToken : null;
+    }
+
     public void clear() {
+        staffAccessToken = null;
+
         preferences
                 .edit()
                 .clear()

@@ -24,14 +24,16 @@ import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 
-import com.example.sporthubandroidmembershipapplicationv1.models.MembershipQrValidationRequest;
-import com.example.sporthubandroidmembershipapplicationv1.models.MembershipQrValidationResponse;
+import com.example.sporthubandroidmembershipapplicationv1.models.GateEntryRequest;
+import com.example.sporthubandroidmembershipapplicationv1.models.GateEntryResponse;
 import com.example.sporthubandroidmembershipapplicationv1.network.ApiClient;
 import com.example.sporthubandroidmembershipapplicationv1.session.MemberSession;
 import com.google.android.material.button.MaterialButton;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanIntentResult;
 import com.journeyapps.barcodescanner.ScanOptions;
+
+import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -52,9 +54,9 @@ public class StaffQrScannerActivity extends AppCompatActivity {
     private MaterialButton btnScanAnother;
     private MaterialButton btnOpenPermissionSettings;
 
-    private Call<MembershipQrValidationResponse> validationCall;
+    private Call<GateEntryResponse> gateEntryCall;
     private String lastScannedToken;
-    private boolean validationInProgress;
+    private boolean gateProcessingInProgress;
 
     private final ActivityResultLauncher<ScanOptions>
             scannerLauncher = registerForActivityResult(
@@ -83,6 +85,12 @@ public class StaffQrScannerActivity extends AppCompatActivity {
             ).show();
 
             finish();
+            return;
+        }
+
+        if (memberSession.getStaffAccessToken() == null
+                || memberSession.getStaffAccessToken().trim().isEmpty()) {
+            redirectToStaffLogin("Sign in again to use the gate scanner.");
             return;
         }
 
@@ -144,11 +152,11 @@ public class StaffQrScannerActivity extends AppCompatActivity {
         );
 
         btnRetryValidation.setOnClickListener(
-                view -> retryLastValidation()
+                view -> retryLastGateEntry()
         );
 
         btnScanAnother.setOnClickListener(view -> {
-            clearPendingValidation();
+            clearPendingGateEntry();
             showReadyState();
             startScannerFlow();
         });
@@ -159,7 +167,7 @@ public class StaffQrScannerActivity extends AppCompatActivity {
     }
 
     private void startScannerFlow() {
-        if (validationInProgress) {
+        if (gateProcessingInProgress) {
             return;
         }
 
@@ -212,7 +220,7 @@ public class StaffQrScannerActivity extends AppCompatActivity {
         txtScannerResultCode.setVisibility(View.VISIBLE);
 
         txtScannerResultMessage.setText(
-                "Camera permission is required to scan a membership QR code."
+                "Camera permission is required to scan a SportHub QR code."
         );
 
         txtScannerResultDetails.setVisibility(View.GONE);
@@ -239,7 +247,7 @@ public class StaffQrScannerActivity extends AppCompatActivity {
         );
 
         options.setPrompt(
-                "Place the SportHub membership QR inside the frame"
+                "Place the current SportHub QR inside the frame"
         );
 
         options.setBeepEnabled(false);
@@ -257,7 +265,7 @@ public class StaffQrScannerActivity extends AppCompatActivity {
         if (contents == null) {
             showScannerError(
                     "Scan cancelled",
-                    "No QR code was submitted for validation."
+                    "No QR code was submitted for gate processing."
             );
 
             return;
@@ -268,47 +276,64 @@ public class StaffQrScannerActivity extends AppCompatActivity {
         if (token.isEmpty()) {
             showScannerError(
                     "Invalid QR code",
-                    "The scanned QR code did not contain validation information."
+                    "The scanned QR code did not contain gate-entry information."
             );
 
             return;
         }
 
         lastScannedToken = token;
-        validateToken(token);
+        processGateEntry(token);
     }
 
-    private void validateToken(String token) {
-        if (validationInProgress) {
+    private void processGateEntry(String token) {
+        if (gateProcessingInProgress) {
             return;
         }
 
-        validationInProgress = true;
-        showValidationLoading();
+        String staffAccessToken =
+                new MemberSession(this).getStaffAccessToken();
 
-        MembershipQrValidationRequest request =
-                new MembershipQrValidationRequest(token);
+        if (staffAccessToken == null
+                || staffAccessToken.trim().isEmpty()) {
+            redirectToStaffLogin("Sign in again to use the gate scanner.");
+            return;
+        }
 
-        validationCall = ApiClient
-                .getMembershipQrApiService()
-                .validateMembershipQr(request);
+        gateProcessingInProgress = true;
+        showGateProcessingLoading();
 
-        validationCall.enqueue(
-                new Callback<MembershipQrValidationResponse>() {
+        GateEntryRequest request =
+                new GateEntryRequest(token);
+
+        gateEntryCall = ApiClient
+                .getGateEntryApiService()
+                .processGateEntry("Bearer " + staffAccessToken, request);
+
+        gateEntryCall.enqueue(
+                new Callback<GateEntryResponse>() {
                     @Override
                     public void onResponse(
-                            Call<MembershipQrValidationResponse> call,
-                            Response<MembershipQrValidationResponse> response
+                            Call<GateEntryResponse> call,
+                            Response<GateEntryResponse> response
                     ) {
-                        validationInProgress = false;
+                        gateProcessingInProgress = false;
 
-                        MembershipQrValidationResponse result =
+                        if (response.code() == 401
+                                || response.code() == 403) {
+                            redirectToStaffLogin(
+                                    "Staff access expired or was removed. Sign in again."
+                            );
+                            return;
+                        }
+
+                        GateEntryResponse result =
                                 response.body();
 
                         if (!response.isSuccessful()
                                 || result == null) {
                             showNetworkError(
-                                    "The validation API returned HTTP "
+                                    "The gate-processing API returned HTTP "
                                             + response.code()
                                             + "."
                             );
@@ -316,26 +341,32 @@ public class StaffQrScannerActivity extends AppCompatActivity {
                             return;
                         }
 
-                        showValidationResult(result);
+                        showGateEntryResult(result);
                     }
 
                     @Override
                     public void onFailure(
-                            Call<MembershipQrValidationResponse> call,
+                            Call<GateEntryResponse> call,
                             Throwable throwable
                     ) {
-                        validationInProgress = false;
+                        gateProcessingInProgress = false;
 
                         if (call.isCanceled()) {
                             return;
                         }
 
                         showNetworkError(
-                                "Unable to connect to the SportHub API. Check the connection and retry."
+                                "The entry outcome could not be confirmed. Check the connection and safely retry the same QR token."
                         );
                     }
                 }
         );
+    }
+
+    private void redirectToStaffLogin(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        startActivity(new Intent(this, LoginActivity.class));
+        finish();
     }
 
     private void showReadyState() {
@@ -348,7 +379,7 @@ public class StaffQrScannerActivity extends AppCompatActivity {
         txtScannerResultCode.setVisibility(View.GONE);
 
         txtScannerResultMessage.setText(
-                "Open the camera and scan a member's current SportHub membership QR code."
+                "Open the camera and scan a member's current SportHub QR code to simulate gate entry."
         );
 
         txtScannerResultDetails.setVisibility(View.GONE);
@@ -359,9 +390,9 @@ public class StaffQrScannerActivity extends AppCompatActivity {
         btnOpenPermissionSettings.setVisibility(View.GONE);
     }
 
-    private void showValidationLoading() {
+    private void showGateProcessingLoading() {
         txtScannerResultTitle.setText(
-                "Validating QR code"
+                "Processing gate entry"
         );
 
         txtScannerResultTitle.setTextColor(
@@ -371,7 +402,7 @@ public class StaffQrScannerActivity extends AppCompatActivity {
         txtScannerResultCode.setVisibility(View.GONE);
 
         txtScannerResultMessage.setText(
-                "Checking the token and current membership record..."
+                "Checking the current account record and applying the correct entry rule..."
         );
 
         txtScannerResultDetails.setVisibility(View.GONE);
@@ -382,16 +413,19 @@ public class StaffQrScannerActivity extends AppCompatActivity {
         btnOpenPermissionSettings.setVisibility(View.GONE);
     }
 
-    private void showValidationResult(
-            MembershipQrValidationResponse result
+    private void showGateEntryResult(
+            GateEntryResponse result
     ) {
         progressScannerValidation.setVisibility(View.GONE);
 
         boolean isApproved = result.isApproved();
+        boolean isDuplicate = result.isDuplicate();
 
         txtScannerResultTitle.setText(
                 isApproved
                         ? "Access approved"
+                        : isDuplicate
+                        ? "Entry already processed"
                         : "Access denied"
         );
 
@@ -399,13 +433,19 @@ public class StaffQrScannerActivity extends AppCompatActivity {
                 Color.parseColor(
                         isApproved
                                 ? "#1B7F3A"
+                                : isDuplicate
+                                ? "#A66A00"
                                 : "#A52A2A"
                 )
         );
 
         String resultCode = safeText(
                 result.getResultCode(),
-                isApproved ? "VALID" : "DENIED"
+                isApproved
+                        ? "ENTRY_PROCESSED"
+                        : isDuplicate
+                        ? "ALREADY_PROCESSED"
+                        : "DENIED"
         );
 
         txtScannerResultCode.setText(resultCode);
@@ -415,14 +455,14 @@ public class StaffQrScannerActivity extends AppCompatActivity {
                 safeText(
                         result.getMessage(),
                         isApproved
-                                ? "Membership validation succeeded."
-                                : "Membership validation was denied."
+                                ? "The simulated gate entry was completed."
+                                : isDuplicate
+                                ? "No additional deduction was made."
+                                : "The simulated gate denied entry."
                 )
         );
 
-        String details = isApproved
-                ? buildApprovedDetails(result)
-                : "";
+        String details = buildGateEntryDetails(result);
 
         if (details.isEmpty()) {
             txtScannerResultDetails.setVisibility(View.GONE);
@@ -437,10 +477,16 @@ public class StaffQrScannerActivity extends AppCompatActivity {
         btnOpenPermissionSettings.setVisibility(View.GONE);
     }
 
-    private String buildApprovedDetails(
-            MembershipQrValidationResponse result
+    private String buildGateEntryDetails(
+            GateEntryResponse result
     ) {
         StringBuilder details = new StringBuilder();
+
+        appendDetail(
+                details,
+                "Access method",
+                formatAccessType(result.getAccessType())
+        );
 
         appendDetail(
                 details,
@@ -470,18 +516,59 @@ public class StaffQrScannerActivity extends AppCompatActivity {
             );
         }
 
-        if (details.length() == 0
+        if (result.getAmountCharged() != null
+                && result.getAmountCharged() > 0) {
+            appendDetail(
+                    details,
+                    "Amount charged",
+                    String.format(
+                            Locale.US,
+                            "%.2f %s",
+                            result.getAmountCharged(),
+                            safeText(result.getCurrency(), "NZD")
+                    )
+            );
+        }
+
+        if (result.getBalance() != null
                 && "BALANCE".equalsIgnoreCase(
                 result.getAccessType()
         )) {
             appendDetail(
                     details,
-                    "Access type",
-                    "Balance Access"
+                    "Updated balance",
+                    String.format(
+                            Locale.US,
+                            "%.2f %s",
+                            result.getBalance(),
+                            safeText(result.getCurrency(), "NZD")
+                    )
             );
         }
 
+        appendDetail(
+                details,
+                "Processing ID",
+                result.getProcessingId()
+        );
+
         return details.toString();
+    }
+
+    private String formatAccessType(String accessType) {
+        if ("STANDARD_MEMBERSHIP".equalsIgnoreCase(accessType)) {
+            return "Standard membership";
+        }
+
+        if ("SPORTS_PASSCARD".equalsIgnoreCase(accessType)) {
+            return "Sports Passcard";
+        }
+
+        if ("BALANCE".equalsIgnoreCase(accessType)) {
+            return "Balance access";
+        }
+
+        return accessType;
     }
 
     private void appendDetail(
@@ -546,7 +633,7 @@ public class StaffQrScannerActivity extends AppCompatActivity {
         btnOpenPermissionSettings.setVisibility(View.GONE);
     }
 
-    private void retryLastValidation() {
+    private void retryLastGateEntry() {
         if (lastScannedToken == null
                 || lastScannedToken.trim().isEmpty()) {
             startScannerFlow();
@@ -554,17 +641,17 @@ public class StaffQrScannerActivity extends AppCompatActivity {
             return;
         }
 
-        validateToken(lastScannedToken);
+        processGateEntry(lastScannedToken);
     }
 
-    private void clearPendingValidation() {
-        if (validationCall != null
-                && !validationCall.isCanceled()) {
-            validationCall.cancel();
+    private void clearPendingGateEntry() {
+        if (gateEntryCall != null
+                && !gateEntryCall.isCanceled()) {
+            gateEntryCall.cancel();
         }
 
-        validationCall = null;
-        validationInProgress = false;
+        gateEntryCall = null;
+        gateProcessingInProgress = false;
         lastScannedToken = null;
     }
 
@@ -633,7 +720,7 @@ public class StaffQrScannerActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        clearPendingValidation();
+        clearPendingGateEntry();
         super.onDestroy();
     }
 }

@@ -1,20 +1,19 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using SportHub.Api.Data;
 using SportHub.Api.Models;
 using SportHub.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add controller support.
+// Controllers and Swagger.
 builder.Services.AddControllers();
-
-// Add Swagger/OpenAPI support.
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Configure Entity Framework Core to use the connection string
-// named "SportHubDatabase".
+// Database.
 builder.Services.AddDbContext<SportHubDbContext>(
     options =>
         options.UseSqlServer(
@@ -24,36 +23,60 @@ builder.Services.AddDbContext<SportHubDbContext>(
         )
 );
 
-// Register the password hasher used for user passwords.
-builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+// Existing authentication and QR services.
+builder.Services.AddScoped<
+    IPasswordHasher<User>,
+    PasswordHasher<User>
+>();
 
-// Register the authentication service.
 builder.Services.AddScoped<AuthService>();
-
-// Register the shared QR token service (US-09 issuance,
-// US-10 validation). Singleton: holds only an immutable
-// signing key read once from configuration, no DbContext
-// dependency.
 builder.Services.AddSingleton<QrTokenService>();
+
+// Staff tokens must use their own secret, separate from QR tokens.
+var staffTokenService =
+    new StaffTokenService(builder.Configuration);
+
+builder.Services.AddSingleton(staffTokenService);
+
+builder.Services
+    .AddAuthentication(
+        JwtBearerDefaults.AuthenticationScheme
+    )
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters =
+            new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuer = StaffTokenService.Issuer,
+
+                ValidateAudience = true,
+                ValidAudience = StaffTokenService.Audience,
+
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey =
+                    staffTokenService.SigningKey,
+
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.FromSeconds(30)
+            };
+    });
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
 /*
- * Running:
- *
- * dotnet run -- --seed
- *
- * creates the fake development account and exits.
- * A normal "dotnet run" does not seed automatically.
+ * Running `dotnet run -- --seed` applies migrations,
+ * creates the development account if needed, and exits.
  */
 bool seedRequested =
-    args.Any(
-        argument =>
-            string.Equals(
-                argument,
-                "--seed",
-                StringComparison.OrdinalIgnoreCase
-            )
+    args.Any(argument =>
+        string.Equals(
+            argument,
+            "--seed",
+            StringComparison.OrdinalIgnoreCase
+        )
     );
 
 if (seedRequested)
@@ -66,12 +89,12 @@ if (seedRequested)
             .GetRequiredService<SportHubDbContext>();
 
     IPasswordHasher<User> passwordHasher =
-        scope.ServiceProvider.GetRequiredService<IPasswordHasher<User>>();
+        scope.ServiceProvider.GetRequiredService<
+            IPasswordHasher<User>
+        >();
 
-    // Apply any pending migrations before seeding.
     await dbContext.Database.MigrateAsync();
 
-    // Insert the test member and user account if they do not exist.
     await DbSeeder.SeedAsync(
         dbContext,
         passwordHasher
@@ -80,21 +103,23 @@ if (seedRequested)
     return;
 }
 
-// Enable Swagger in both local development and Azure.
-// This lets you access /swagger after deployment.
 app.UseSwagger();
 app.UseSwaggerUI();
 
-/*
- * Local Android testing may use HTTP.
- * Azure App Service uses HTTPS.
- */
 if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
 
+app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
+
+// Protect the existing gate controller without replacing
+// its large file again.
+app.UseMiddleware<
+    GateStaffAuthorizationMiddleware
+>();
 
 app.MapControllers();
 

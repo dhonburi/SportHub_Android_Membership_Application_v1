@@ -7,6 +7,8 @@ public class LoginResponse {
     private Integer memberId;
     private String memberNumber;
     private boolean isAdmin;
+    private String staffAccessToken;
+    private String staffAccessTokenExpiresAtUtc;
     private String message;
 
     public LoginResponse() {
@@ -50,6 +52,25 @@ public class LoginResponse {
 
     public void setAdmin(boolean admin) {
         isAdmin = admin;
+    }
+
+    public String getStaffAccessToken() {
+        return staffAccessToken;
+    }
+
+    public void setStaffAccessToken(String staffAccessToken) {
+        this.staffAccessToken = staffAccessToken;
+    }
+
+    public String getStaffAccessTokenExpiresAtUtc() {
+        return staffAccessTokenExpiresAtUtc;
+    }
+
+    public void setStaffAccessTokenExpiresAtUtc(
+            String staffAccessTokenExpiresAtUtc
+    ) {
+        this.staffAccessTokenExpiresAtUtc =
+                staffAccessTokenExpiresAtUtc;
     }
 
     public String getMessage() {
