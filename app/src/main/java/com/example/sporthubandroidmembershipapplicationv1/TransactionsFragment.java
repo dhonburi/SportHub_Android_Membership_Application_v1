@@ -274,6 +274,11 @@ public class TransactionsFragment extends Fragment {
                         R.id.txtTransactionAmount
                 );
 
+        TextView txtTransactionTime =
+                rowView.findViewById(
+                        R.id.txtTransactionTime
+                );
+
         String description =
                 clean(transaction.getDescription());
 
@@ -290,7 +295,7 @@ public class TransactionsFragment extends Fragment {
         double amount = transaction.getAmount();
 
         String amountText = String.format(
-                Locale.getDefault(),
+                Locale.US,
                 amount >= 0
                         ? "+%.2f %s"
                         : "-%.2f %s",
@@ -299,6 +304,12 @@ public class TransactionsFragment extends Fragment {
         );
 
         txtTransactionDescription.setText(description);
+
+        String timeText = formatTime(
+                transaction.getOccurredAtUtc()
+        );
+
+        txtTransactionTime.setText(timeText);
         txtTransactionAmount.setText(amountText);
 
         txtTransactionAmount.setTextColor(
@@ -310,15 +321,58 @@ public class TransactionsFragment extends Fragment {
         );
 
         rowView.setContentDescription(
-                description + ", " + amountText
+                description + ", "
+                        + formatDate(transaction.getOccurredAtUtc())
+                        + ", " + timeText
+                        + ", " + amountText
         );
     }
 
     private String formatDate(String occurredAtUtc) {
+        Date transactionDate = parseUtcTimestamp(occurredAtUtc);
+
+        if (transactionDate == null) {
+            return "Date unavailable";
+        }
+
+        SimpleDateFormat outputFormat =
+                new SimpleDateFormat(
+                        "MMMM d, yyyy",
+                        Locale.getDefault()
+                );
+
+        outputFormat.setTimeZone(
+                TimeZone.getTimeZone("Pacific/Auckland")
+        );
+
+        return outputFormat.format(transactionDate);
+    }
+
+    private String formatTime(String occurredAtUtc) {
+        Date transactionDate = parseUtcTimestamp(occurredAtUtc);
+
+        if (transactionDate == null) {
+            return "Time unavailable";
+        }
+
+        SimpleDateFormat outputFormat =
+                new SimpleDateFormat(
+                        "h:mm a",
+                        Locale.ENGLISH
+                );
+
+        outputFormat.setTimeZone(
+                TimeZone.getTimeZone("Pacific/Auckland")
+        );
+
+        return outputFormat.format(transactionDate);
+    }
+
+    private Date parseUtcTimestamp(String occurredAtUtc) {
         String cleanTimestamp = clean(occurredAtUtc);
 
         if (cleanTimestamp.isEmpty()) {
-            return "Date unavailable";
+            return null;
         }
 
         SimpleDateFormat inputFormat =
@@ -332,28 +386,10 @@ public class TransactionsFragment extends Fragment {
                 TimeZone.getTimeZone("UTC")
         );
 
-        SimpleDateFormat outputFormat =
-                new SimpleDateFormat(
-                        "MMMM d, yyyy",
-                        Locale.getDefault()
-                );
-
-        outputFormat.setTimeZone(
-                TimeZone.getTimeZone("Pacific/Auckland")
-        );
-
         try {
-            Date transactionDate =
-                    inputFormat.parse(cleanTimestamp);
-
-            if (transactionDate == null) {
-                return "Date unavailable";
-            }
-
-            return outputFormat.format(transactionDate);
-
+            return inputFormat.parse(cleanTimestamp);
         } catch (ParseException exception) {
-            return "Date unavailable";
+            return null;
         }
     }
 

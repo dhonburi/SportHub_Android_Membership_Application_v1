@@ -2,23 +2,41 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="64dp"
+    android:layout_height="wrap_content"
+    android:minHeight="64dp"
     android:gravity="center_vertical"
     android:orientation="horizontal"
     android:paddingStart="18dp"
-    android:paddingEnd="18dp">
+    android:paddingEnd="18dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp">
 
-    <TextView
-        android:id="@+id/txtTransactionDescription"
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:ellipsize="end"
-        android:maxLines="2"
-        android:paddingEnd="12dp"
-        android:text="Balance Top Up"
-        android:textColor="#111111"
-        android:textSize="18sp" />
+        android:orientation="vertical"
+        android:paddingEnd="12dp">
+
+        <TextView
+            android:id="@+id/txtTransactionDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:text="Balance Top Up"
+            android:textColor="#111111"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/txtTransactionTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:text="3:45 PM"
+            android:textColor="#666666"
+            android:textSize="14sp" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/txtTransactionAmount"
