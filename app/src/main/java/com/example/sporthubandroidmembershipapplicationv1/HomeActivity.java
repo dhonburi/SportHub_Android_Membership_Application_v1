@@ -263,14 +263,50 @@ public class HomeActivity extends AppCompatActivity {
         return homeTabFragment;
     }
 
+    private boolean canBatchChildPageTabSwitch(FragmentManager fragmentManager) {
+        if (fragmentManager.getBackStackEntryCount() == 0) {
+            return false;
+        }
+
+        // Rewards and Membership opened from QR keep the root tabs added.
+        // Batch their back-stack pop with the selected tab to skip Profile.
+        // Pages that replace the root tabs retain their restoration path.
+        for (String tag : new String[]{TAG_HOME, TAG_QR, TAG_PROFILE}) {
+            Fragment tab = fragmentManager.findFragmentByTag(tag);
+            if (tab == null || !tab.isAdded()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private void showTab(
             String tabTag,
             boolean clearBackStack
     ) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+
+        if (fragmentManager.isStateSaved()) {
+            return;
+        }
+
+        boolean batchChildPageExit = clearBackStack
+                && canBatchChildPageTabSwitch(fragmentManager);
+
         activeTabTag = tabTag;
 
         if (clearBackStack) {
-            clearChildPageBackStack();
+            if (batchChildPageExit) {
+                // Queue the pop so it executes with the target tab transaction.
+                // An immediate pop would animate Profile as an intermediate page.
+                fragmentManager.popBackStack(
+                        null,
+                        FragmentManager.POP_BACK_STACK_INCLUSIVE
+                );
+            } else {
+                clearChildPageBackStack();
+            }
         }
 
         restoreOrCreateTabFragments();
@@ -281,9 +317,10 @@ public class HomeActivity extends AppCompatActivity {
         updateHeaderForActiveScreen();
 
         FragmentTransaction transaction =
-                getSupportFragmentManager()
+                fragmentManager
                         .beginTransaction()
-                        .setReorderingAllowed(true);
+                        .setReorderingAllowed(true)
+                        .setCustomAnimations(0, 0, 0, 0);
 
         Fragment[] tabFragments = {
                 homeTabFragment,
@@ -331,7 +368,14 @@ public class HomeActivity extends AppCompatActivity {
                 targetFragment
         );
 
-        transaction.commitNow();
+        if (batchChildPageExit) {
+            transaction.commit();
+            fragmentManager.executePendingTransactions();
+        } else {
+            transaction.commitNow();
+        }
+
+        updateHeaderForActiveScreen();
     }
 
     private void updateHeaderForActiveScreen() {
