@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title">Settings</string>
+    <string name="settings_back">Back to previous screen</string>
+    <string name="settings_tab_general">General</string>
+    <string name="settings_tab_alerts">Alerts</string>
+    <string name="settings_tab_security">Security</string>
+    <string name="settings_tab_help">Help</string>
+    <string name="settings_general_placeholder">List of Settings Here</string>
+    <string name="settings_alerts_placeholder">Alerts Settings Placeholder</string>
+    <string name="settings_security_placeholder">Security Settings Placeholder</string>
+    <string name="settings_staff_title">Staff tools</string>
+    <string name="settings_staff_description">Scan and validate a member\'s SportHub membership QR code.</string>
+    <string name="settings_staff_scanner">Open membership QR scanner</string>
+
+    <string name="help_title">How can we help?</string>
+    <string name="help_intro">Get in touch with SportHub Community Trust or Synergy Sports using the contact details below.</string>
+    <string name="help_action_hint">Tap a phone number, email address or address to get in touch.</string>
+    <string name="help_sporthub_name">SportHub Community Trust</string>
+    <string name="help_synergy_name">Synergy Sports</string>
+    <string name="help_sporthub_hours"><b>Phone hours</b>\nMonday–Friday: 10am–4pm</string>
+    <string name="help_synergy_hours"><b>Opening hours</b>\nOpen 7 days a week</string>
+    <string name="help_synergy_hours_note">Please call ahead for today\'s hours.</string>
+
+    <string name="help_landline_action"><b>Call landline</b>\n09 392 0008</string>
+    <string name="help_sporthub_mobile_action"><b>Call mobile</b>\n022 676 6712</string>
+    <string name="help_synergy_mobile_action"><b>Call mobile</b>\n+64 22 676 6712</string>
+    <string name="help_sporthub_email_action"><b>Email</b>\nadmin@sporthub.org.nz</string>
+    <string name="help_synergy_email_action"><b>Email</b>\ninfo@synergysports.co.nz</string>
+    <string name="help_sporthub_address_action"><b>View address in Maps</b>\n44 Portage Road, New Lynn, 0600</string>
+    <string name="help_synergy_address_action"><b>View address in Maps</b>\nUnit 3, 44 Portage Road, New Lynn, Auckland</string>
+
+    <string name="help_landline_number" translatable="false">+6493920008</string>
+    <string name="help_mobile_number" translatable="false">+64226766712</string>
+    <string name="help_sporthub_email" translatable="false">admin@sporthub.org.nz</string>
+    <string name="help_synergy_email" translatable="false">info@synergysports.co.nz</string>
+    <string name="help_sporthub_address" translatable="false">44 Portage Road, New Lynn, 0600</string>
+    <string name="help_synergy_address" translatable="false">Unit 3, 44 Portage Road, New Lynn, Auckland</string>
+    <string name="help_no_phone_app">No phone app is available. Please use the number shown here.</string>
+    <string name="help_no_email_app">No email app is available. Please use the email address shown here.</string>
+    <string name="help_no_maps_app">No maps app is available. Please use the address shown here.</string>
+
+    <style name="SportHubSettingsTab" parent="Widget.AppCompat.Button">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:background">@drawable/home_tab_unselected_bg</item>
+        <item name="android:backgroundTint">@null</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:elevation">0dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:minHeight">0dp</item>
+        <item name="android:padding">0dp</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">#111111</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="autoSizeMaxTextSize">14sp</item>
+        <item name="autoSizeMinTextSize">10sp</item>
+        <item name="autoSizeStepGranularity">1sp</item>
+        <item name="autoSizeTextType">uniform</item>
+    </style>
+
+    <style name="SportHubHelpContactButton" parent="Widget.Material3.Button.TextButton">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:minHeight">64dp</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:gravity">start|center_vertical</item>
+        <item name="android:textAlignment">viewStart</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">#111111</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:singleLine">false</item>
+        <item name="android:maxLines">10</item>
+        <item name="android:ellipsize">@null</item>
+        <item name="android:padding">14dp</item>
+        <item name="android:paddingStart">14dp</item>
+        <item name="android:paddingEnd">14dp</item>
+        <item name="android:lineSpacingExtra">3dp</item>
+        <item name="backgroundTint">#FFFFFF</item>
+        <item name="cornerRadius">14dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="rippleColor">#24000000</item>
+    </style>
+</resources>

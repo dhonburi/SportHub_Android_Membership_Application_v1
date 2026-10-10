@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layoutSettingsHelp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:accessibilityHeading="true"
+        android:text="@string/help_title"
+        android:textColor="#111111"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:lineSpacingExtra="3dp"
+        android:text="@string/help_intro"
+        android:textColor="#5F5F5F"
+        android:textSize="15sp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:lineSpacingExtra="2dp"
+        android:text="@string/help_action_hint"
+        android:textColor="#5F5F5F"
+        android:textSize="14sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/training_card_bg"
+        android:orientation="vertical"
+        android:padding="18dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:accessibilityHeading="true"
+            android:text="@string/help_sporthub_name"
+            android:textColor="#111111"
+            android:textSize="21sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="4dp"
+            android:lineSpacingExtra="3dp"
+            android:text="@string/help_sporthub_hours"
+            android:textColor="#5F5F5F"
+            android:textSize="15sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSportHubLandline"
+            style="@style/SportHubHelpContactButton"
+            android:text="@string/help_landline_action" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSportHubMobile"
+            style="@style/SportHubHelpContactButton"
+            android:text="@string/help_sporthub_mobile_action" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSportHubEmail"
+            style="@style/SportHubHelpContactButton"
+            android:text="@string/help_sporthub_email_action" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSportHubAddress"
+            style="@style/SportHubHelpContactButton"
+            android:text="@string/help_sporthub_address_action" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
+        android:background="@drawable/training_card_bg"
+        android:orientation="vertical"
+        android:padding="18dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:accessibilityHeading="true"
+            android:text="@string/help_synergy_name"
+            android:textColor="#111111"
+            android:textSize="21sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:lineSpacingExtra="3dp"
+            android:text="@string/help_synergy_hours"
+            android:textColor="#5F5F5F"
+            android:textSize="15sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="4dp"
+            android:lineSpacingExtra="2dp"
+            android:text="@string/help_synergy_hours_note"
+            android:textColor="#5F5F5F"
+            android:textSize="14sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSynergyLandline"
+            style="@style/SportHubHelpContactButton"
+            android:text="@string/help_landline_action" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSynergyMobile"
+            style="@style/SportHubHelpContactButton"
+            android:text="@string/help_synergy_mobile_action" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSynergyEmail"
+            style="@style/SportHubHelpContactButton"
+            android:text="@string/help_synergy_email_action" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSynergyAddress"
+            style="@style/SportHubHelpContactButton"
+            android:text="@string/help_synergy_address_action" />
+    </LinearLayout>
+</LinearLayout>
