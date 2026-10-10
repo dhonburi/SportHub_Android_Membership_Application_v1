@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Lifecycle;
 
 import com.example.sporthubandroidmembershipapplicationv1.models.MemberProfileResponse;
 import com.example.sporthubandroidmembershipapplicationv1.models.TopUpBalanceRequest;
@@ -98,6 +99,15 @@ public class ProfileFragment extends Fragment {
         updateBalanceText();
         setClickListeners();
         loadMemberProfile();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (layoutRewards != null) {
+            layoutRewards.setEnabled(true);
+        }
     }
 
     private void loadMemberProfile() {
@@ -272,11 +282,39 @@ public class ProfileFragment extends Fragment {
                     .commit();
         });
 
-        layoutRewards.setOnClickListener(view ->
-                showMessage(
-                        "Rewards details will be added later."
-                )
-        );
+        layoutRewards.setOnClickListener(view -> {
+            if (getParentFragmentManager().isStateSaved()) {
+                return;
+            }
+
+            // Keep the Profile tab and session intact while showing this child page.
+            view.setEnabled(false);
+
+            RewardsFragment rewardsFragment = new RewardsFragment();
+
+            getParentFragmentManager()
+                    .beginTransaction()
+                    .setReorderingAllowed(true)
+                    .setCustomAnimations(
+                            R.anim.slide_in_right,
+                            R.anim.slide_out_left,
+                            R.anim.slide_in_left,
+                            R.anim.slide_out_right
+                    )
+                    .hide(ProfileFragment.this)
+                    .setMaxLifecycle(
+                            ProfileFragment.this,
+                            Lifecycle.State.STARTED
+                    )
+                    .add(
+                            R.id.fragmentContainer,
+                            rewardsFragment,
+                            "rewards_preview"
+                    )
+                    .setPrimaryNavigationFragment(rewardsFragment)
+                    .addToBackStack("rewards")
+                    .commit();
+        });
 
         layoutMemberships.setOnClickListener(view -> {
             getParentFragmentManager()
