@@ -4,10 +4,14 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.SystemClock;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Patterns;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
@@ -31,6 +35,13 @@ import com.example.sporthubandroidmembershipapplicationv1.session.MemberSession;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.Locale;
+import java.io.InterruptedIOException;
+import java.net.ConnectException;
+import java.net.NoRouteToHostException;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
+import javax.net.ssl.SSLException;
+import com.google.gson.JsonParseException;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -46,6 +57,18 @@ public class LoginActivity extends AppCompatActivity {
 
     private boolean loginInProgress = false;
     private Call<LoginResponse> loginCall;
+    private long loginStartedAtMs;
+    private CharSequence originalLoginButtonText;
+    private boolean slowLoginNoticeShowing;
+    private final Handler loginProgressHandler = new Handler(Looper.getMainLooper());
+    private final Runnable slowLoginNotice = () -> {
+        if (!loginInProgress || isFinishing() || isDestroyed()) return;
+        TextView alertText = findViewById(R.id.alertText);
+        alertText.setTextColor(Color.DKGRAY);
+        alertText.setText("SportHub is taking longer than usual to respond. Please wait.");
+        alertText.setVisibility(View.VISIBLE);
+        slowLoginNoticeShowing = true;
+    };
 
     private TextInputLayout loginEmailField;
     private TextInputLayout loginPasswordField;
@@ -180,6 +203,7 @@ public class LoginActivity extends AppCompatActivity {
         });
         String reason = getIntent().getStringExtra(com.example.sporthubandroidmembershipapplicationv1.security.AppLockManager.EXTRA_LOGIN_REASON);
         if (reason != null && !reason.isEmpty()) IncorrectLogin(reason);
+        ApiClient.warmUpAuthenticationService();
     }
 
     public void CheckLogin(View view) {
@@ -274,6 +298,7 @@ public class LoginActivity extends AppCompatActivity {
         loginCall = ApiClient
                 .getAuthApiService()
                 .login(loginRequest);
+        loginStartedAtMs = SystemClock.elapsedRealtime();
 
         loginCall.enqueue(
                 new Callback<LoginResponse>() {
@@ -285,6 +310,11 @@ public class LoginActivity extends AppCompatActivity {
                     ) {
                         if (isFinishing() || isDestroyed()) {
                             return;
+                        }
+
+                        if ((getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+                            Log.d("SportHubLogin", "Login HTTP " + response.code()
+                                    + " after " + (SystemClock.elapsedRealtime() - loginStartedAtMs) + " ms");
                         }
 
                         SetLoginLoading(
@@ -360,9 +390,12 @@ public class LoginActivity extends AppCompatActivity {
 
 
 
-                        IncorrectLogin(
-                                "Unable to connect. Check your internet connection and try again."
-                        );
+                        if ((getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+                            Log.d("SportHubLogin", "Login failed after "
+                                    + (SystemClock.elapsedRealtime() - loginStartedAtMs)
+                                    + " ms; " + throwable.getClass().getSimpleName());
+                        }
+                        IncorrectLogin(ConnectionFailureMessage(throwable));
                     }
                 }
         );
@@ -373,6 +406,21 @@ public class LoginActivity extends AppCompatActivity {
             boolean loading
     ) {
         loginInProgress = loading;
+        loginProgressHandler.removeCallbacks(slowLoginNotice);
+
+        if (loginButton instanceof Button) {
+            Button button = (Button) loginButton;
+            if (originalLoginButtonText == null) originalLoginButtonText = button.getText();
+            button.setText(loading ? "Signing in…" : originalLoginButtonText);
+        }
+
+        if (loading) {
+            slowLoginNoticeShowing = false;
+            loginProgressHandler.postDelayed(slowLoginNotice, 8_000);
+        } else if (slowLoginNoticeShowing) {
+            slowLoginNoticeShowing = false;
+            ClearGeneralLoginMessage();
+        }
 
         loginButton.setEnabled(!loading);
         loginEmailField.setEnabled(!loading);
@@ -402,6 +450,29 @@ public class LoginActivity extends AppCompatActivity {
             startActivity(com.example.sporthubandroidmembershipapplicationv1.security.AppLockManager.get().homeIntent(this));
         } else startActivity(new Intent(this, PinActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
         finish();
+    }
+
+    private String ConnectionFailureMessage(Throwable throwable) {
+        // Classify the actual failure without logging credentials or tokens.
+        Throwable cause = throwable;
+        for (int depth = 0; cause != null && depth < 8; depth++, cause = cause.getCause()) {
+            if (cause instanceof SocketTimeoutException
+                    || cause instanceof InterruptedIOException) {
+                return "SportHub took too long to respond. Please try again.";
+            }
+            if (cause instanceof UnknownHostException
+                    || cause instanceof ConnectException
+                    || cause instanceof NoRouteToHostException) {
+                return "Unable to reach SportHub. Check your internet connection and try again.";
+            }
+            if (cause instanceof SSLException) {
+                return "A secure connection to SportHub could not be established. Please try again.";
+            }
+            if (cause instanceof JsonParseException) {
+                return "SportHub returned an unexpected response. Please try again.";
+            }
+        }
+        return "Unable to connect to SportHub. Please check your connection and try again.";
     }
 
     private String FormatDisplayNameFromEmail(
@@ -539,6 +610,7 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        loginProgressHandler.removeCallbacks(slowLoginNotice);
         if (loginCall != null
                 && !loginCall.isCanceled()) {
 

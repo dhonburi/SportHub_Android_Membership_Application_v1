@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
@@ -60,13 +61,27 @@ public final class AppLockManager implements Application.ActivityLifecycleCallba
     private boolean protectedActivity(Activity a) {
         return !(a instanceof LoginActivity) && !(a instanceof RegisterActivity) && !(a instanceof PinActivity);
     }
+    private void protectRecents(Activity a) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // Hide task previews without hiding the live activity during an
+            // ordinary Settings/Profile transition or a predictive Back gesture.
+            a.setRecentsScreenshotEnabled(false);
+        } else {
+            // Older Android versions have no separate task-preview control.
+            // Keep their protected windows secure even while unlocked.
+            a.getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+        }
+    }
     private void cover(Activity a) {
-        a.getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+        if ((a.getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_SECURE) == 0)
+            a.getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
         a.getWindow().getDecorView().setVisibility(View.INVISIBLE);
     }
     private void reveal(Activity a) {
         a.getWindow().getDecorView().setVisibility(View.VISIBLE);
-        a.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                && (a.getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_SECURE) != 0)
+            a.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
     }
     public void authenticated() {
         unlocked = true; routing = false; backgroundAt = -1;
@@ -118,7 +133,10 @@ public final class AppLockManager implements Application.ActivityLifecycleCallba
     }
     @Override public void onActivityCreated(Activity a, Bundle state) {
         activities.add(a);
-        if (protectedActivity(a) && (!unlocked || new MemberSession(app).isExpired())) cover(a);
+        if (protectedActivity(a)) {
+            protectRecents(a);
+            if (!unlocked || new MemberSession(app).isExpired()) cover(a);
+        }
     }
     @Override public void onActivityStarted(Activity a) {
         if (started.isEmpty() && backgroundAt >= 0) {
@@ -132,10 +150,18 @@ public final class AppLockManager implements Application.ActivityLifecycleCallba
         if (a instanceof LoginActivity || a instanceof PinActivity) routing = false;
         guard(a);
     }
-    @Override public void onActivityPaused(Activity a) { if (protectedActivity(a)) cover(a); }
+    @Override public void onActivityPaused(Activity a) {
+        // onPause also runs when another SportHub activity opens or finishes.
+        // Keep an authenticated page drawable for that navigation animation.
+        // A real lock must still hide it immediately.
+        if (protectedActivity(a) && (!unlocked || new MemberSession(app).isExpired())) cover(a);
+    }
     @Override public void onActivityStopped(Activity a) {
         started.remove(a);
         if (started.isEmpty() && !a.isChangingConfigurations()) {
+            // Only an empty started set means the whole app left the screen.
+            // Cover its protected pages then, not every internal page switch.
+            for (Activity activity : activities) if (protectedActivity(activity)) cover(activity);
             backgroundAt = SystemClock.elapsedRealtime(); handler.removeCallbacks(expiry);
             handler.postDelayed(backgroundLock, SessionPolicy.BACKGROUND_GRACE_MS);
         }

@@ -31,7 +31,9 @@ public class AuthService
 
         User? user =
             await _dbContext.Users
-                .AsNoTracking()
+                // Keep the authenticated user in this request's DbContext so
+                // session issuance can reuse the verified account snapshot.
+                .AsTracking()
                 .Include(userAccount => userAccount.Member)
                 .SingleOrDefaultAsync(
                     userAccount =>

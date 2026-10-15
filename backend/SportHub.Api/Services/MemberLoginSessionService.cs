@@ -15,7 +15,15 @@ public sealed class MemberLoginSessionService
 
     public async Task<(string Token, MemberLoginSession Session)> CreateAsync(int userId, CancellationToken cancellationToken)
     {
-        var user = await _db.Users.SingleAsync(u => u.UserId == userId && u.IsActive, cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
+        // AuthService and this service share one request-scoped DbContext.
+        // Reuse the account whose password was just verified instead of making
+        // a second SQL read. Never cache it across requests or PIN unlocks.
+        var user = _db.Users.Local.SingleOrDefault(u => u.UserId == userId);
+        if (user == null)
+            user = await _db.Users.SingleAsync(u => u.UserId == userId && u.IsActive, cancellationToken);
+        if (!user.IsActive)
+            throw new InvalidOperationException("An inactive account cannot create a member session.");
         var now = DateTime.UtcNow;
         var token = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
         var session = new MemberLoginSession
