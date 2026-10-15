@@ -31,6 +31,8 @@ public class SportHubApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        com.example.sporthubandroidmembershipapplicationv1.network.ApiClient.initialize(this);
+        com.example.sporthubandroidmembershipapplicationv1.security.AppLockManager.install(this);
 
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
             private final Map<Activity, RippleObserver> observers =

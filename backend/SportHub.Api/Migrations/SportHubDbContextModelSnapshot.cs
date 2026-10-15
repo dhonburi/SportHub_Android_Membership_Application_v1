@@ -140,6 +140,23 @@ namespace SportHub.Api.Migrations
                         });
                 });
 
+            modelBuilder.Entity("SportHub.Api.Models.MemberLoginSession", b =>
+                {
+                    b.Property<Guid>("SessionId").ValueGeneratedOnAdd().HasColumnType("uniqueidentifier");
+                    b.Property<string>("CredentialStamp").IsRequired().HasMaxLength(64).HasColumnType("nvarchar(64)");
+                    b.Property<DateTime>("ExpiresAtUtc").HasColumnType("datetime2");
+                    b.Property<DateTime>("IssuedAtUtc").HasColumnType("datetime2");
+                    b.Property<int>("MemberId").HasColumnType("int");
+                    b.Property<DateTime?>("RevokedAtUtc").HasColumnType("datetime2");
+                    b.Property<string>("TokenHash").IsRequired().HasMaxLength(64).HasColumnType("nvarchar(64)");
+                    b.Property<int>("UserId").HasColumnType("int");
+                    b.HasKey("SessionId");
+                    b.HasIndex("ExpiresAtUtc");
+                    b.HasIndex("TokenHash").IsUnique();
+                    b.HasIndex("UserId");
+                    b.ToTable("MemberLoginSessions");
+                });
+
             modelBuilder.Entity("SportHub.Api.Models.MemberMembership", b =>
                 {
                     b.Property<int>("MemberMembershipId")
@@ -312,6 +329,13 @@ namespace SportHub.Api.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("SportHub.Api.Models.MemberLoginSession", b =>
+                {
+                    b.HasOne("SportHub.Api.Models.User", "User").WithMany().HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade).IsRequired();
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SportHub.Api.Models.GateEntryProcessing", b =>

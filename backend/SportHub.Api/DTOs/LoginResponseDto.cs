@@ -16,5 +16,9 @@ public class LoginResponseDto
 
     public DateTime? StaffAccessTokenExpiresAtUtc { get; set; }
 
+    public string? MemberAccessToken { get; set; }
+    public long? MemberSessionExpiresAtUnixMs { get; set; }
+    public long ServerTimeUnixMs { get; set; }
+
     public string Message { get; set; } = string.Empty;
 }

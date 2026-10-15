@@ -11,16 +11,19 @@ namespace SportHub.Api.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly AuthService _authService;
+    private readonly MemberLoginSessionService _sessions;
     private readonly StaffTokenService _staffTokenService;
     private readonly ILogger<AuthController> _logger;
 
     public AuthController(
         AuthService authService,
+        MemberLoginSessionService sessions,
         StaffTokenService staffTokenService,
         ILogger<AuthController> logger
     )
     {
         _authService = authService;
+        _sessions = sessions;
         _staffTokenService = staffTokenService;
         _logger = logger;
     }
@@ -47,7 +50,34 @@ public class AuthController : ControllerBase
                 staffToken.ExpiresAtUtc;
         }
 
+        if (response.Success && response.UserId is int memberUserId)
+        {
+            var issued = await _sessions.CreateAsync(memberUserId, HttpContext.RequestAborted);
+            response.MemberAccessToken = issued.Token;
+            response.MemberSessionExpiresAtUnixMs = new DateTimeOffset(issued.Session.ExpiresAtUtc).ToUnixTimeMilliseconds();
+            response.ServerTimeUnixMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        }
         return Ok(response);
+    }
+
+    [HttpGet("session")]
+    public ActionResult<SessionResponseDto> Session()
+    {
+        var session = (SportHub.Api.Models.MemberLoginSession)HttpContext.Items[MemberLoginSessionService.ContextKey]!;
+        return Ok(new SessionResponseDto
+        {
+            MemberId = session.MemberId,
+            MemberSessionExpiresAtUnixMs = new DateTimeOffset(DateTime.SpecifyKind(session.ExpiresAtUtc, DateTimeKind.Utc)).ToUnixTimeMilliseconds(),
+            ServerTimeUnixMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+        });
+    }
+
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout(CancellationToken cancellationToken)
+    {
+        var session = (SportHub.Api.Models.MemberLoginSession)HttpContext.Items[MemberLoginSessionService.ContextKey]!;
+        await _sessions.RevokeAsync(session.SessionId, cancellationToken);
+        return NoContent();
     }
 
     [HttpPost("register")]

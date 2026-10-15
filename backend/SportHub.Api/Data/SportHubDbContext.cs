@@ -14,6 +14,7 @@ public class SportHubDbContext : DbContext
     public DbSet<Member> Members => Set<Member>();
 
     public DbSet<User> Users => Set<User>();
+    public DbSet<MemberLoginSession> MemberLoginSessions => Set<MemberLoginSession>();
 
     public DbSet<MembershipPlan> MembershipPlans =>
         Set<MembershipPlan>();
@@ -30,6 +31,16 @@ public class SportHubDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<MemberLoginSession>(entity =>
+        {
+            entity.HasKey(session => session.SessionId);
+            entity.Property(session => session.TokenHash).HasMaxLength(64).IsRequired();
+            entity.Property(session => session.CredentialStamp).HasMaxLength(64).IsRequired();
+            entity.HasIndex(session => session.TokenHash).IsUnique();
+            entity.HasIndex(session => session.ExpiresAtUtc);
+            entity.HasOne(session => session.User).WithMany().HasForeignKey(session => session.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
 
         modelBuilder.Entity<Member>()
             .HasIndex(member => member.MemberNumber)

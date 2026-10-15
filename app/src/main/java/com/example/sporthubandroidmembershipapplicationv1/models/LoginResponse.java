@@ -10,6 +10,9 @@ public class LoginResponse {
     private String staffAccessToken;
     private String staffAccessTokenExpiresAtUtc;
     private String message;
+    private String memberAccessToken;
+    private Long memberSessionExpiresAtUnixMs;
+    private Long serverTimeUnixMs;
 
     public LoginResponse() {
     }
@@ -80,4 +83,7 @@ public class LoginResponse {
     public void setMessage(String message) {
         this.message = message;
     }
+    public String getMemberAccessToken() { return memberAccessToken; }
+    public Long getMemberSessionExpiresAtUnixMs() { return memberSessionExpiresAtUnixMs; }
+    public Long getServerTimeUnixMs() { return serverTimeUnixMs; }
 }

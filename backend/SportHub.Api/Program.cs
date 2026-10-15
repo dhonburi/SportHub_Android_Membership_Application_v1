@@ -11,7 +11,20 @@ var builder = WebApplication.CreateBuilder(args);
 // Controllers and Swagger.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http, Scheme = "bearer",
+        Description = "Paste memberAccessToken for member/session routes, or staffAccessToken for gate entry."
+    });
+    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        { new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+          { Reference = new Microsoft.OpenApi.Models.OpenApiReference
+            { Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme, Id = "Bearer" } }, Array.Empty<string>() }
+    });
+});
 
 // Database.
 builder.Services.AddDbContext<SportHubDbContext>(
@@ -30,6 +43,7 @@ builder.Services.AddScoped<
 >();
 
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<MemberLoginSessionService>();
 builder.Services.AddSingleton<QrTokenService>();
 
 // Staff tokens must use their own secret, separate from QR tokens.
@@ -113,6 +127,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseRouting();
 app.UseAuthentication();
+app.UseMiddleware<MemberSessionAuthorizationMiddleware>();
 app.UseAuthorization();
 
 // Protect the existing gate controller without replacing

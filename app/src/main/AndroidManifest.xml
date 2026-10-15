@@ -11,7 +11,7 @@
 
     <application
         android:name=".SportHubApplication"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:hardwareAccelerated="true"
@@ -21,6 +21,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SportHubAndroidMembershipApplicationV1"
         android:usesCleartextTraffic="true">
+
+        <activity android:name=".PinActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".RegisterActivity"

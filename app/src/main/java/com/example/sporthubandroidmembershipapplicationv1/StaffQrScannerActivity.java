@@ -364,9 +364,7 @@ public class StaffQrScannerActivity extends AppCompatActivity {
     }
 
     private void redirectToStaffLogin(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-        startActivity(new Intent(this, LoginActivity.class));
-        finish();
+        com.example.sporthubandroidmembershipapplicationv1.security.AppLockManager.get().forceLogin(this, message);
     }
 
     private void showReadyState() {

@@ -18,4 +18,8 @@ public interface AuthApiService {
 
     @POST("api/Auth/register")
     Call<RegisterResponse> register(@Body RegisterRequest registerRequest);
+    @retrofit2.http.GET("api/Auth/session")
+    Call<com.example.sporthubandroidmembershipapplicationv1.models.SessionResponse> session();
+    @POST("api/Auth/logout")
+    Call<Void> logout(@retrofit2.http.Header("Authorization") String authorization);
 }

@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -39,29 +38,11 @@ import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private static final String LOG_TAG = "SPORT_HUB_LOGIN";
 
     /*
      * false = use existing mock accounts
      * true  = use the Azure database-backed API
      */
-    private static final boolean USE_API_LOGIN = true;
-
-    private final String[] validUsernames = {
-            "kyle",
-            "solomon",
-            "dhon",
-            "member",
-            "admin"
-    };
-
-    private final String[] validPasswords = {
-            "Kyle123!@",
-            "Solomon123!@",
-            "Dhon123!@",
-            "Member123!@",
-            "Admin123!@"
-    };
 
     private boolean loginInProgress = false;
     private Call<LoginResponse> loginCall;
@@ -97,6 +78,13 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        MemberSession remembered = new MemberSession(this);
+        if (getIntent().getStringExtra(com.example.sporthubandroidmembershipapplicationv1.security.AppLockManager.EXTRA_LOGIN_REASON) == null
+                && remembered.hasLogin() && !remembered.isExpired()) {
+            startActivity(new Intent(this, PinActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+            finish(); return;
+        }
+        if (remembered.hasLogin() && remembered.isExpired()) remembered.invalidate();
 
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
@@ -126,12 +114,7 @@ public class LoginActivity extends AppCompatActivity {
                 }
         );
 
-        if (!USE_API_LOGIN) {
-            TextView emailLabel = findViewById(R.id.loginEmailLabel);
-            emailLabel.setText("Username *");
-            loginEmailInput.setHint("Enter username");
-            loginEmailInput.setInputType(InputType.TYPE_CLASS_TEXT);
-        }
+
 
         getWindow().setNavigationBarColor(
                 Color.parseColor("#181818")
@@ -195,6 +178,8 @@ public class LoginActivity extends AppCompatActivity {
 
             registrationLauncher.launch(intent);
         });
+        String reason = getIntent().getStringExtra(com.example.sporthubandroidmembershipapplicationv1.security.AppLockManager.EXTRA_LOGIN_REASON);
+        if (reason != null && !reason.isEmpty()) IncorrectLogin(reason);
     }
 
     public void CheckLogin(View view) {
@@ -225,14 +210,11 @@ public class LoginActivity extends AppCompatActivity {
 
         if (usernameOrEmail.isEmpty()) {
             loginEmailField.setError(
-                    USE_API_LOGIN
-                            ? "Email address is required."
-                            : "Username is required."
+                    "Email address is required."
             );
 
             valid = false;
-        } else if (USE_API_LOGIN
-                && !Patterns.EMAIL_ADDRESS
+        } else if (!Patterns.EMAIL_ADDRESS
                 .matcher(usernameOrEmail)
                 .matches()) {
 
@@ -266,47 +248,10 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         // Registration rules must not prevent existing accounts signing in.
-        if (USE_API_LOGIN) {
-            LoginWithApi(
-                    view,
-                    usernameOrEmail,
-                    password
-            );
-        } else {
-            LoginWithMockAccount(
-                    usernameOrEmail,
-                    password
-            );
-        }
+        LoginWithApi(view, usernameOrEmail, password);
     }
 
-    private void LoginWithMockAccount(
-            String username,
-            String password
-    ) {
-        String lowercaseUsername =
-                username.toLowerCase(Locale.ROOT);
 
-        for (int i = 0; i < validUsernames.length; i++) {
-
-            if (lowercaseUsername.equals(validUsernames[i])
-                    && password.equals(validPasswords[i])) {
-
-                String formattedUsername =
-                        validUsernames[i]
-                                .substring(0, 1)
-                                .toUpperCase(Locale.ROOT)
-                                + validUsernames[i].substring(1);
-
-                LaunchHome(formattedUsername);
-                return;
-            }
-        }
-
-        IncorrectLogin(
-                "Incorrect Username or Password"
-        );
-    }
 
     private void LoginWithApi(
             View loginButton,
@@ -318,10 +263,7 @@ public class LoginActivity extends AppCompatActivity {
                 true
         );
 
-        Log.d(
-                LOG_TAG,
-                "Starting Azure login request for: " + email
-        );
+
 
         LoginRequest loginRequest =
                 new LoginRequest(
@@ -350,11 +292,7 @@ public class LoginActivity extends AppCompatActivity {
                                 false
                         );
 
-                        Log.d(
-                                LOG_TAG,
-                                "Received HTTP response: "
-                                        + response.code()
-                        );
+
 
                         LoginResponse loginResponse =
                                 response.body();
@@ -363,11 +301,7 @@ public class LoginActivity extends AppCompatActivity {
                                 && loginResponse != null
                                 && loginResponse.isSuccess()) {
 
-                            Log.d(
-                                    LOG_TAG,
-                                    "Login successful. Member number: "
-                                            + loginResponse.getMemberNumber()
-                            );
+
 
                             LaunchHomeFromApi(
                                     email,
@@ -402,13 +336,7 @@ public class LoginActivity extends AppCompatActivity {
                                     loginResponse.getMessage();
                         }
 
-                        Log.e(
-                                LOG_TAG,
-                                "Login rejected. HTTP status: "
-                                        + response.code()
-                                        + ". Message: "
-                                        + errorMessage
-                        );
+
 
                         IncorrectLogin(errorMessage);
                     }
@@ -430,11 +358,7 @@ public class LoginActivity extends AppCompatActivity {
                                 false
                         );
 
-                        Log.e(
-                                LOG_TAG,
-                                "Azure login request failed",
-                                throwable
-                        );
+
 
                         IncorrectLogin(
                                 "Unable to connect. Check your internet connection and try again."
@@ -464,70 +388,19 @@ public class LoginActivity extends AppCompatActivity {
         );
     }
 
-    private void LaunchHomeFromApi(
-            String email,
-            LoginResponse loginResponse
-    ) {
-        if (loginResponse.getMemberId() == null
-                || loginResponse.getMemberNumber() == null
-                || loginResponse
-                .getMemberNumber()
-                .trim()
-                .isEmpty()) {
-
-            IncorrectLogin(
-                    "Your member profile could not be loaded."
-            );
-
-            return;
+    private void LaunchHomeFromApi(String email, LoginResponse loginResponse) {
+        if (loginResponse.getMemberId() == null || loginResponse.getMemberNumber() == null
+                || loginResponse.getMemberNumber().trim().isEmpty()) {
+            IncorrectLogin("Your member profile could not be loaded."); return;
         }
-
-        MemberSession memberSession =
-                new MemberSession(this);
-
-        memberSession.save(
-                loginResponse.getMemberId(),
-                loginResponse.getMemberNumber(),
-                loginResponse.isAdmin(),
-                loginResponse.getStaffAccessToken()
-        );
-
-        String displayName =
-                FormatDisplayNameFromEmail(email);
-
-        Intent intent = new Intent(
-                LoginActivity.this,
-                HomeActivity.class
-        );
-
-        intent.putExtra(
-                "Username",
-                displayName
-        );
-
-        if (loginResponse.getUserId() != null) {
-            intent.putExtra(
-                    "UserId",
-                    loginResponse.getUserId()
-            );
-        }
-
-        intent.putExtra(
-                "MemberId",
-                loginResponse.getMemberId()
-        );
-
-        intent.putExtra(
-                "MemberNumber",
-                loginResponse.getMemberNumber()
-        );
-
-        intent.putExtra(
-                "OPEN_FRAGMENT",
-                "QR"
-        );
-
-        startActivity(intent);
+        MemberSession session = new MemberSession(this);
+        try { session.saveLogin(loginResponse, FormatDisplayNameFromEmail(email)); }
+        catch (IllegalStateException error) { IncorrectLogin(error.getMessage()); return; }
+        ((EditText)findViewById(R.id.editTextPassword)).setText("");
+        if (session.hasPin()) {
+            com.example.sporthubandroidmembershipapplicationv1.security.AppLockManager.get().authenticated();
+            startActivity(com.example.sporthubandroidmembershipapplicationv1.security.AppLockManager.get().homeIntent(this));
+        } else startActivity(new Intent(this, PinActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
         finish();
     }
 
@@ -557,25 +430,7 @@ public class LoginActivity extends AppCompatActivity {
                 + displayName.substring(1);
     }
 
-    public void LaunchHome(String username) {
-        Intent intent = new Intent(
-                LoginActivity.this,
-                HomeActivity.class
-        );
 
-        intent.putExtra(
-                "Username",
-                username
-        );
-
-        intent.putExtra(
-                "OPEN_FRAGMENT",
-                "QR"
-        );
-
-        startActivity(intent);
-        finish();
-    }
 
     private void AttachErrorClearing(
             EditText input,
