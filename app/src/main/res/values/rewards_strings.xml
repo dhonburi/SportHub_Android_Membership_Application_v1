@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rewards_heading">Redeem for points</string>
+    <string name="rewards_back">Back to Profile</string>
+    <string name="rewards_preview_label">Rewards preview</string>
+    <string name="rewards_unavailable_message">Rewards are not available in this MVP. The points, visit rule and reward options below are examples, not your points or entitlements.</string>
+    <string name="rewards_example_visit_rule">Example: 10 visits = 1 point</string>
+    <string name="rewards_example_points">8 example points</string>
+    <string name="rewards_example_max">10 max (example)</string>
+    <string name="rewards_example_progress_accessibility">Example points progress: 8 out of 10. This is not your points balance.</string>
+    <string name="reward_preview_cost_badge">%1$s · example</string>
+    <string name="reward_preview_card_accessibility">%1$s. Example cost: %2$s. Open preview information. Redemption unavailable.</string>
+    <string name="rewards_preview_dialog_title">Reward preview</string>
+    <string name="rewards_preview_dialog_message">%1$s\nExample cost: %2$s.\n\nRedemption is not available in this MVP. No points are earned, spent or saved here.</string>
+
+    <plurals name="reward_preview_points">
+        <item quantity="one">%d point</item>
+        <item quantity="other">%d points</item>
+    </plurals>
+
+    <string name="reward_preview_court_name">One Free Court Entry</string>
+    <string name="reward_preview_court_visual">1\nEntry</string>
+    <string name="reward_preview_booking_name">$10 Booking Discount</string>
+    <string name="reward_preview_booking_visual">−$10</string>
+    <string name="reward_preview_drink_name">Free Powerade / Beverage</string>
+    <string name="reward_preview_drink_visual">Free\nDrink</string>
+    <string name="reward_preview_membership_name">20% Off Membership</string>
+    <string name="reward_preview_membership_visual">20%\nOff</string>
+    <string name="reward_preview_friend_name">Bring a Friend</string>
+    <string name="reward_preview_friend_visual">+1\nFriend</string>
+    <string name="reward_preview_session_name">Sports Session</string>
+    <string name="reward_preview_session_visual">Sports\nSession</string>
+</resources>

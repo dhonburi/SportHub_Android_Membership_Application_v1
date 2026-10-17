@@ -5,16 +5,27 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
+import com.example.sporthubandroidmembershipapplicationv1.models.BalanceQrCodeResponse;
+import com.example.sporthubandroidmembershipapplicationv1.models.MemberMembershipResponse;
+import com.example.sporthubandroidmembershipapplicationv1.models.MembershipQrCodeResponse;
+import com.example.sporthubandroidmembershipapplicationv1.network.ApiClient;
+import com.example.sporthubandroidmembershipapplicationv1.session.MemberSession;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.WriterException;
@@ -22,142 +33,1342 @@ import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class QrFragment extends Fragment {
 
-    private ImageView imageViewQrCode;
-    private TextView textViewTimer;
-    private TextView textViewReferenceCode;
+    public static final String BALANCE_CHANGED_REQUEST_KEY =
+            "sporthub_member_balance_changed";
 
-    private Handler refreshHandler = new Handler(Looper.getMainLooper());
-    private Runnable refreshRunnable;
-    private long lastWindowGenerated = -1;
+    public static final String BALANCE_CHANGED_MEMBER_ID =
+            "member_id";
+
+    private boolean usingBalanceQr = false;
+
+    private ViewPager2 viewPagerQr;
+    private LinearLayout layoutQrDots;
+
+    private ProgressBar progressQrMembershipsLoading;
+    private TextView txtQrMembershipsMessage;
+    private AppCompatButton btnRetryQrMemberships;
+
+    private View cardCreditTopUp;
+    private View cardPurchaseMembership;
+
+    // Balance QR fallback - shown in the same slot as viewPagerQr
+    // whenever the member has no active membership.
+    private View cardBalanceQr;
+    private TextView txtBalanceQrTitle;
+    private ImageView imageViewBalanceQrCode;
+    private ProgressBar progressBalanceQrLoading;
+    private TextView txtBalanceQrError;
+    private TextView txtBalanceQrInsufficientMessage;
+    private TextView txtBalanceQrSubtitle;
+    private TextView txtBalanceQrRemaining;
+    private AppCompatButton btnBalanceQrRetry;
+
+    private QrPagerAdapter qrPagerAdapter;
+
+    private Call<List<MemberMembershipResponse>> membershipsCall;
+    private Call<MembershipQrCodeResponse> qrCodeCall;
+    private Call<BalanceQrCodeResponse> balanceQrCodeCall;
+
+    private Integer loadingMemberMembershipId;
+
+    private final Handler refreshHandler =
+            new Handler(Looper.getMainLooper());
+
+    private Runnable countdownRunnable;
+    private int activeQrPosition = -1;
+
+    private Runnable balanceCountdownRunnable;
+    private Bitmap balanceQrBitmap;
+    private long balanceQrExpiresAtElapsedRealtime = -1;
+
+    /*
+     * Each membership receives its own cached QR image and expiry time.
+     * Swiping between memberships no longer generates another token
+     * unless that membership's original token has expired.
+     */
+    private final Map<Integer, CachedQrCode> cachedQrCodes =
+            new HashMap<>();
+
+    private static class CachedQrCode {
+
+        private final Bitmap bitmap;
+        private final long expiresAtElapsedRealtime;
+
+        CachedQrCode(
+                Bitmap bitmap,
+                long expiresAtElapsedRealtime
+        ) {
+            this.bitmap = bitmap;
+            this.expiresAtElapsedRealtime =
+                    expiresAtElapsedRealtime;
+        }
+    }
+
+    private final ViewPager2.OnPageChangeCallback pageChangeCallback =
+            new ViewPager2.OnPageChangeCallback() {
+                @Override
+                public void onPageSelected(int position) {
+                    super.onPageSelected(position);
+                    selectPage(position);
+                }
+            };
 
     public QrFragment() {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_qr, container, false);
+    public View onCreateView(
+            LayoutInflater inflater,
+            ViewGroup container,
+            Bundle savedInstanceState
+    ) {
+        return inflater.inflate(
+                R.layout.fragment_qr,
+                container,
+                false
+        );
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    public void onViewCreated(
+            @NonNull View view,
+            @Nullable Bundle savedInstanceState
+    ) {
+        super.onViewCreated(
+                view,
+                savedInstanceState
+        );
 
-        imageViewQrCode = view.findViewById(R.id.imageViewQrCode);
-        textViewTimer = view.findViewById(R.id.textViewTimer);
-        textViewReferenceCode = view.findViewById(R.id.textViewReferenceCode);
+        usingBalanceQr = false;
 
-        startSystemClockSync();
+        bindViews(view);
+        configureQrPager();
+        setShortcutClickListeners();
+
+        getParentFragmentManager().setFragmentResultListener(
+                BALANCE_CHANGED_REQUEST_KEY,
+                getViewLifecycleOwner(),
+                (requestKey, result) -> {
+                    if (!isAdded()
+                            || getView() == null
+                            || result.getInt(BALANCE_CHANGED_MEMBER_ID, -1)
+                            != getLoggedInMemberId()) {
+
+                        return;
+                    }
+
+                    // Fetch authoritative balance and eligibility from the API.
+                    // Active membership QR codes and their timers stay unchanged.
+                    if (usingBalanceQr) {
+                        loadBalanceQrCode();
+                    }
+                }
+        );
+
+        btnRetryQrMemberships.setOnClickListener(
+                clickedView -> loadMemberships()
+        );
+
+        btnBalanceQrRetry.setOnClickListener(
+                clickedView -> loadBalanceQrCode()
+        );
+
+        loadMemberships();
     }
 
-    private void startSystemClockSync() {
+    @Override
+    public void onResume() {
+        super.onResume();
 
-        refreshRunnable = new Runnable() {
+        // Recover a stale insufficient-funds or connection-error state
+        // when returning to QR, without resetting a valid QR countdown.
+        if (usingBalanceQr
+                && getView() != null
+                && balanceQrCodeCall == null
+                && (txtBalanceQrInsufficientMessage.getVisibility()
+                == View.VISIBLE
+                || txtBalanceQrError.getVisibility() == View.VISIBLE)) {
+
+            loadBalanceQrCode();
+        }
+    }
+
+    private void bindViews(View view) {
+        viewPagerQr =
+                view.findViewById(R.id.viewPagerQr);
+
+        layoutQrDots =
+                view.findViewById(R.id.layoutQrDots);
+
+        progressQrMembershipsLoading =
+                view.findViewById(
+                        R.id.progressQrMembershipsLoading
+                );
+
+        txtQrMembershipsMessage =
+                view.findViewById(
+                        R.id.txtQrMembershipsMessage
+                );
+
+        btnRetryQrMemberships =
+                view.findViewById(
+                        R.id.btnRetryQrMemberships
+                );
+
+        cardCreditTopUp =
+                view.findViewById(
+                        R.id.cardCreditTopUp
+                );
+
+        cardPurchaseMembership =
+                view.findViewById(
+                        R.id.cardPurchaseMembership
+                );
+
+        cardBalanceQr =
+                view.findViewById(R.id.cardBalanceQr);
+
+        txtBalanceQrTitle =
+                view.findViewById(R.id.txtBalanceQrTitle);
+
+        imageViewBalanceQrCode =
+                view.findViewById(R.id.imageViewBalanceQrCode);
+
+        progressBalanceQrLoading =
+                view.findViewById(R.id.progressBalanceQrLoading);
+
+        txtBalanceQrError =
+                view.findViewById(R.id.txtBalanceQrError);
+
+        txtBalanceQrInsufficientMessage =
+                view.findViewById(R.id.txtBalanceQrInsufficientMessage);
+
+        txtBalanceQrSubtitle =
+                view.findViewById(R.id.txtBalanceQrSubtitle);
+
+        txtBalanceQrRemaining =
+                view.findViewById(R.id.txtBalanceQrRemaining);
+
+        btnBalanceQrRetry =
+                view.findViewById(R.id.btnBalanceQrRetry);
+    }
+
+    private void configureQrPager() {
+        qrPagerAdapter =
+                new QrPagerAdapter();
+
+        qrPagerAdapter.setRetryListener(
+                position ->
+                        loadQrForPosition(position)
+        );
+
+        viewPagerQr.setAdapter(
+                qrPagerAdapter
+        );
+
+        viewPagerQr.setOffscreenPageLimit(1);
+
+        viewPagerQr.registerOnPageChangeCallback(
+                pageChangeCallback
+        );
+
+        RecyclerView qrRecyclerView =
+                (RecyclerView) viewPagerQr.getChildAt(0);
+
+        qrRecyclerView.setItemAnimator(null);
+    }
+
+    private void setShortcutClickListeners() {
+        cardCreditTopUp.setOnClickListener(view -> {
+            if (getActivity() instanceof HomeActivity) {
+                ((HomeActivity) getActivity())
+                        .openProfileAndShowTopUp();
+            }
+        });
+
+        cardPurchaseMembership.setOnClickListener(view -> {
+            if (getActivity() instanceof HomeActivity) {
+                ((HomeActivity) getActivity())
+                        .openMembershipFromQr();
+            }
+        });
+    }
+
+    private int getLoggedInMemberId() {
+        MemberSession memberSession =
+                new MemberSession(requireContext());
+
+        return memberSession.getMemberId();
+    }
+
+    private void loadMemberships() {
+        int memberId =
+                getLoggedInMemberId();
+
+        if (memberId <= 0) {
+            hideBalanceQrCard();
+
+            showMembershipsMessage(
+                    "No logged-in member was found.",
+                    false
+            );
+
+            return;
+        }
+
+        showMembershipsLoading();
+
+        membershipsCall =
+                ApiClient.getMemberApiService()
+                        .getMemberMemberships(memberId);
+
+        membershipsCall.enqueue(
+                new Callback<List<MemberMembershipResponse>>() {
+                    @Override
+                    public void onResponse(
+                            Call<List<MemberMembershipResponse>> call,
+                            Response<List<MemberMembershipResponse>> response
+                    ) {
+                        if (!isAdded()
+                                || getView() == null) {
+
+                            return;
+                        }
+
+                        List<MemberMembershipResponse> memberships =
+                                response.body();
+
+                        if (response.isSuccessful()
+                                && memberships != null) {
+
+                            displayMemberships(memberships);
+                            return;
+                        }
+
+                        hideBalanceQrCard();
+
+                        showMembershipsMessage(
+                                "Unable to load your memberships.",
+                                true
+                        );
+                    }
+
+                    @Override
+                    public void onFailure(
+                            Call<List<MemberMembershipResponse>> call,
+                            Throwable throwable
+                    ) {
+                        if (call.isCanceled()
+                                || !isAdded()
+                                || getView() == null) {
+
+                            return;
+                        }
+
+                        hideBalanceQrCard();
+
+                        showMembershipsMessage(
+                                "Unable to connect to the server.",
+                                true
+                        );
+                    }
+                }
+        );
+    }
+
+    private void displayMemberships(
+            List<MemberMembershipResponse> memberships
+    ) {
+        progressQrMembershipsLoading.setVisibility(
+                View.GONE
+        );
+
+        btnRetryQrMemberships.setVisibility(
+                View.GONE
+        );
+
+        txtQrMembershipsMessage.setVisibility(
+                View.GONE
+        );
+
+        stopCountdown();
+        cachedQrCodes.clear();
+
+        qrPagerAdapter.submitMemberships(
+                memberships
+        );
+
+        usingBalanceQr = !hasActiveMembership(memberships);
+
+        if (usingBalanceQr) {
+            viewPagerQr.setVisibility(
+                    View.INVISIBLE
+            );
+
+            layoutQrDots.removeAllViews();
+
+            layoutQrDots.setVisibility(
+                    View.INVISIBLE
+            );
+
+            loadBalanceQrCode();
+            return;
+        }
+
+        hideBalanceQrCard();
+
+        viewPagerQr.setVisibility(
+                View.VISIBLE
+        );
+
+        createDots(memberships.size());
+
+        viewPagerQr.setCurrentItem(
+                0,
+                false
+        );
+
+        selectPage(0);
+    }
+
+    private boolean hasActiveMembership(
+            List<MemberMembershipResponse> memberships
+    ) {
+        for (MemberMembershipResponse membership : memberships) {
+            if ("Active".equalsIgnoreCase(membership.getStatus())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void selectPage(int position) {
+        updateDots(position);
+
+        MemberMembershipResponse membership =
+                qrPagerAdapter.getMembershipAt(
+                        position
+                );
+
+        if (membership == null) {
+            return;
+        }
+
+        stopCountdown();
+        activeQrPosition = position;
+
+        int memberMembershipId =
+                membership.getMemberMembershipId();
+
+        CachedQrCode cachedQrCode =
+                cachedQrCodes.get(
+                        memberMembershipId
+                );
+
+        /*
+         * If this membership already has an unexpired QR,
+         * display it and calculate the remaining time from
+         * its original backend expiry.
+         */
+        if (cachedQrCode != null
+                && cachedQrCode.expiresAtElapsedRealtime
+                > SystemClock.elapsedRealtime()) {
+
+            showCachedQrCode(
+                    position,
+                    cachedQrCode
+            );
+
+            startCountdown();
+            return;
+        }
+
+        /*
+         * Its cached token is missing or has genuinely
+         * expired, so a new token may now be requested.
+         */
+        cachedQrCodes.remove(
+                memberMembershipId
+        );
+
+        loadQrForPosition(position);
+    }
+
+    private void loadQrForPosition(int position) {
+        MemberMembershipResponse membership =
+                qrPagerAdapter.getMembershipAt(
+                        position
+                );
+
+        if (membership == null) {
+            return;
+        }
+
+        int memberMembershipId =
+                membership.getMemberMembershipId();
+
+        /*
+         * Avoid issuing the same request twice when
+         * ViewPager selects the initial page.
+         */
+        if (loadingMemberMembershipId != null
+                && loadingMemberMembershipId
+                == memberMembershipId
+                && qrCodeCall != null
+                && !qrCodeCall.isCanceled()) {
+
+            return;
+        }
+
+        stopCountdown();
+        activeQrPosition = position;
+
+        if ("Expired".equalsIgnoreCase(
+                membership.getStatus()
+        )) {
+            qrPagerAdapter.updateState(
+                    position,
+                    QrPagerAdapter.QrPageState.expired()
+            );
+
+            return;
+        }
+
+        qrPagerAdapter.updateState(
+                position,
+                QrPagerAdapter.QrPageState.loading()
+        );
+
+        if (qrCodeCall != null
+                && !qrCodeCall.isCanceled()) {
+
+            qrCodeCall.cancel();
+        }
+
+        int memberId =
+                getLoggedInMemberId();
+
+        if (memberId <= 0) {
+            qrPagerAdapter.updateState(
+                    position,
+                    QrPagerAdapter.QrPageState.error(
+                            "No logged-in member was found."
+                    )
+            );
+
+            return;
+        }
+
+        loadingMemberMembershipId =
+                memberMembershipId;
+
+        qrCodeCall =
+                ApiClient.getMemberApiService()
+                        .getMembershipQrCode(
+                                memberId,
+                                memberMembershipId
+                        );
+
+        qrCodeCall.enqueue(
+                new Callback<MembershipQrCodeResponse>() {
+                    @Override
+                    public void onResponse(
+                            Call<MembershipQrCodeResponse> call,
+                            Response<MembershipQrCodeResponse> response
+                    ) {
+                        if (loadingMemberMembershipId != null
+                                && loadingMemberMembershipId
+                                == memberMembershipId) {
+
+                            loadingMemberMembershipId = null;
+                        }
+
+                        if (!isAdded()
+                                || getView() == null
+                                || viewPagerQr.getCurrentItem()
+                                != position) {
+
+                            return;
+                        }
+
+                        MembershipQrCodeResponse qr =
+                                response.body();
+
+                        if (response.isSuccessful()
+                                && qr != null
+                                && qr.getQrToken() != null
+                                && !qr.getQrToken()
+                                .trim()
+                                .isEmpty()) {
+
+                            applyQrResult(
+                                    position,
+                                    qr
+                            );
+
+                            return;
+                        }
+
+                        if (response.code() == 409) {
+                            qrPagerAdapter.updateState(
+                                    position,
+                                    QrPagerAdapter
+                                            .QrPageState
+                                            .expired()
+                            );
+
+                            return;
+                        }
+
+                        qrPagerAdapter.updateState(
+                                position,
+                                QrPagerAdapter.QrPageState.error(
+                                        "Unable to load the QR code."
+                                )
+                        );
+                    }
+
+                    @Override
+                    public void onFailure(
+                            Call<MembershipQrCodeResponse> call,
+                            Throwable throwable
+                    ) {
+                        if (loadingMemberMembershipId != null
+                                && loadingMemberMembershipId
+                                == memberMembershipId) {
+
+                            loadingMemberMembershipId = null;
+                        }
+
+                        if (call.isCanceled()
+                                || !isAdded()
+                                || getView() == null
+                                || viewPagerQr.getCurrentItem()
+                                != position) {
+
+                            return;
+                        }
+
+                        qrPagerAdapter.updateState(
+                                position,
+                                QrPagerAdapter.QrPageState.error(
+                                        "Unable to connect to the server."
+                                )
+                        );
+                    }
+                }
+        );
+    }
+
+    private void applyQrResult(
+            int position,
+            MembershipQrCodeResponse qr
+    ) {
+        Bitmap bitmap =
+                generateQrCodeBitmap(
+                        qr.getQrToken()
+                );
+
+        if (bitmap == null) {
+            qrPagerAdapter.updateState(
+                    position,
+                    QrPagerAdapter.QrPageState.error(
+                            "Unable to generate the QR code."
+                    )
+            );
+
+            return;
+        }
+
+        int validitySeconds =
+                qr.getValiditySeconds() > 0
+                        ? Math.min(
+                        qr.getValiditySeconds(),
+                        60
+                )
+                        : 60;
+
+        long expiresAtElapsedRealtime =
+                SystemClock.elapsedRealtime()
+                        + (validitySeconds * 1000L);
+
+        activeQrPosition = position;
+
+        MemberMembershipResponse membership =
+                qrPagerAdapter.getMembershipAt(
+                        position
+                );
+
+        if (membership == null) {
+            return;
+        }
+
+        CachedQrCode cachedQrCode =
+                new CachedQrCode(
+                        bitmap,
+                        expiresAtElapsedRealtime
+                );
+
+        cachedQrCodes.put(
+                membership.getMemberMembershipId(),
+                cachedQrCode
+        );
+
+        showCachedQrCode(
+                position,
+                cachedQrCode
+        );
+
+        startCountdown();
+    }
+
+    private void showCachedQrCode(
+            int position,
+            CachedQrCode cachedQrCode
+    ) {
+        long remainingSeconds =
+                Math.max(
+                        0,
+                        (
+                                cachedQrCode
+                                        .expiresAtElapsedRealtime
+                                        - SystemClock.elapsedRealtime()
+                                        + 999
+                        ) / 1000
+                );
+
+        qrPagerAdapter.updateState(
+                position,
+                QrPagerAdapter.QrPageState.ready(
+                        cachedQrCode.bitmap,
+                        formatRemainingLabel(
+                                remainingSeconds
+                        )
+                )
+        );
+    }
+
+    private void startCountdown() {
+        countdownRunnable =
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!isAdded()
+                                || getView() == null
+                                || activeQrPosition < 0) {
+
+                            return;
+                        }
+
+                        MemberMembershipResponse membership =
+                                qrPagerAdapter.getMembershipAt(
+                                        activeQrPosition
+                                );
+
+                        if (membership == null) {
+                            return;
+                        }
+
+                        int memberMembershipId =
+                                membership
+                                        .getMemberMembershipId();
+
+                        CachedQrCode cachedQrCode =
+                                cachedQrCodes.get(
+                                        memberMembershipId
+                                );
+
+                        if (cachedQrCode == null) {
+                            loadQrForPosition(
+                                    activeQrPosition
+                            );
+
+                            return;
+                        }
+
+                        long remainingMillis =
+                                cachedQrCode
+                                        .expiresAtElapsedRealtime
+                                        - SystemClock.elapsedRealtime();
+
+                        if (remainingMillis <= 0) {
+                            cachedQrCodes.remove(
+                                    memberMembershipId
+                            );
+
+                            loadQrForPosition(
+                                    activeQrPosition
+                            );
+
+                            return;
+                        }
+
+                        showCachedQrCode(
+                                activeQrPosition,
+                                cachedQrCode
+                        );
+
+                        refreshHandler.postDelayed(
+                                this,
+                                1000
+                        );
+                    }
+                };
+
+        refreshHandler.postDelayed(
+                countdownRunnable,
+                1000
+        );
+    }
+
+    private void stopCountdown() {
+        if (countdownRunnable != null) {
+            refreshHandler.removeCallbacks(
+                    countdownRunnable
+            );
+
+            countdownRunnable = null;
+        }
+    }
+
+    // ---- Balance QR fallback ----
+
+    private void loadBalanceQrCode() {
+        if (!isAdded() || getView() == null || !usingBalanceQr) {
+            return;
+        }
+
+        stopBalanceCountdown();
+
+        cardBalanceQr.setVisibility(View.VISIBLE);
+        showBalanceQrLoading();
+
+        int memberId = getLoggedInMemberId();
+
+        if (memberId <= 0) {
+            showBalanceQrError("No logged-in member was found.");
+            return;
+        }
+
+        if (balanceQrCodeCall != null
+                && !balanceQrCodeCall.isCanceled()) {
+
+            balanceQrCodeCall.cancel();
+        }
+
+        balanceQrCodeCall =
+                ApiClient.getMemberApiService()
+                        .getBalanceQrCode(memberId);
+
+        balanceQrCodeCall.enqueue(
+                new Callback<BalanceQrCodeResponse>() {
+                    @Override
+                    public void onResponse(
+                            Call<BalanceQrCodeResponse> call,
+                            Response<BalanceQrCodeResponse> response
+                    ) {
+                        if (call.isCanceled()
+                                || call != balanceQrCodeCall
+                                || !isAdded()
+                                || getView() == null
+                                || !usingBalanceQr) {
+
+                            return;
+                        }
+
+                        balanceQrCodeCall = null;
+
+                        BalanceQrCodeResponse balanceQr =
+                                response.body();
+
+                        if (response.isSuccessful()
+                                && balanceQr != null
+                                && balanceQr.getQrToken() != null
+                                && !balanceQr.getQrToken()
+                                .trim()
+                                .isEmpty()) {
+
+                            applyBalanceQrResult(balanceQr);
+                            return;
+                        }
+
+                        if (response.code() == 409) {
+                            showBalanceQrInsufficientFunds();
+                            return;
+                        }
+
+                        showBalanceQrError(
+                                "Unable to load the QR code."
+                        );
+                    }
+
+                    @Override
+                    public void onFailure(
+                            Call<BalanceQrCodeResponse> call,
+                            Throwable throwable
+                    ) {
+                        if (call.isCanceled()
+                                || call != balanceQrCodeCall
+                                || !isAdded()
+                                || getView() == null
+                                || !usingBalanceQr) {
+
+                            return;
+                        }
+
+                        balanceQrCodeCall = null;
+
+                        showBalanceQrError(
+                                "Unable to connect to the server."
+                        );
+                    }
+                }
+        );
+    }
+
+    private void applyBalanceQrResult(BalanceQrCodeResponse balanceQr) {
+        Bitmap bitmap = generateQrCodeBitmap(balanceQr.getQrToken());
+
+        if (bitmap == null) {
+            showBalanceQrError("Unable to generate the QR code.");
+            return;
+        }
+
+        int validitySeconds =
+                balanceQr.getValiditySeconds() > 0
+                        ? Math.min(
+                        balanceQr.getValiditySeconds(),
+                        60
+                )
+                        : 60;
+
+        long expiresAtElapsedRealtime =
+                SystemClock.elapsedRealtime()
+                        + (validitySeconds * 1000L);
+
+        balanceQrBitmap = bitmap;
+        balanceQrExpiresAtElapsedRealtime =
+                expiresAtElapsedRealtime;
+
+        showBalanceQrReady(balanceQr.getBalance());
+        startBalanceCountdown();
+    }
+
+    private void showBalanceQrLoading() {
+        txtBalanceQrTitle.setText("Balance Access");
+
+        imageViewBalanceQrCode.setVisibility(View.INVISIBLE);
+        progressBalanceQrLoading.setVisibility(View.VISIBLE);
+        txtBalanceQrError.setVisibility(View.GONE);
+        txtBalanceQrInsufficientMessage.setVisibility(View.GONE);
+        btnBalanceQrRetry.setVisibility(View.GONE);
+        txtBalanceQrSubtitle.setVisibility(View.GONE);
+        txtBalanceQrRemaining.setVisibility(View.GONE);
+    }
+
+    private void showBalanceQrReady(double balance) {
+        txtBalanceQrTitle.setText("Balance Access");
+
+        imageViewBalanceQrCode.setImageBitmap(balanceQrBitmap);
+        imageViewBalanceQrCode.setVisibility(View.VISIBLE);
+        progressBalanceQrLoading.setVisibility(View.GONE);
+        txtBalanceQrError.setVisibility(View.GONE);
+        txtBalanceQrInsufficientMessage.setVisibility(View.GONE);
+        btnBalanceQrRetry.setVisibility(View.GONE);
+
+        txtBalanceQrSubtitle.setText(
+                String.format(Locale.getDefault(), "Balance: $%.2f", balance)
+        );
+        txtBalanceQrSubtitle.setVisibility(View.VISIBLE);
+
+        long remainingSeconds = Math.max(
+                0,
+                (
+                        balanceQrExpiresAtElapsedRealtime
+                                - SystemClock.elapsedRealtime()
+                                + 999
+                ) / 1000
+        );
+
+        txtBalanceQrRemaining.setText(formatRemainingLabel(remainingSeconds));
+        txtBalanceQrRemaining.setVisibility(View.VISIBLE);
+    }
+
+    private void showBalanceQrInsufficientFunds() {
+        stopBalanceCountdown();
+
+        txtBalanceQrTitle.setText("Insufficient Funds");
+
+        imageViewBalanceQrCode.setVisibility(View.GONE);
+        progressBalanceQrLoading.setVisibility(View.GONE);
+        txtBalanceQrError.setVisibility(View.GONE);
+        txtBalanceQrInsufficientMessage.setVisibility(View.VISIBLE);
+        btnBalanceQrRetry.setVisibility(View.GONE);
+        txtBalanceQrSubtitle.setVisibility(View.GONE);
+        txtBalanceQrRemaining.setVisibility(View.GONE);
+    }
+
+    private void showBalanceQrError(String message) {
+        stopBalanceCountdown();
+
+        txtBalanceQrTitle.setText("Balance Access");
+
+        imageViewBalanceQrCode.setVisibility(View.INVISIBLE);
+        progressBalanceQrLoading.setVisibility(View.GONE);
+        txtBalanceQrError.setText(message);
+        txtBalanceQrError.setVisibility(View.VISIBLE);
+        txtBalanceQrInsufficientMessage.setVisibility(View.GONE);
+        btnBalanceQrRetry.setVisibility(View.VISIBLE);
+        txtBalanceQrSubtitle.setVisibility(View.GONE);
+        txtBalanceQrRemaining.setVisibility(View.GONE);
+    }
+
+    private void hideBalanceQrCard() {
+        usingBalanceQr = false;
+
+        stopBalanceCountdown();
+
+        cardBalanceQr.setVisibility(View.INVISIBLE);
+        balanceQrBitmap = null;
+        balanceQrExpiresAtElapsedRealtime = -1;
+
+        if (balanceQrCodeCall != null
+                && !balanceQrCodeCall.isCanceled()) {
+
+            balanceQrCodeCall.cancel();
+        }
+    }
+
+    private void startBalanceCountdown() {
+        balanceCountdownRunnable = new Runnable() {
             @Override
             public void run() {
+                if (!isAdded() || getView() == null) {
+                    return;
+                }
 
-                long currentTimeMillis = System.currentTimeMillis();
-                long secondsPassedInMinute = (currentTimeMillis / 1000) % 60;
-                long secondsLeft = 60 - secondsPassedInMinute;
+                long remainingMillis =
+                        balanceQrExpiresAtElapsedRealtime
+                                - SystemClock.elapsedRealtime();
 
-                // Sync QR with the current minute
-                long currentMinuteWindow = currentTimeMillis / 60000;
+                if (remainingMillis <= 0) {
+                    loadBalanceQrCode();
+                    return;
+                }
 
-                updateQrForWindow(currentMinuteWindow);
+                long remainingSeconds = (remainingMillis + 999) / 1000;
 
-                textViewTimer.setText(
-                        String.format(
-                                Locale.getDefault(),
-                                "Updating in %ds...",
-                                secondsLeft
-                        )
+                txtBalanceQrRemaining.setText(
+                        formatRemainingLabel(remainingSeconds)
                 );
 
                 refreshHandler.postDelayed(this, 1000);
             }
         };
 
-        refreshHandler.post(refreshRunnable);
+        refreshHandler.postDelayed(balanceCountdownRunnable, 1000);
     }
 
-    private void updateQrForWindow(long windowId) {
-
-        if (windowId != lastWindowGenerated) {
-
-            lastWindowGenerated = windowId;
-
-            String uniqueData = "MEMBER-99821_" + windowId;
-            String refCode = "REF: 99821-" + (windowId % 10000);
-
-            textViewReferenceCode.setText(refCode);
-
-            Bitmap bitmap = generateQrCodeBitmap(uniqueData);
-
-            if (bitmap != null) {
-                imageViewQrCode.setImageBitmap(bitmap);
-            }
+    private void stopBalanceCountdown() {
+        if (balanceCountdownRunnable != null) {
+            refreshHandler.removeCallbacks(balanceCountdownRunnable);
+            balanceCountdownRunnable = null;
         }
     }
 
-    private Bitmap generateQrCodeBitmap(String text) {
+    // ---- Shared helpers (unchanged from before) ----
 
-        QRCodeWriter writer = new QRCodeWriter();
+    private String formatRemainingLabel(
+            long remainingSeconds
+    ) {
+        return String.format(
+                Locale.getDefault(),
+                "Refreshing in %ds...",
+                remainingSeconds
+        );
+    }
+
+    private Bitmap generateQrCodeBitmap(
+            String text
+    ) {
+        QRCodeWriter writer =
+                new QRCodeWriter();
 
         try {
+            Map<EncodeHintType, Object> hints =
+                    new HashMap<>();
 
-            Map<EncodeHintType, Object> hints = new HashMap<>();
-            hints.put(EncodeHintType.MARGIN, 1);
-
-            BitMatrix bitMatrix = writer.encode(
-                    text,
-                    BarcodeFormat.QR_CODE,
-                    512,
-                    512,
-                    hints
+            hints.put(
+                    EncodeHintType.MARGIN,
+                    1
             );
 
-            int width = bitMatrix.getWidth();
-            int height = bitMatrix.getHeight();
+            BitMatrix bitMatrix =
+                    writer.encode(
+                            text,
+                            BarcodeFormat.QR_CODE,
+                            512,
+                            512,
+                            hints
+                    );
 
-            Bitmap bitmap = Bitmap.createBitmap(
-                    width,
-                    height,
-                    Bitmap.Config.RGB_565
-            );
+            int width =
+                    bitMatrix.getWidth();
 
-            for (int x = 0; x < width; x++) {
+            int height =
+                    bitMatrix.getHeight();
 
-                for (int y = 0; y < height; y++) {
+            Bitmap bitmap =
+                    Bitmap.createBitmap(
+                            width,
+                            height,
+                            Bitmap.Config.RGB_565
+                    );
 
-                    bitmap.setPixel(
-                            x,
-                            y,
+            int[] pixels =
+                    new int[width * height];
+
+            for (int y = 0; y < height; y++) {
+                int rowOffset =
+                        y * width;
+
+                for (int x = 0; x < width; x++) {
+                    pixels[rowOffset + x] =
                             bitMatrix.get(x, y)
                                     ? Color.BLACK
-                                    : Color.WHITE
-                    );
+                                    : Color.WHITE;
                 }
             }
 
+            bitmap.setPixels(
+                    pixels,
+                    0,
+                    width,
+                    0,
+                    0,
+                    width,
+                    height
+            );
+
             return bitmap;
 
-        } catch (WriterException e) {
-            e.printStackTrace();
+        } catch (WriterException exception) {
+            exception.printStackTrace();
             return null;
         }
     }
 
+    private void createDots(
+            int membershipCount
+    ) {
+        layoutQrDots.removeAllViews();
+
+        for (int index = 0;
+             index < membershipCount;
+             index++) {
+
+            final int pagePosition =
+                    index;
+
+            View dot =
+                    new View(requireContext());
+
+            int dotSize =
+                    dpToPx(10);
+
+            int dotMargin =
+                    dpToPx(5);
+
+            LinearLayout.LayoutParams layoutParams =
+                    new LinearLayout.LayoutParams(
+                            dotSize,
+                            dotSize
+                    );
+
+            layoutParams.setMargins(
+                    dotMargin,
+                    0,
+                    dotMargin,
+                    0
+            );
+
+            dot.setLayoutParams(
+                    layoutParams
+            );
+
+            dot.setContentDescription(
+                    String.format(
+                            Locale.getDefault(),
+                            "Membership %d of %d",
+                            index + 1,
+                            membershipCount
+                    )
+            );
+
+            dot.setOnClickListener(
+                    clickedView ->
+                            viewPagerQr.setCurrentItem(
+                                    pagePosition,
+                                    true
+                            )
+            );
+
+            layoutQrDots.addView(dot);
+        }
+
+        layoutQrDots.setVisibility(
+                View.VISIBLE
+        );
+    }
+
+    private void updateDots(
+            int selectedPosition
+    ) {
+        if (layoutQrDots == null) {
+            return;
+        }
+
+        int dotCount =
+                layoutQrDots.getChildCount();
+
+        for (int index = 0;
+             index < dotCount;
+             index++) {
+
+            View dot =
+                    layoutQrDots.getChildAt(index);
+
+            dot.setBackgroundResource(
+                    index == selectedPosition
+                            ? R.drawable
+                            .membership_dot_active
+                            : R.drawable
+                            .membership_dot_inactive
+            );
+        }
+    }
+
+    private void showMembershipsLoading() {
+        viewPagerQr.setVisibility(
+                View.INVISIBLE
+        );
+
+        layoutQrDots.setVisibility(
+                View.INVISIBLE
+        );
+
+        txtQrMembershipsMessage.setText(
+                "Loading your memberships..."
+        );
+
+        txtQrMembershipsMessage.setVisibility(
+                View.GONE
+        );
+
+        btnRetryQrMemberships.setVisibility(
+                View.GONE
+        );
+
+        progressQrMembershipsLoading.setVisibility(
+                View.VISIBLE
+        );
+    }
+
+    private void showMembershipsMessage(
+            String message,
+            boolean showRetry
+    ) {
+        viewPagerQr.setVisibility(
+                View.INVISIBLE
+        );
+
+        layoutQrDots.setVisibility(
+                View.INVISIBLE
+        );
+
+        progressQrMembershipsLoading.setVisibility(
+                View.GONE
+        );
+
+        txtQrMembershipsMessage.setText(
+                message
+        );
+
+        txtQrMembershipsMessage.setVisibility(
+                View.VISIBLE
+        );
+
+        btnRetryQrMemberships.setVisibility(
+                showRetry
+                        ? View.VISIBLE
+                        : View.GONE
+        );
+    }
+
+    private int dpToPx(int dp) {
+        float density =
+                getResources()
+                        .getDisplayMetrics()
+                        .density;
+
+        return Math.round(
+                dp * density
+        );
+    }
+
     @Override
     public void onDestroyView() {
-        super.onDestroyView();
+        usingBalanceQr = false;
 
-        if (refreshHandler != null && refreshRunnable != null) {
-            refreshHandler.removeCallbacks(refreshRunnable);
+        stopCountdown();
+        stopBalanceCountdown();
+
+        viewPagerQr.unregisterOnPageChangeCallback(
+                pageChangeCallback
+        );
+
+        viewPagerQr.setAdapter(null);
+
+        if (membershipsCall != null
+                && !membershipsCall.isCanceled()) {
+
+            membershipsCall.cancel();
         }
+
+        if (qrCodeCall != null
+                && !qrCodeCall.isCanceled()) {
+
+            qrCodeCall.cancel();
+        }
+
+        if (balanceQrCodeCall != null
+                && !balanceQrCodeCall.isCanceled()) {
+
+            balanceQrCodeCall.cancel();
+        }
+
+        balanceQrCodeCall = null;
+
+        qrPagerAdapter = null;
+        activeQrPosition = -1;
+        loadingMemberMembershipId = null;
+
+        balanceQrBitmap = null;
+        balanceQrExpiresAtElapsedRealtime = -1;
+
+        cachedQrCodes.clear();
+
+        super.onDestroyView();
     }
 }

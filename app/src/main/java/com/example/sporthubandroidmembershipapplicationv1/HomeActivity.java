@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -20,8 +21,15 @@ import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.Lifecycle;
 
 public class HomeActivity extends AppCompatActivity {
+
+    private static final String TAG_HOME = "tab_home";
+    private static final String TAG_QR = "tab_qr";
+    private static final String TAG_PROFILE = "tab_profile";
 
     private LinearLayout navHome;
     private LinearLayout navQr;
@@ -37,6 +45,12 @@ public class HomeActivity extends AppCompatActivity {
 
     private Button btnSettings;
     private View headerLayout;
+
+    private Fragment homeTabFragment;
+    private Fragment qrTabFragment;
+    private Fragment profileTabFragment;
+
+    private String activeTabTag = TAG_HOME;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,8 +73,20 @@ public class HomeActivity extends AppCompatActivity {
                             systemBars.left,
                             systemBars.top,
                             systemBars.right,
-                            systemBars.bottom
+                            0
                     );
+
+                    View bottomNavigation =
+                            view.findViewById(R.id.bottomNavLayout);
+
+                    ViewGroup.MarginLayoutParams layoutParams =
+                            (ViewGroup.MarginLayoutParams)
+                                    bottomNavigation.getLayoutParams();
+
+                    layoutParams.bottomMargin =
+                            dpToPx(14) + systemBars.bottom;
+
+                    bottomNavigation.setLayoutParams(layoutParams);
 
                     return insets;
                 }
@@ -79,7 +105,6 @@ public class HomeActivity extends AppCompatActivity {
         txtProfile = findViewById(R.id.txtProfile);
 
         btnSettings = findViewById(R.id.btnSettings);
-
         headerLayout = findViewById(R.id.headerLayout);
 
         btnSettings.setOnClickListener(view -> {
@@ -87,11 +112,18 @@ public class HomeActivity extends AppCompatActivity {
                     HomeActivity.this,
                     SettingsActivity.class
             );
+
             startActivity(intent);
         });
 
+        getSupportFragmentManager()
+                .addOnBackStackChangedListener(
+                        this::updateHeaderForActiveScreen
+                );
+
         navHome.setOnClickListener(view -> {
-            loadFragment(new HomeFragment());
+            showTab(TAG_HOME, true);
+
             updateSelectedNavigation(
                     navHome,
                     iconHome,
@@ -100,7 +132,8 @@ public class HomeActivity extends AppCompatActivity {
         });
 
         navQr.setOnClickListener(view -> {
-            loadFragment(new QrFragment());
+            showTab(TAG_QR, true);
+
             updateSelectedNavigation(
                     navQr,
                     iconQr,
@@ -109,7 +142,8 @@ public class HomeActivity extends AppCompatActivity {
         });
 
         navProfile.setOnClickListener(view -> {
-            loadFragment(new ProfileFragment());
+            showTab(TAG_PROFILE, true);
+
             updateSelectedNavigation(
                     navProfile,
                     iconProfile,
@@ -121,7 +155,7 @@ public class HomeActivity extends AppCompatActivity {
                 getIntent().getStringExtra("OPEN_FRAGMENT");
 
         if ("QR".equals(openFragment)) {
-            loadFragment(new QrFragment());
+            showTab(TAG_QR, false);
 
             updateSelectedNavigation(
                     navQr,
@@ -129,7 +163,7 @@ public class HomeActivity extends AppCompatActivity {
                     txtQr
             );
         } else {
-            loadFragment(new HomeFragment());
+            showTab(TAG_HOME, false);
 
             updateSelectedNavigation(
                     navHome,
@@ -140,11 +174,14 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void configureSystemBars() {
-
         Window window = getWindow();
 
         window.setStatusBarColor(Color.WHITE);
-        window.setNavigationBarColor(Color.WHITE);
+        window.setNavigationBarColor(Color.TRANSPARENT);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            window.setNavigationBarDividerColor(Color.TRANSPARENT);
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             window.setStatusBarContrastEnforced(false);
@@ -160,22 +197,254 @@ public class HomeActivity extends AppCompatActivity {
         controller.setAppearanceLightStatusBars(true);
         controller.setAppearanceLightNavigationBars(true);
 
-        window.getDecorView().setBackgroundColor(Color.WHITE);
+        window.getDecorView()
+                .setBackgroundColor(Color.WHITE);
     }
 
-    private void loadFragment(Fragment fragment) {
+    private int dpToPx(int dp) {
+        return Math.round(
+                dp * getResources().getDisplayMetrics().density
+        );
+    }
 
-        if (fragment instanceof QrFragment) {
-            headerLayout.setVisibility(View.GONE);
-        } else {
-            headerLayout.setVisibility(View.VISIBLE);
+    private void updateNavigationBarIcons(boolean useDarkIcons) {
+        WindowInsetsControllerCompat controller =
+                WindowCompat.getInsetsController(
+                        getWindow(),
+                        getWindow().getDecorView()
+                );
+
+        controller.setAppearanceLightNavigationBars(useDarkIcons);
+    }
+
+    private void clearChildPageBackStack() {
+        getSupportFragmentManager()
+                .popBackStackImmediate(
+                        null,
+                        FragmentManager.POP_BACK_STACK_INCLUSIVE
+                );
+    }
+
+    private void restoreOrCreateTabFragments() {
+        FragmentManager fragmentManager =
+                getSupportFragmentManager();
+
+        homeTabFragment =
+                fragmentManager.findFragmentByTag(TAG_HOME);
+
+        qrTabFragment =
+                fragmentManager.findFragmentByTag(TAG_QR);
+
+        profileTabFragment =
+                fragmentManager.findFragmentByTag(TAG_PROFILE);
+
+        if (homeTabFragment == null) {
+            homeTabFragment = new HomeFragment();
         }
+
+        if (qrTabFragment == null) {
+            qrTabFragment = new QrFragment();
+        }
+
+        if (profileTabFragment == null) {
+            profileTabFragment = new ProfileFragment();
+        }
+    }
+
+    private Fragment getTabFragment(String tabTag) {
+        if (TAG_QR.equals(tabTag)) {
+            return qrTabFragment;
+        }
+
+        if (TAG_PROFILE.equals(tabTag)) {
+            return profileTabFragment;
+        }
+
+        return homeTabFragment;
+    }
+
+    private boolean canBatchChildPageTabSwitch(FragmentManager fragmentManager) {
+        if (fragmentManager.getBackStackEntryCount() == 0) {
+            return false;
+        }
+
+        // Rewards and Membership opened from QR keep the root tabs added.
+        // Batch their back-stack pop with the selected tab to skip Profile.
+        // Pages that replace the root tabs retain their restoration path.
+        for (String tag : new String[]{TAG_HOME, TAG_QR, TAG_PROFILE}) {
+            Fragment tab = fragmentManager.findFragmentByTag(tag);
+            if (tab == null || !tab.isAdded()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private void showTab(
+            String tabTag,
+            boolean clearBackStack
+    ) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+
+        if (fragmentManager.isStateSaved()) {
+            return;
+        }
+
+        boolean batchChildPageExit = clearBackStack
+                && canBatchChildPageTabSwitch(fragmentManager);
+
+        activeTabTag = tabTag;
+
+        if (clearBackStack) {
+            if (batchChildPageExit) {
+                // Queue the pop so it executes with the target tab transaction.
+                // An immediate pop would animate Profile as an intermediate page.
+                fragmentManager.popBackStack(
+                        null,
+                        FragmentManager.POP_BACK_STACK_INCLUSIVE
+                );
+            } else {
+                clearChildPageBackStack();
+            }
+        }
+
+        restoreOrCreateTabFragments();
+
+        Fragment targetFragment =
+                getTabFragment(tabTag);
+
+        updateHeaderForActiveScreen();
+
+        FragmentTransaction transaction =
+                fragmentManager
+                        .beginTransaction()
+                        .setReorderingAllowed(true)
+                        .setCustomAnimations(0, 0, 0, 0);
+
+        Fragment[] tabFragments = {
+                homeTabFragment,
+                qrTabFragment,
+                profileTabFragment
+        };
+
+        String[] tabTags = {
+                TAG_HOME,
+                TAG_QR,
+                TAG_PROFILE
+        };
+
+        for (int index = 0;
+             index < tabFragments.length;
+             index++) {
+
+            Fragment tabFragment =
+                    tabFragments[index];
+
+            if (!tabFragment.isAdded()) {
+                transaction.add(
+                        R.id.fragmentContainer,
+                        tabFragment,
+                        tabTags[index]
+                );
+            }
+
+            transaction.hide(tabFragment);
+
+            transaction.setMaxLifecycle(
+                    tabFragment,
+                    Lifecycle.State.STARTED
+            );
+        }
+
+        transaction.show(targetFragment);
+
+        transaction.setMaxLifecycle(
+                targetFragment,
+                Lifecycle.State.RESUMED
+        );
+
+        transaction.setPrimaryNavigationFragment(
+                targetFragment
+        );
+
+        if (batchChildPageExit) {
+            transaction.commit();
+            fragmentManager.executePendingTransactions();
+        } else {
+            transaction.commitNow();
+        }
+
+        updateHeaderForActiveScreen();
+    }
+
+    private void updateHeaderForActiveScreen() {
+        boolean isQrTab = TAG_QR.equals(activeTabTag);
+
+        headerLayout.setVisibility(
+                isQrTab ? View.GONE : View.VISIBLE
+        );
+
+        updateNavigationBarIcons(!isQrTab);
+
+        boolean isMainProfilePage =
+                TAG_PROFILE.equals(activeTabTag)
+                        && getSupportFragmentManager()
+                        .getBackStackEntryCount() == 0;
+
+        btnSettings.setVisibility(
+                isMainProfilePage
+                        ? View.VISIBLE
+                        : View.GONE
+        );
+    }
+
+    public void openProfileAndShowTopUp() {
+        showTab(TAG_PROFILE, true);
+
+        updateSelectedNavigation(
+                navProfile,
+                iconProfile,
+                txtProfile
+        );
+
+        View topUpButton =
+                findViewById(R.id.btnTopUpBalance);
+
+        if (topUpButton != null) {
+            topUpButton.performClick();
+        }
+    }
+
+    public void openMembershipFromQr() {
+        showTab(TAG_PROFILE, true);
 
         getSupportFragmentManager()
                 .beginTransaction()
                 .setReorderingAllowed(true)
-                .replace(R.id.fragmentContainer, fragment)
+                .setCustomAnimations(
+                        R.anim.slide_in_right,
+                        R.anim.slide_out_left,
+                        R.anim.slide_in_left,
+                        R.anim.slide_out_right
+                )
+                .hide(profileTabFragment)
+                .setMaxLifecycle(
+                        profileTabFragment,
+                        Lifecycle.State.STARTED
+                )
+                .add(
+                        R.id.fragmentContainer,
+                        new MembershipFragment()
+                )
+                .addToBackStack("membership")
                 .commit();
+
+        updateSelectedNavigation(
+                navProfile,
+                iconProfile,
+                txtProfile
+        );
     }
 
     private void updateSelectedNavigation(
@@ -183,7 +452,6 @@ public class HomeActivity extends AppCompatActivity {
             ImageView selectedIcon,
             TextView selectedText
     ) {
-
         int white = ContextCompat.getColor(
                 this,
                 android.R.color.white
@@ -194,7 +462,6 @@ public class HomeActivity extends AppCompatActivity {
                 android.R.color.black
         );
 
-        // Reset all bottom navigation backgrounds
         navHome.setBackgroundResource(
                 R.drawable.bottom_nav_unselected_bg
         );
@@ -207,25 +474,20 @@ public class HomeActivity extends AppCompatActivity {
                 R.drawable.bottom_nav_unselected_bg
         );
 
-        // Hide all navigation text
         txtHome.setVisibility(View.GONE);
         txtQr.setVisibility(View.GONE);
         txtProfile.setVisibility(View.GONE);
 
-        // Make all icons white
         iconHome.setColorFilter(white);
         iconQr.setColorFilter(white);
         iconProfile.setColorFilter(white);
 
-        // Highlight selected navigation button
         selectedNavigation.setBackgroundResource(
                 R.drawable.bottom_nav_selected_bg
         );
 
-        // Make selected icon black
         selectedIcon.setColorFilter(black);
 
-        // Show selected navigation text
         selectedText.setTextColor(black);
         selectedText.setVisibility(View.VISIBLE);
 

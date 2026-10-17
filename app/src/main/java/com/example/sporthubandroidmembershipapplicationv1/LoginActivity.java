@@ -1,47 +1,143 @@
 package com.example.sporthubandroidmembershipapplicationv1;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.SystemClock;
+import android.text.Editable;
+import android.text.InputType;
+import android.text.TextWatcher;
+import android.util.Patterns;
+import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 
+import com.example.sporthubandroidmembershipapplicationv1.models.LoginRequest;
+import com.example.sporthubandroidmembershipapplicationv1.models.LoginResponse;
+import com.example.sporthubandroidmembershipapplicationv1.network.ApiClient;
+import com.example.sporthubandroidmembershipapplicationv1.session.MemberSession;
+import com.google.android.material.textfield.TextInputLayout;
+
 import java.util.Locale;
+import java.io.InterruptedIOException;
+import java.net.ConnectException;
+import java.net.NoRouteToHostException;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
+import javax.net.ssl.SSLException;
+import com.google.gson.JsonParseException;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private final String[] validUsernames = {
-            "kyle",
-            "solomon",
-            "dhon",
-            "member",
-            "admin"
+
+    /*
+     * false = use existing mock accounts
+     * true  = use the Azure database-backed API
+     */
+
+    private boolean loginInProgress = false;
+    private Call<LoginResponse> loginCall;
+    private long loginStartedAtMs;
+    private CharSequence originalLoginButtonText;
+    private boolean slowLoginNoticeShowing;
+    private final Handler loginProgressHandler = new Handler(Looper.getMainLooper());
+    private final Runnable slowLoginNotice = () -> {
+        if (!loginInProgress || isFinishing() || isDestroyed()) return;
+        TextView alertText = findViewById(R.id.alertText);
+        alertText.setTextColor(Color.DKGRAY);
+        alertText.setText("SportHub is taking longer than usual to respond. Please wait.");
+        alertText.setVisibility(View.VISIBLE);
+        slowLoginNoticeShowing = true;
     };
 
-    private final String[] validPasswords = {
-            "Kyle123!@",
-            "Solomon123!@",
-            "Dhon123!@",
-            "Member123!@",
-            "Admin123!@"
-    };
+    private TextInputLayout loginEmailField;
+    private TextInputLayout loginPasswordField;
+    private boolean registrationConfirmationShowing = false;
+
+    private final ActivityResultLauncher<Intent> registrationLauncher =
+            registerForActivityResult(
+                    new ActivityResultContracts.StartActivityForResult(),
+                    result -> {
+
+                        Intent data = result.getData();
+
+                        if (result.getResultCode() != Activity.RESULT_OK
+                                || data == null) {
+                            return;
+                        }
+
+                        String registeredEmail = data.getStringExtra(
+                                RegisterActivity.EXTRA_REGISTERED_EMAIL
+                        );
+
+                        if (registeredEmail != null
+                                && !registeredEmail.trim().isEmpty()) {
+
+                            ShowRegistrationConfirmation(registeredEmail);
+                        }
+                    }
+            );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        MemberSession remembered = new MemberSession(this);
+        if (getIntent().getStringExtra(com.example.sporthubandroidmembershipapplicationv1.security.AppLockManager.EXTRA_LOGIN_REASON) == null
+                && remembered.hasLogin() && !remembered.isExpired()) {
+            startActivity(new Intent(this, PinActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+            finish(); return;
+        }
+        if (remembered.hasLogin() && remembered.isExpired()) remembered.invalidate();
 
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
+
+        loginEmailField = findViewById(R.id.loginEmailField);
+        loginPasswordField = findViewById(R.id.loginPasswordField);
+
+        EditText loginEmailInput =
+                findViewById(R.id.editTextEmailAddress);
+
+        EditText loginPasswordInput =
+                findViewById(R.id.editTextPassword);
+
+        loginPasswordInput.setSaveEnabled(false);
+
+        AttachErrorClearing(loginEmailInput, loginEmailField);
+        AttachErrorClearing(loginPasswordInput, loginPasswordField);
+
+        loginPasswordInput.setOnEditorActionListener(
+                (textView, actionId, event) -> {
+                    if (actionId == EditorInfo.IME_ACTION_DONE) {
+                        CheckLogin(findViewById(R.id.btnLogin));
+                        return true;
+                    }
+
+                    return false;
+                }
+        );
+
+
 
         getWindow().setNavigationBarColor(
                 Color.parseColor("#181818")
@@ -63,6 +159,8 @@ public class LoginActivity extends AppCompatActivity {
 
                     Insets systemBars = insets.getInsets(
                             WindowInsetsCompat.Type.systemBars()
+                                    | WindowInsetsCompat.Type.displayCutout()
+                                    | WindowInsetsCompat.Type.ime()
                     );
 
                     view.setPadding(
@@ -72,7 +170,7 @@ public class LoginActivity extends AppCompatActivity {
                             systemBars.bottom
                     );
 
-                    return insets;
+                    return WindowInsetsCompat.CONSUMED;
                 }
         );
 
@@ -90,16 +188,31 @@ public class LoginActivity extends AppCompatActivity {
                 ).show()
         );
 
-        createAccountButton.setOnClickListener(view ->
-                Toast.makeText(
-                        LoginActivity.this,
-                        "Account creation will be added later.",
-                        Toast.LENGTH_SHORT
-                ).show()
-        );
+        createAccountButton.setOnClickListener(view -> {
+
+            if (loginInProgress) {
+                return;
+            }
+
+            Intent intent = new Intent(
+                    LoginActivity.this,
+                    RegisterActivity.class
+            );
+
+            registrationLauncher.launch(intent);
+        });
+        String reason = getIntent().getStringExtra(com.example.sporthubandroidmembershipapplicationv1.security.AppLockManager.EXTRA_LOGIN_REASON);
+        if (reason != null && !reason.isEmpty()) IncorrectLogin(reason);
+        ApiClient.warmUpAuthenticationService();
     }
 
     public void CheckLogin(View view) {
+
+        if (loginInProgress) {
+            return;
+        }
+
+        ClearLoginMessages();
 
         EditText usernameInput =
                 findViewById(R.id.editTextEmailAddress);
@@ -107,98 +220,403 @@ public class LoginActivity extends AppCompatActivity {
         EditText passwordInput =
                 findViewById(R.id.editTextPassword);
 
-        String username = usernameInput
+        String usernameOrEmail = usernameInput
                 .getText()
                 .toString()
                 .trim();
 
+        // Preserve the password exactly as entered.
         String password = passwordInput
                 .getText()
                 .toString();
 
-        if (username.isEmpty()) {
-            IncorrectLogin(
-                    "Please enter a Username/Email"
+        boolean valid = true;
+
+        if (usernameOrEmail.isEmpty()) {
+            loginEmailField.setError(
+                    "Email address is required."
             );
-            return;
+
+            valid = false;
+        } else if (!Patterns.EMAIL_ADDRESS
+                .matcher(usernameOrEmail)
+                .matches()) {
+
+            loginEmailField.setError(
+                    "Enter a valid email address."
+            );
+
+            valid = false;
         }
 
         if (password.isEmpty()) {
-            IncorrectLogin(
-                    "Please enter a Password"
+            loginPasswordField.setError(
+                    "Password is required."
             );
+
+            valid = false;
+        }
+
+        if (!valid) {
+            IncorrectLogin(
+                    "Please correct the highlighted details."
+            );
+
+            if (loginEmailField.getError() != null) {
+                usernameInput.requestFocus();
+            } else {
+                passwordInput.requestFocus();
+            }
+
             return;
         }
 
-        String lowercaseUsername =
-                username.toLowerCase(Locale.ROOT);
+        // Registration rules must not prevent existing accounts signing in.
+        LoginWithApi(view, usernameOrEmail, password);
+    }
 
-        for (int i = 0; i < validUsernames.length; i++) {
 
-            if (lowercaseUsername.equals(validUsernames[i])
-                    && password.equals(validPasswords[i])) {
 
-                String formattedUsername =
-                        validUsernames[i]
-                                .substring(0, 1)
-                                .toUpperCase(Locale.ROOT)
-                                + validUsernames[i].substring(1);
+    private void LoginWithApi(
+            View loginButton,
+            String email,
+            String password
+    ) {
+        SetLoginLoading(
+                loginButton,
+                true
+        );
 
-                LaunchHome(formattedUsername);
-                return;
-            }
-        }
 
-        IncorrectLogin(
-                "Incorrect Username or Password"
+
+        LoginRequest loginRequest =
+                new LoginRequest(
+                        email,
+                        password
+                );
+
+        loginCall = ApiClient
+                .getAuthApiService()
+                .login(loginRequest);
+        loginStartedAtMs = SystemClock.elapsedRealtime();
+
+        loginCall.enqueue(
+                new Callback<LoginResponse>() {
+
+                    @Override
+                    public void onResponse(
+                            Call<LoginResponse> call,
+                            Response<LoginResponse> response
+                    ) {
+                        if (isFinishing() || isDestroyed()) {
+                            return;
+                        }
+
+                        if ((getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+                            Log.d("SportHubLogin", "Login HTTP " + response.code()
+                                    + " after " + (SystemClock.elapsedRealtime() - loginStartedAtMs) + " ms");
+                        }
+
+                        SetLoginLoading(
+                                loginButton,
+                                false
+                        );
+
+
+
+                        LoginResponse loginResponse =
+                                response.body();
+
+                        if (response.isSuccessful()
+                                && loginResponse != null
+                                && loginResponse.isSuccess()) {
+
+
+
+                            LaunchHomeFromApi(
+                                    email,
+                                    loginResponse
+                            );
+
+                            return;
+                        }
+
+                        String errorMessage =
+                                "Invalid email or password";
+
+                        if (response.code() >= 500) {
+                            errorMessage =
+                                    "Sign-in is temporarily unavailable. Please try again.";
+                        } else if (response.code() == 429) {
+                            errorMessage =
+                                    "Too many sign-in attempts. Please wait and try again.";
+                        } else if (response.code() == 404
+                                || response.code() == 405) {
+                            errorMessage =
+                                    "Sign-in is currently unavailable. Please try again later.";
+                        } else if (response.isSuccessful()
+                                && loginResponse != null
+                                && loginResponse.getMessage() != null
+                                && !loginResponse
+                                .getMessage()
+                                .trim()
+                                .isEmpty()) {
+
+                            errorMessage =
+                                    loginResponse.getMessage();
+                        }
+
+
+
+                        IncorrectLogin(errorMessage);
+                    }
+
+                    @Override
+                    public void onFailure(
+                            Call<LoginResponse> call,
+                            Throwable throwable
+                    ) {
+                        if (call.isCanceled()
+                                || isFinishing()
+                                || isDestroyed()) {
+
+                            return;
+                        }
+
+                        SetLoginLoading(
+                                loginButton,
+                                false
+                        );
+
+
+
+                        if ((getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+                            Log.d("SportHubLogin", "Login failed after "
+                                    + (SystemClock.elapsedRealtime() - loginStartedAtMs)
+                                    + " ms; " + throwable.getClass().getSimpleName());
+                        }
+                        IncorrectLogin(ConnectionFailureMessage(throwable));
+                    }
+                }
         );
     }
 
-    public void LaunchHome(String username) {
+    private void SetLoginLoading(
+            View loginButton,
+            boolean loading
+    ) {
+        loginInProgress = loading;
+        loginProgressHandler.removeCallbacks(slowLoginNotice);
 
-        Intent intent = new Intent(
-                LoginActivity.this,
-                HomeActivity.class
+        if (loginButton instanceof Button) {
+            Button button = (Button) loginButton;
+            if (originalLoginButtonText == null) originalLoginButtonText = button.getText();
+            button.setText(loading ? "Signing in…" : originalLoginButtonText);
+        }
+
+        if (loading) {
+            slowLoginNoticeShowing = false;
+            loginProgressHandler.postDelayed(slowLoginNotice, 8_000);
+        } else if (slowLoginNoticeShowing) {
+            slowLoginNoticeShowing = false;
+            ClearGeneralLoginMessage();
+        }
+
+        loginButton.setEnabled(!loading);
+        loginEmailField.setEnabled(!loading);
+        loginPasswordField.setEnabled(!loading);
+
+        Button createAccountButton =
+                findViewById(R.id.btnCreateAccount);
+
+        createAccountButton.setEnabled(!loading);
+
+        loginButton.setAlpha(
+                loading ? 0.6f : 1f
         );
+    }
 
-        intent.putExtra(
-                "Username",
-                username
-        );
-
-        // Keeps your current login → QR behaviour
-        intent.putExtra(
-                "OPEN_FRAGMENT",
-                "QR"
-        );
-
-        startActivity(intent);
+    private void LaunchHomeFromApi(String email, LoginResponse loginResponse) {
+        if (loginResponse.getMemberId() == null || loginResponse.getMemberNumber() == null
+                || loginResponse.getMemberNumber().trim().isEmpty()) {
+            IncorrectLogin("Your member profile could not be loaded."); return;
+        }
+        MemberSession session = new MemberSession(this);
+        try { session.saveLogin(loginResponse, FormatDisplayNameFromEmail(email)); }
+        catch (IllegalStateException error) { IncorrectLogin(error.getMessage()); return; }
+        ((EditText)findViewById(R.id.editTextPassword)).setText("");
+        if (session.hasPin()) {
+            com.example.sporthubandroidmembershipapplicationv1.security.AppLockManager.get().authenticated();
+            startActivity(com.example.sporthubandroidmembershipapplicationv1.security.AppLockManager.get().homeIntent(this));
+        } else startActivity(new Intent(this, PinActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
         finish();
     }
 
-    public void IncorrectLogin(String message) {
+    private String ConnectionFailureMessage(Throwable throwable) {
+        // Classify the actual failure without logging credentials or tokens.
+        Throwable cause = throwable;
+        for (int depth = 0; cause != null && depth < 8; depth++, cause = cause.getCause()) {
+            if (cause instanceof SocketTimeoutException
+                    || cause instanceof InterruptedIOException) {
+                return "SportHub took too long to respond. Please try again.";
+            }
+            if (cause instanceof UnknownHostException
+                    || cause instanceof ConnectException
+                    || cause instanceof NoRouteToHostException) {
+                return "Unable to reach SportHub. Check your internet connection and try again.";
+            }
+            if (cause instanceof SSLException) {
+                return "A secure connection to SportHub could not be established. Please try again.";
+            }
+            if (cause instanceof JsonParseException) {
+                return "SportHub returned an unexpected response. Please try again.";
+            }
+        }
+        return "Unable to connect to SportHub. Please check your connection and try again.";
+    }
+
+    private String FormatDisplayNameFromEmail(
+            String email
+    ) {
+        String displayName = email;
+
+        int atPosition =
+                displayName.indexOf("@");
+
+        if (atPosition > 0) {
+            displayName =
+                    displayName.substring(
+                            0,
+                            atPosition
+                    );
+        }
+
+        if (displayName.isEmpty()) {
+            return "Member";
+        }
+
+        return displayName
+                .substring(0, 1)
+                .toUpperCase(Locale.ROOT)
+                + displayName.substring(1);
+    }
+
+
+
+    private void AttachErrorClearing(
+            EditText input,
+            TextInputLayout field
+    ) {
+        input.addTextChangedListener(
+                new TextWatcher() {
+
+                    @Override
+                    public void beforeTextChanged(
+                            CharSequence text,
+                            int start,
+                            int count,
+                            int after
+                    ) {
+                    }
+
+                    @Override
+                    public void onTextChanged(
+                            CharSequence text,
+                            int start,
+                            int before,
+                            int count
+                    ) {
+                        field.setError(null);
+
+                        if (!registrationConfirmationShowing) {
+                            ClearGeneralLoginMessage();
+                        }
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable text) {
+                    }
+                }
+        );
+    }
+
+    private void ClearGeneralLoginMessage() {
+        TextView alertText =
+                findViewById(R.id.alertText);
+
+        alertText.setVisibility(View.GONE);
+        alertText.setAlpha(1f);
+
+        registrationConfirmationShowing = false;
+    }
+
+    private void ClearLoginMessages() {
+        loginEmailField.setError(null);
+        loginPasswordField.setError(null);
+
+        ClearGeneralLoginMessage();
+    }
+
+    private void ShowRegistrationConfirmation(String registeredEmail) {
+        ClearLoginMessages();
+
+        EditText usernameInput =
+                findViewById(R.id.editTextEmailAddress);
+
+        EditText passwordInput =
+                findViewById(R.id.editTextPassword);
+
+        usernameInput.setText(registeredEmail);
+        passwordInput.setText("");
+        passwordInput.requestFocus();
 
         TextView alertText =
                 findViewById(R.id.alertText);
 
+        alertText.setAlpha(1f);
+
+        alertText.setTextColor(
+                Color.parseColor("#1B5E20")
+        );
+
+        alertText.setText(
+                "Account created successfully. Sign in with your new password."
+        );
+
+        alertText.setVisibility(View.VISIBLE);
+        registrationConfirmationShowing = true;
+
+        Toast.makeText(
+                LoginActivity.this,
+                "Account created successfully.",
+                Toast.LENGTH_LONG
+        ).show();
+    }
+
+    public void IncorrectLogin(String message) {
+        TextView alertText =
+                findViewById(R.id.alertText);
+
+        registrationConfirmationShowing = false;
+
+        alertText.setTextColor(
+                Color.parseColor("#B3261E")
+        );
+
         alertText.setText(message);
         alertText.setVisibility(View.VISIBLE);
         alertText.setAlpha(1f);
+    }
 
-        alertText.postDelayed(() ->
+    @Override
+    protected void onDestroy() {
+        loginProgressHandler.removeCallbacks(slowLoginNotice);
+        if (loginCall != null
+                && !loginCall.isCanceled()) {
 
-                        alertText.animate()
-                                .alpha(0f)
-                                .setDuration(500)
-                                .withEndAction(() -> {
-                                    alertText.setVisibility(
-                                            View.INVISIBLE
-                                    );
+            loginCall.cancel();
+        }
 
-                                    alertText.setAlpha(1f);
-                                }),
-
-                1500
-        );
+        super.onDestroy();
     }
 }

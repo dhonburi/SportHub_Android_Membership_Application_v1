@@ -1,24 +1,140 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using SportHub.Api.Data;
+using SportHub.Api.Models;
+using SportHub.Api.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
+// Controllers and Swagger.
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http, Scheme = "bearer",
+        Description = "Paste memberAccessToken for member/session routes, or staffAccessToken for gate entry."
+    });
+    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        { new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+          { Reference = new Microsoft.OpenApi.Models.OpenApiReference
+            { Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme, Id = "Bearer" } }, Array.Empty<string>() }
+    });
+});
+
+// Database.
+builder.Services.AddDbContext<SportHubDbContext>(
+    options =>
+        options.UseSqlServer(
+            builder.Configuration.GetConnectionString(
+                "SportHubDatabase"
+            )
+        )
+);
+
+// Existing authentication and QR services.
+builder.Services.AddScoped<
+    IPasswordHasher<User>,
+    PasswordHasher<User>
+>();
+
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<MemberLoginSessionService>();
+builder.Services.AddSingleton<QrTokenService>();
+
+// Staff tokens must use their own secret, separate from QR tokens.
+var staffTokenService =
+    new StaffTokenService(builder.Configuration);
+
+builder.Services.AddSingleton(staffTokenService);
+
+builder.Services
+    .AddAuthentication(
+        JwtBearerDefaults.AuthenticationScheme
+    )
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters =
+            new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuer = StaffTokenService.Issuer,
+
+                ValidateAudience = true,
+                ValidAudience = StaffTokenService.Audience,
+
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey =
+                    staffTokenService.SigningKey,
+
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.FromSeconds(30)
+            };
+    });
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+/*
+ * Running `dotnet run -- --seed` applies migrations,
+ * creates the development account if needed, and exits.
+ */
+bool seedRequested =
+    args.Any(argument =>
+        string.Equals(
+            argument,
+            "--seed",
+            StringComparison.OrdinalIgnoreCase
+        )
+    );
+
+if (seedRequested)
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    using IServiceScope scope =
+        app.Services.CreateScope();
+
+    SportHubDbContext dbContext =
+        scope.ServiceProvider
+            .GetRequiredService<SportHubDbContext>();
+
+    IPasswordHasher<User> passwordHasher =
+        scope.ServiceProvider.GetRequiredService<
+            IPasswordHasher<User>
+        >();
+
+    await dbContext.Database.MigrateAsync();
+
+    await DbSeeder.SeedAsync(
+        dbContext,
+        passwordHasher
+    );
+
+    return;
 }
 
-app.UseHttpsRedirection();
+app.UseSwagger();
+app.UseSwaggerUI();
 
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
+app.UseRouting();
+app.UseAuthentication();
+app.UseMiddleware<MemberSessionAuthorizationMiddleware>();
 app.UseAuthorization();
+
+// Protect the existing gate controller without replacing
+// its large file again.
+app.UseMiddleware<
+    GateStaffAuthorizationMiddleware
+>();
 
 app.MapControllers();
 

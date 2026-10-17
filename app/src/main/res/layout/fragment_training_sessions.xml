@@ -8,9 +8,6 @@
     android:fillViewport="true"
     android:overScrollMode="never"
     android:paddingBottom="110dp">
-    android:clipToPadding="false"
-    android:fillViewport="true"
-    android:overScrollMode="never">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -37,6 +34,7 @@
                 android:background="@drawable/training_card_bg"
                 android:clickable="true"
                 android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
                 android:orientation="vertical">
 
                 <View
@@ -84,6 +82,7 @@
                 android:background="@drawable/training_card_bg"
                 android:clickable="true"
                 android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
                 android:orientation="vertical">
 
                 <View
@@ -142,6 +141,7 @@
                 android:background="@drawable/training_card_bg"
                 android:clickable="true"
                 android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
                 android:orientation="vertical">
 
                 <View
@@ -189,6 +189,7 @@
                 android:background="@drawable/training_card_bg"
                 android:clickable="true"
                 android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
                 android:orientation="vertical">
 
                 <View
@@ -247,6 +248,7 @@
                 android:background="@drawable/training_card_bg"
                 android:clickable="true"
                 android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
                 android:orientation="vertical">
 
                 <View
@@ -294,6 +296,7 @@
                 android:background="@drawable/training_card_bg"
                 android:clickable="true"
                 android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
                 android:orientation="vertical">
 
                 <View
